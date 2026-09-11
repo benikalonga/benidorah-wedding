@@ -23,7 +23,7 @@ services:
     # bound to loopback only, since it's reached locally, not from the
     # internet directly.
     ports:
-      - "127.0.0.1:3001:3000"
+      - "127.0.0.1:${HOST_PORT:-3001}:3000"
 
   db:
     image: postgres:16-alpine
