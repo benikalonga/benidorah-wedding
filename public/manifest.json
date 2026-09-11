@@ -1,0 +1,16 @@
+{
+  "name": "Beni & Dorah — 23.12.2026",
+  "short_name": "Beni & Dorah",
+  "description": "Join Beni & Dorah's wedding celebration — RSVP, gallery, gift registry and live wish wall.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FAF8F3",
+  "theme_color": "#1B3FA0",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

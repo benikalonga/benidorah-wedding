@@ -1,0 +1,198 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum GuestType {
+  single
+  couple
+}
+
+enum GuestSide {
+  groom
+  bride
+}
+
+enum Attendance {
+  yes
+  no
+  one_only
+  none
+  pending
+}
+
+enum MediaType {
+  image
+  video
+}
+
+enum GiftStatus {
+  available
+  booked
+  paid
+}
+
+model Table {
+  id          String  @id @default(uuid())
+  tableNumber Int     @unique @map("table_number")
+  capacity    Int     @default(10)
+  guests      Guest[]
+
+  @@map("tables")
+}
+
+model Guest {
+  id            String   @id @default(uuid())
+  userHashCode  String   @unique @map("user_hash_code")
+  type          GuestType
+  fullName      String   @map("full_name")
+  partnerName   String?  @map("partner_name")
+  phoneNumber   String   @map("phone_number")
+  email         String?
+  guestSide     GuestSide @map("guest_side")
+  tableId       String   @map("table_id")
+  table         Table    @relation(fields: [tableId], references: [id])
+  linkOpenedAt  DateTime? @map("link_opened_at")
+  inviteSentAt  DateTime? @map("invite_sent_at")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  rsvp          Rsvp?
+  moments       Moment[]
+  bookedGifts   GiftItem[] @relation("BookedBy")
+  contributions GiftContribution[]
+
+  @@map("guests")
+}
+
+model Rsvp {
+  id                 String     @id @default(uuid())
+  guestId            String     @unique @map("guest_id")
+  guest              Guest      @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  attending          Attendance @default(pending)
+  allergyComment     String?    @map("allergy_comment")
+  wishText           String?    @map("wish_text")
+  displayNameOnWall  Boolean    @default(false) @map("display_name_on_wall")
+  submittedAt        DateTime?  @map("submitted_at")
+  updatedAt          DateTime   @updatedAt @map("updated_at")
+
+  ticket             Ticket?
+
+  @@map("rsvps")
+}
+
+model Ticket {
+  id            String   @id @default(uuid())
+  rsvpId        String?  @unique @map("rsvp_id")
+  rsvp          Rsvp?    @relation(fields: [rsvpId], references: [id], onDelete: SetNull)
+  displayName   String?  @map("display_name")
+  message       String
+  color         String
+  visible       Boolean  @default(true)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("tickets")
+}
+
+model Moment {
+  id            String    @id @default(uuid())
+  guestId       String?   @map("guest_id")
+  guest         Guest?    @relation(fields: [guestId], references: [id], onDelete: SetNull)
+  uploaderName  String    @map("uploader_name")
+  mediaUrl      String    @map("media_url")
+  thumbnailUrl  String?   @map("thumbnail_url")
+  mediaType     MediaType @map("media_type")
+  visible       Boolean   @default(true)
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  @@map("moments")
+}
+
+model GiftItem {
+  id                String     @id @default(uuid())
+  name              String
+  description       String?
+  imageUrl          String?    @map("image_url")
+  priceZar          Decimal    @map("price_zar") @db.Decimal(10, 2)
+  priceUsd          Decimal    @map("price_usd") @db.Decimal(10, 2)
+  status            GiftStatus @default(available)
+  bookedByGuestId   String?    @map("booked_by_guest_id")
+  bookedByGuest     Guest?     @relation("BookedBy", fields: [bookedByGuestId], references: [id], onDelete: SetNull)
+  sortOrder         Int        @default(0) @map("sort_order")
+  contributions     GiftContribution[]
+
+  @@map("gift_items")
+}
+
+model GiftContribution {
+  id            String   @id @default(uuid())
+  giftId        String   @map("gift_id")
+  gift          GiftItem @relation(fields: [giftId], references: [id], onDelete: Cascade)
+  guestId       String?  @map("guest_id")
+  guest         Guest?   @relation(fields: [guestId], references: [id], onDelete: SetNull)
+  contributorName String? @map("contributor_name")
+  amountZar     Decimal  @map("amount_zar") @db.Decimal(10, 2)
+  note          String?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("gift_contributions")
+}
+
+model AdminUser {
+  id                  String   @id @default(uuid())
+  email               String   @unique
+  name                String
+  passwordHash        String   @map("password_hash")
+  mustChangePassword  Boolean  @default(true) @map("must_change_password")
+  role                String   @default("admin")
+  failedLoginAttempts Int      @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime? @map("locked_until")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  @@map("admin_users")
+}
+
+model HistoryItem {
+  id                String   @id @default(uuid())
+  title             String
+  descriptionShort  String   @map("description_short")
+  descriptionFull   String   @map("description_full")
+  eventDate         DateTime @map("event_date") @db.Date
+  thumbnailUrl      String   @map("thumbnail_url")
+  sortOrder         Int      @map("sort_order")
+  images            HistoryItemImage[]
+
+  @@map("history_items")
+}
+
+model HistoryItemImage {
+  id            String      @id @default(uuid())
+  historyItemId String      @map("history_item_id")
+  historyItem   HistoryItem @relation(fields: [historyItemId], references: [id], onDelete: Cascade)
+  imageUrl      String      @map("image_url")
+
+  @@map("history_item_images")
+}
+
+model GalleryItem {
+  id           String    @id @default(uuid())
+  mediaUrl     String    @map("media_url")
+  mediaType    MediaType @map("media_type")
+  thumbnailUrl String?   @map("thumbnail_url")
+  sortOrder    Int       @map("sort_order")
+
+  @@map("gallery_items")
+}
+
+model SiteSetting {
+  id    String @id @default("singleton")
+  key   String @unique
+  value String
+
+  @@map("site_settings")
+}
