@@ -15,6 +15,15 @@ services:
         condition: service_healthy
     expose:
       - "3000"
+    # On a dedicated VPS, the `nginx` service below reaches this container
+    # over the compose-internal network and this port mapping isn't needed.
+    # On a *shared* box where an existing host-level nginx already owns
+    # ports 80/443 for multiple sites (our case on 162.35.172.181), that
+    # host nginx needs a host-reachable port to proxy_pass to instead —
+    # bound to loopback only, since it's reached locally, not from the
+    # internet directly.
+    ports:
+      - "127.0.0.1:3001:3000"
 
   db:
     image: postgres:16-alpine
@@ -31,6 +40,12 @@ services:
       timeout: 5s
       retries: 10
 
+  # `nginx` and `certbot` below are for a *dedicated* VPS where this app
+  # owns ports 80/443 outright (see deploy.md). On a shared host that
+  # already runs its own nginx for multiple sites (see
+  # deploy-replace-existing.md), skip both — `docker compose up -d db web`
+  # only — and add a server block to the existing host nginx config
+  # instead, proxying to 127.0.0.1:3001 (the `web` port mapping above).
   nginx:
     image: nginx:alpine
     restart: unless-stopped
