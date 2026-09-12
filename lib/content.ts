@@ -31,12 +31,18 @@ export const SITE_COPY = {
     branchCode: process.env.NEXT_PUBLIC_BANK_BRANCH_CODE || "",
   },
   contacts: [
-    { name: "Daniella", phone: process.env.NEXT_PUBLIC_CONTACT_DANIELLA_PHONE || "" },
-    { name: "Jonathan", phone: process.env.NEXT_PUBLIC_CONTACT_JONATHAN_PHONE || "" },
+    {
+      name: "Daniella",
+      phone: process.env.NEXT_PUBLIC_CONTACT_DANIELLA_PHONE || "",
+    },
+    {
+      name: "Jonathan",
+      phone: process.env.NEXT_PUBLIC_CONTACT_JONATHAN_PHONE || "",
+    },
   ],
   email: "benidorah@gmail.com",
   dressCode: {
-    title: "Royalties / Royauté",
+    title: "Royalties / Royautés",
     description:
       "Think regal, not costume. Gentlemen, formal dark attire — think tailored suits in onyx and charcoal. Ladies, gowns in royal hues — sapphire, emerald, amethyst, wine. Gold accents welcome for everyone.",
   },
