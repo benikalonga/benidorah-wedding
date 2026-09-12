@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { motion } from 'framer-motion';
 import { useSocketEvent } from '@/lib/useSocket';
@@ -10,6 +10,72 @@ export interface TicketEntry {
   displayName: string | null;
   message: string;
   color: string;
+}
+
+// The wall is a fixed lattice of cells (columns × rows) — that's what
+// makes it read as a grid/wall rather than a scattered pile. Which cell a
+// given ticket lands in is derived from a hash of its own id, not from
+// array order, so adding a new wish can never move an existing one: every
+// ticket's cell (and its little rotation/nudge) is a pure function of its
+// own id, computed fresh every render but always landing the same place.
+const CELL_W = 176;
+const CELL_H = 150;
+const CELL_PADDING = 24; // shrink from the cell size so notes don't touch
+const EXTRA_SLOT_RATIO = 1.5; // more cells than tickets => real breathing room
+
+function hashString(input: string): number {
+  let hash = 0;
+  for (let i = 0; i < input.length; i++) {
+    hash = (hash * 31 + input.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+}
+
+interface Placement {
+  left: number;
+  top: number;
+  rotation: number;
+}
+
+function computeWall(tickets: TicketEntry[]) {
+  const columns = Math.max(6, Math.ceil(Math.sqrt(tickets.length * EXTRA_SLOT_RATIO) * 1.3));
+  const totalSlots = Math.max(columns * 3, Math.ceil(tickets.length * EXTRA_SLOT_RATIO));
+  const rows = Math.max(3, Math.ceil(totalSlots / columns));
+  const slotCount = columns * rows;
+
+  // Resolved in id order (not arrival order) so a given set of wishes
+  // always claims the same slots regardless of who posted when — the
+  // only time an existing note's slot can change is the rare case where
+  // a newly-added id's hash collides with one already in use.
+  const sortedIds = [...tickets].map((t) => t.id).sort();
+  const taken = new Set<number>();
+  const placements = new Map<string, Placement>();
+
+  for (const id of sortedIds) {
+    const h = hashString(id);
+    let slot = h % slotCount;
+    let probes = 0;
+    while (taken.has(slot) && probes < slotCount) {
+      slot = (slot + 1) % slotCount;
+      probes++;
+    }
+    taken.add(slot);
+
+    const col = slot % columns;
+    const row = Math.floor(slot / columns);
+    const jitter = hashString(id + ':j');
+    const jitterX = ((jitter % 17) - 8); // -8..8 px
+    const jitterY = (((jitter >> 5) % 17) - 8);
+    const rotation = ((jitter >> 10) % 11) - 5; // -5..5 deg
+
+    placements.set(id, {
+      left: col * CELL_W + CELL_W / 2 + jitterX,
+      top: row * CELL_H + CELL_H / 2 + jitterY,
+      rotation,
+    });
+  }
+
+  return { placements, wallWidth: columns * CELL_W, wallHeight: rows * CELL_H };
 }
 
 export default function WishWall({ initialTickets }: { initialTickets: TicketEntry[] }) {
@@ -22,6 +88,8 @@ export default function WishWall({ initialTickets }: { initialTickets: TicketEnt
   useSocketEvent<{ ticketId: string }>('ticket:hidden', (payload) => {
     setTickets((prev) => prev.filter((t) => t.id !== payload.ticketId));
   });
+
+  const { placements, wallWidth, wallHeight } = useMemo(() => computeWall(tickets), [tickets]);
 
   return (
     <div className="mx-auto max-w-6xl px-5 pb-16 sm:px-8 sm:pb-20">
@@ -38,25 +106,36 @@ export default function WishWall({ initialTickets }: { initialTickets: TicketEnt
       </motion.div>
       <p className="mt-3 text-sm text-charcoal/50">Pinch or scroll to zoom, drag to explore — updates live as wishes come in.</p>
 
-      <div className="hairline mt-6 h-[420px] overflow-hidden bg-cream">
+      <div className="hairline mt-6 h-[420px] overflow-hidden bg-[#EDE7D8]">
         {tickets.length === 0 ? (
           <div className="flex h-full items-center justify-center text-sm text-charcoal/40">
             Be the first to leave a wish above 💌
           </div>
         ) : (
-          <TransformWrapper minScale={0.5} maxScale={3} initialScale={1} wheel={{ step: 0.1 }}>
+          <TransformWrapper minScale={0.3} maxScale={3} initialScale={0.7} centerOnInit wheel={{ step: 0.1 }}>
             <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
-              <div className="grid auto-rows-[140px] grid-cols-[repeat(auto-fill,180px)] gap-4 p-6">
-                {tickets.map((t) => (
-                  <div
-                    key={t.id}
-                    className="flex rotate-[-2deg] flex-col justify-between rounded-sm p-3 shadow-md odd:rotate-[2deg]"
-                    style={{ backgroundColor: t.color }}
-                  >
-                    <p className="font-hand text-lg leading-tight text-onyx/90">{t.message}</p>
-                    <p className="text-right text-xs font-semibold text-onyx/70">— {t.displayName || 'Anonymous'}</p>
-                  </div>
-                ))}
+              <div className="relative" style={{ width: wallWidth, height: wallHeight }}>
+                {tickets.map((t) => {
+                  const p = placements.get(t.id);
+                  if (!p) return null;
+                  return (
+                    <div
+                      key={t.id}
+                      className="absolute flex flex-col justify-between rounded-sm p-3 shadow-md"
+                      style={{
+                        left: p.left,
+                        top: p.top,
+                        width: CELL_W - CELL_PADDING,
+                        height: CELL_H - CELL_PADDING,
+                        backgroundColor: t.color,
+                        transform: `translate(-50%, -50%) rotate(${p.rotation}deg)`,
+                      }}
+                    >
+                      <p className="line-clamp-4 font-hand text-lg leading-tight text-black">{t.message}</p>
+                      <p className="text-right text-xs font-semibold text-black/80">— {t.displayName || 'Anonymous'}</p>
+                    </div>
+                  );
+                })}
               </div>
             </TransformComponent>
           </TransformWrapper>
