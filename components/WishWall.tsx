@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
+import { TransformWrapper, TransformComponent, type ReactZoomPanPinchRef } from 'react-zoom-pan-pinch';
 import { motion } from 'framer-motion';
 import { useSocketEvent } from '@/lib/useSocket';
 
@@ -310,7 +310,9 @@ export default function WishWall({ initialTickets }: { initialTickets: TicketEnt
 
   const viewportRef = useRef<HTMLDivElement>(null);
   const metaRef = useEdgeScrollHandoff(viewportRef, tickets.length > 0);
-  const syncMeta = (ref: { instance: { bounds: { minPositionY: number; maxPositionY: number } | null } }, state: { scale: number; positionY: number }) => {
+  const transformApiRef = useRef<ReactZoomPanPinchRef | null>(null);
+  const syncMeta = (ref: ReactZoomPanPinchRef, state: { scale: number; positionY: number }) => {
+    transformApiRef.current = ref;
     metaRef.current = {
       scale: state.scale,
       positionY: state.positionY,
@@ -318,6 +320,26 @@ export default function WishWall({ initialTickets }: { initialTickets: TicketEnt
       maxPositionY: ref.instance.bounds?.maxPositionY ?? 0,
     };
   };
+
+  // Double-tap/double-click normally zooms IN (the library's default,
+  // centered on wherever you tapped — worth keeping for every other
+  // case). But once already at max zoom, that's a dead end — a second
+  // double-tap there should feel like "ok, back out" rather than doing
+  // nothing. Intercepted the same way as the edge-scroll handoff: a
+  // capture-phase listener ahead of the library's own, which only acts
+  // when already maxed, otherwise gets out of the way entirely.
+  useEffect(() => {
+    const el = viewportRef.current;
+    if (!el || tickets.length === 0) return;
+    function onDoubleClick(e: MouseEvent) {
+      const meta = metaRef.current;
+      if (!meta || meta.scale < MAX_SCALE - SCALE_EPS) return;
+      e.stopPropagation();
+      transformApiRef.current?.resetTransform();
+    }
+    el.addEventListener('dblclick', onDoubleClick, { capture: true });
+    return () => el.removeEventListener('dblclick', onDoubleClick, true);
+  }, [tickets.length, metaRef]);
 
   return (
     <div className="mx-auto max-w-6xl px-5 pb-16 sm:px-8 sm:pb-20">
