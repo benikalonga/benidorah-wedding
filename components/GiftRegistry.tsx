@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { SITE_COPY } from "@/lib/content";
@@ -30,8 +30,25 @@ export default function GiftRegistry({
   const [contributorName, setContributorName] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [viewingId, setViewingId] = useState<string | null>(null);
 
   const { bank } = SITE_COPY;
+  const viewingGift = viewingId ? items.find((g) => g.id === viewingId) ?? null : null;
+
+  // Lock page scroll while the gift popup is open, and let Escape close it.
+  useEffect(() => {
+    if (!viewingId) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setViewingId(null);
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [viewingId]);
 
   async function handleCopyAccountNumber() {
     const text = bank.accountNumber;
@@ -118,6 +135,60 @@ export default function GiftRegistry({
         "Something went wrong recording your contribution — please try again.",
       );
     }
+  }
+
+  // Shared between the grid card and the popup, so both offer the exact
+  // same buy/contribute actions rather than the popup being a read-only
+  // preview.
+  function renderGiftActions(gift: GiftEntry) {
+    return (
+      <div className="mt-auto flex flex-col gap-2 pt-2">
+        {gift.status === "available" ? (
+          <button
+            onClick={() => handleBookIt(gift.id)}
+            className="btn-gold px-4 py-2 text-[11px] uppercase tracking-widest"
+          >
+            I will buy it
+          </button>
+        ) : (
+          <span className="border border-charcoal/15 px-4 py-2 text-center text-[11px] uppercase tracking-widest text-charcoal/50">
+            {gift.status === "paid" ? "Received with thanks" : "Already claimed"}
+          </span>
+        )}
+
+        {contributingId === gift.id ? (
+          <div className="flex flex-col gap-2 bg-cream p-3">
+            <input
+              type="text"
+              placeholder="Your name (optional)"
+              value={contributorName}
+              onChange={(e) => setContributorName(e.target.value)}
+              className="field-underline text-xs"
+            />
+            <input
+              type="number"
+              placeholder="Amount (ZAR)"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="field-underline text-xs"
+            />
+            <button
+              onClick={() => handleContribute(gift.id)}
+              className="btn-primary px-3 py-2 text-[11px] uppercase tracking-widest"
+            >
+              Confirm contribution
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setContributingId(gift.id)}
+            className="text-left text-[11px] uppercase tracking-widest text-champagne-gold underline underline-offset-4"
+          >
+            Make a deposit toward this
+          </button>
+        )}
+      </div>
+    );
   }
 
   return (
@@ -241,82 +312,46 @@ export default function GiftRegistry({
                     key={gift.id}
                     className="hairline flex flex-col overflow-hidden"
                   >
-                    <div className="relative h-36 w-full bg-cream">
-                      {gift.imageUrl && (
-                        <Image
-                          src={gift.imageUrl}
-                          alt={gift.name}
-                          fill
-                          className="object-cover"
-                        />
-                      )}
-                    </div>
-                    <div className="flex flex-1 flex-col gap-2 p-4">
-                      <h3 className="section-title text-base text-onyx">
-                        {gift.name}
-                      </h3>
-                      {gift.description && (
-                        <p className="text-xs text-charcoal/60">
-                          {gift.description}
-                        </p>
-                      )}
-                      <p className="section-title text-lg text-royal-blue">
-                        R{Number(gift.priceZar).toLocaleString("en-ZA")}{" "}
-                        <span className="text-xs font-normal text-charcoal/40">
-                          · ${Number(gift.priceUsd).toLocaleString("en-US")}
-                        </span>
-                      </p>
-
-                      <div className="mt-auto flex flex-col gap-2 pt-2">
-                        {gift.status === "available" ? (
-                          <button
-                            onClick={() => handleBookIt(gift.id)}
-                            className="btn-gold px-4 py-2 text-[11px] uppercase tracking-widest"
-                          >
-                            I will buy it
-                          </button>
-                        ) : (
-                          <span className="border border-charcoal/15 px-4 py-2 text-center text-[11px] uppercase tracking-widest text-charcoal/50">
-                            {gift.status === "paid"
-                              ? "Received with thanks"
-                              : "Already claimed"}
-                          </span>
-                        )}
-
-                        {contributingId === gift.id ? (
-                          <div className="flex flex-col gap-2 bg-cream p-3">
-                            <input
-                              type="text"
-                              placeholder="Your name (optional)"
-                              value={contributorName}
-                              onChange={(e) =>
-                                setContributorName(e.target.value)
-                              }
-                              className="field-underline text-xs"
-                            />
-                            <input
-                              type="number"
-                              placeholder="Amount (ZAR)"
-                              value={amount}
-                              onChange={(e) => setAmount(e.target.value)}
-                              className="field-underline text-xs"
-                            />
-                            <button
-                              onClick={() => handleContribute(gift.id)}
-                              className="btn-primary px-3 py-2 text-[11px] uppercase tracking-widest"
-                            >
-                              Confirm contribution
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => setContributingId(gift.id)}
-                            className="text-left text-[11px] uppercase tracking-widest text-champagne-gold underline underline-offset-4"
-                          >
-                            Make a deposit toward this
-                          </button>
+                    <button
+                      type="button"
+                      onClick={() => setViewingId(gift.id)}
+                      className="block text-left"
+                      aria-label={`View ${gift.name}`}
+                    >
+                      <div className="relative h-36 w-full bg-cream">
+                        {gift.imageUrl && (
+                          <Image
+                            src={gift.imageUrl}
+                            alt={gift.name}
+                            fill
+                            className="object-cover"
+                          />
                         )}
                       </div>
+                    </button>
+                    <div className="flex flex-1 flex-col gap-2 p-4">
+                      <button
+                        type="button"
+                        onClick={() => setViewingId(gift.id)}
+                        className="text-left"
+                      >
+                        <h3 className="section-title text-base text-onyx">
+                          {gift.name}
+                        </h3>
+                        {gift.description && (
+                          <p className="text-xs text-charcoal/60">
+                            {gift.description}
+                          </p>
+                        )}
+                        <p className="section-title text-lg text-royal-blue">
+                          R{Number(gift.priceZar).toLocaleString("en-ZA")}{" "}
+                          <span className="text-xs font-normal text-charcoal/40">
+                            · ${Number(gift.priceUsd).toLocaleString("en-US")}
+                          </span>
+                        </p>
+                      </button>
+
+                      {renderGiftActions(gift)}
                     </div>
                   </div>
                 ))}
@@ -324,6 +359,65 @@ export default function GiftRegistry({
             )}
           </AnimatePresence>
         </div>
+
+        <AnimatePresence>
+          {viewingGift && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-onyx/70 p-4 sm:p-8"
+              onClick={() => setViewingId(null)}
+            >
+              <motion.div
+                initial={{ opacity: 0, y: 16, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 16, scale: 0.98 }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="hairline relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-y-auto bg-ivory"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  type="button"
+                  onClick={() => setViewingId(null)}
+                  aria-label="Close"
+                  className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-onyx/80 text-ivory transition-colors hover:bg-onyx"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M18 6 6 18M6 6l12 12" strokeLinecap="round" />
+                  </svg>
+                </button>
+
+                {viewingGift.imageUrl && (
+                  <div className="relative h-64 w-full shrink-0 bg-cream sm:h-80">
+                    <Image
+                      src={viewingGift.imageUrl}
+                      alt={viewingGift.name}
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                )}
+
+                <div className="flex flex-col gap-2 p-6 sm:p-8">
+                  <h3 className="section-title text-2xl text-onyx">{viewingGift.name}</h3>
+                  {viewingGift.description && (
+                    <p className="text-sm text-charcoal/60">{viewingGift.description}</p>
+                  )}
+                  <p className="section-title text-2xl text-royal-blue">
+                    R{Number(viewingGift.priceZar).toLocaleString("en-ZA")}{" "}
+                    <span className="text-sm font-normal text-charcoal/40">
+                      · ${Number(viewingGift.priceUsd).toLocaleString("en-US")}
+                    </span>
+                  </p>
+
+                  {renderGiftActions(viewingGift)}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );
