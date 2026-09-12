@@ -33,7 +33,9 @@ export default function GiftRegistry({
   const [viewingId, setViewingId] = useState<string | null>(null);
 
   const { bank } = SITE_COPY;
-  const viewingGift = viewingId ? items.find((g) => g.id === viewingId) ?? null : null;
+  const viewingGift = viewingId
+    ? (items.find((g) => g.id === viewingId) ?? null)
+    : null;
 
   // Lock page scroll while the gift popup is open, and let Escape close it.
   useEffect(() => {
@@ -152,7 +154,9 @@ export default function GiftRegistry({
           </button>
         ) : (
           <span className="border border-charcoal/15 px-4 py-2 text-center text-[11px] uppercase tracking-widest text-charcoal/50">
-            {gift.status === "paid" ? "Received with thanks" : "Already claimed"}
+            {gift.status === "paid"
+              ? "Received with thanks"
+              : "Already claimed"}
           </span>
         )}
 
@@ -293,7 +297,7 @@ export default function GiftRegistry({
 
           <div className="relative">
             <motion.div
-              animate={{ maxHeight: expanded ? 4000 : 460 }}
+              animate={{ maxHeight: expanded ? 4000 : 260 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
               className="grid gap-5 overflow-hidden sm:grid-cols-2"
             >
@@ -347,17 +351,15 @@ export default function GiftRegistry({
               ))}
             </motion.div>
 
-            {!expanded && (
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-40 items-end justify-center bg-gradient-to-t from-onyx via-onyx/70 to-transparent pb-6">
-                <button
-                  type="button"
-                  onClick={() => setExpanded(true)}
-                  className="btn-gold pointer-events-auto px-8 py-3 text-xs uppercase tracking-widest"
-                >
-                  View more →
-                </button>
-              </div>
-            )}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-32 items-end justify-center bg-gradient-to-t from-ivory/90 via-ivory/50 to-transparent pb-6">
+              <button
+                type="button"
+                onClick={() => setExpanded(!expanded)}
+                className="btn-gold pointer-events-auto px-8 py-3 text-xs uppercase tracking-widest"
+              >
+                {expanded ? "Show less" : "Show all gifts →"}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -385,7 +387,14 @@ export default function GiftRegistry({
                   aria-label="Close"
                   className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-onyx/80 text-ivory transition-colors hover:bg-onyx"
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
                     <path d="M18 6 6 18M6 6l12 12" strokeLinecap="round" />
                   </svg>
                 </button>
@@ -402,9 +411,13 @@ export default function GiftRegistry({
                 )}
 
                 <div className="flex flex-col gap-2 p-6 sm:p-8">
-                  <h3 className="section-title text-2xl text-onyx">{viewingGift.name}</h3>
+                  <h3 className="section-title text-2xl text-onyx">
+                    {viewingGift.name}
+                  </h3>
                   {viewingGift.description && (
-                    <p className="text-sm text-charcoal/60">{viewingGift.description}</p>
+                    <p className="text-sm text-charcoal/60">
+                      {viewingGift.description}
+                    </p>
                   )}
                   <p className="section-title text-2xl text-royal-blue">
                     R{Number(viewingGift.priceZar).toLocaleString("en-ZA")}{" "}
