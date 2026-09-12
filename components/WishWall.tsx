@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { motion } from 'framer-motion';
 import { useSocketEvent } from '@/lib/useSocket';
@@ -22,6 +22,22 @@ const CELL_W = 176;
 const CELL_H = 150;
 const CELL_PADDING = 24; // shrink from the cell size so notes don't touch
 const EXTRA_SLOT_RATIO = 1.5; // more cells than tickets => real breathing room
+
+// A plaster-wall tone with a faint grid etched at exactly the lattice's
+// cell size, plus a couple of soft, mottled radial gradients so it reads
+// as a textured physical wall instead of flat graph paper. The grid lines
+// land right on each note's cell boundary, reinforcing that the wall
+// really is a grid of slots underneath the "randomly" placed notes.
+const WALL_BACKGROUND: CSSProperties = {
+  backgroundColor: '#E4DAC4',
+  backgroundImage: [
+    `repeating-linear-gradient(90deg, rgba(59,42,15,0.09) 0px, rgba(59,42,15,0.09) 1px, transparent 1px, transparent ${CELL_W}px)`,
+    `repeating-linear-gradient(0deg, rgba(59,42,15,0.09) 0px, rgba(59,42,15,0.09) 1px, transparent 1px, transparent ${CELL_H}px)`,
+    'radial-gradient(circle at 15% 20%, rgba(255,255,255,0.4), transparent 40%)',
+    'radial-gradient(circle at 85% 75%, rgba(0,0,0,0.06), transparent 45%)',
+    'radial-gradient(circle at 50% 90%, rgba(255,255,255,0.25), transparent 50%)',
+  ].join(', '),
+};
 
 function hashString(input: string): number {
   let hash = 0;
@@ -106,7 +122,7 @@ export default function WishWall({ initialTickets }: { initialTickets: TicketEnt
       </motion.div>
       <p className="mt-3 text-sm text-charcoal/50">Pinch or scroll to zoom, drag to explore — updates live as wishes come in.</p>
 
-      <div className="hairline mt-6 h-[420px] overflow-hidden bg-[#EDE7D8]">
+      <div className="hairline mt-6 h-[420px] overflow-hidden" style={{ backgroundColor: WALL_BACKGROUND.backgroundColor }}>
         {tickets.length === 0 ? (
           <div className="flex h-full items-center justify-center text-sm text-charcoal/40">
             Be the first to leave a wish above 💌
@@ -114,7 +130,7 @@ export default function WishWall({ initialTickets }: { initialTickets: TicketEnt
         ) : (
           <TransformWrapper minScale={0.3} maxScale={3} initialScale={0.7} centerOnInit wheel={{ step: 0.1 }}>
             <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
-              <div className="relative" style={{ width: wallWidth, height: wallHeight }}>
+              <div className="relative" style={{ width: wallWidth, height: wallHeight, ...WALL_BACKGROUND }}>
                 {tickets.map((t) => {
                   const p = placements.get(t.id);
                   if (!p) return null;
