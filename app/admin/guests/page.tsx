@@ -187,29 +187,29 @@ export default function GuestsPage() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Guests"
+        meta={
+          stats && (
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm text-charcoal/55">
+              <span>
+                <span className="font-semibold text-onyx">{stats.totalGuests}</span> total
+              </span>
+              <span className="text-charcoal/30">·</span>
+              <span>
+                <span className="font-semibold text-onyx">{stats.coupleCount}</span> couples
+              </span>
+              <span className="text-charcoal/30">·</span>
+              <span>
+                <span className="font-semibold text-onyx">{stats.singleCount}</span> singles
+              </span>
+            </div>
+          )
+        }
         action={
           <Button variant="gold" icon={<IconPlus width={16} height={16} />} onClick={openAdd}>
             Add guest
           </Button>
         }
       />
-
-      {stats && (
-        <div className="flex flex-wrap gap-3">
-          <Card padded={false} className="px-4 py-2.5">
-            <p className="text-[11px] uppercase tracking-wide text-charcoal/50">Total guests</p>
-            <p className="section-title text-lg text-onyx">{stats.totalGuests}</p>
-          </Card>
-          <Card padded={false} className="px-4 py-2.5">
-            <p className="text-[11px] uppercase tracking-wide text-charcoal/50">Couple entries</p>
-            <p className="section-title text-lg text-onyx">{stats.coupleCount}</p>
-          </Card>
-          <Card padded={false} className="px-4 py-2.5">
-            <p className="text-[11px] uppercase tracking-wide text-charcoal/50">Single entries</p>
-            <p className="section-title text-lg text-onyx">{stats.singleCount}</p>
-          </Card>
-        </div>
-      )}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative max-w-sm sm:flex-1">
