@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { motion } from 'framer-motion';
 import { useSocketEvent } from '@/lib/useSocket';
@@ -38,6 +38,9 @@ const WALL_BACKGROUND: CSSProperties = {
     'radial-gradient(circle at 50% 90%, rgba(255,255,255,0.25), transparent 50%)',
   ].join(', '),
 };
+
+const MIN_SCALE = 0.3;
+const MAX_SCALE = 3;
 
 function hashString(input: string): number {
   let hash = 0;
@@ -94,6 +97,148 @@ function computeWall(tickets: TicketEntry[]) {
   return { placements, wallWidth: columns * CELL_W, wallHeight: rows * CELL_H };
 }
 
+// How far (in px) a drag has to push past an already-clamped pan edge
+// before we treat it as "the user really means to scroll the page", not
+// an accidental overshoot at the boundary.
+const EDGE_SNAP_PX = 26;
+// Float tolerance for "is the pan already sitting exactly at its bound".
+const EDGE_EPS = 1;
+// Float tolerance for "is the zoom already sitting at min/max scale".
+const SCALE_EPS = 0.002;
+
+interface TransformMeta {
+  scale: number;
+  positionY: number;
+  minPositionY: number;
+  maxPositionY: number;
+}
+
+/**
+ * Lets the page scroll normally once the Wish Wall's own pan/zoom is
+ * already maxed out in the direction the user is pushing — otherwise a
+ * drag or a 2-finger trackpad scroll gets fully swallowed by the wall
+ * forever (react-zoom-pan-pinch calls preventDefault/stopPropagation
+ * unconditionally on every pan/wheel move), trapping the user on top of
+ * it with no way to keep scrolling the page.
+ *
+ * Approach: listen on the wall's outer viewport (an ancestor of the
+ * library's own wrapper element) in the CAPTURE phase, so we see every
+ * touch/mouse/wheel event before the library does.
+ *  - Wheel (mouse wheel or 2-finger trackpad scroll, which this wall
+ *    treats as zoom): once already at min/max scale, stopPropagation so
+ *    the library never sees the event and the browser scrolls the page
+ *    instead of doing nothing.
+ *  - Touch/mouse drag: once the pan is already clamped at its top/bottom
+ *    edge AND the user keeps pushing past it by more than EDGE_SNAP_PX,
+ *    we take the rest of that gesture over ourselves — stopping the
+ *    library and manually scrolling the window to follow the same
+ *    finger/mouse movement, since relying on native scroll to "resume"
+ *    mid-gesture after the library's own preventDefault calls is
+ *    unreliable across browsers.
+ * Dragging left/right, or a vertical drag that's still within bounds,
+ * is left completely alone — only the specific "pushing past an already-
+ * maxed edge" case hands off.
+ */
+function useEdgeScrollHandoff(viewportRef: React.RefObject<HTMLDivElement>, active: boolean) {
+  const metaRef = useRef<TransformMeta | null>(null);
+
+  useEffect(() => {
+    const el = viewportRef.current;
+    if (!el || !active) return;
+
+    let dragActive = false;
+    let released = false;
+    let dragStartY = 0;
+    let lastY = 0;
+
+    function beginDrag(clientY: number) {
+      dragActive = true;
+      released = false;
+      dragStartY = clientY;
+      lastY = clientY;
+    }
+
+    function endDrag() {
+      dragActive = false;
+      released = false;
+    }
+
+    function handleMove(e: TouchEvent | MouseEvent, clientY: number) {
+      if (!dragActive) return;
+
+      if (released) {
+        const dy = clientY - lastY;
+        lastY = clientY;
+        window.scrollBy({ top: -dy });
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+
+      const meta = metaRef.current;
+      if (!meta) return;
+
+      const totalDelta = clientY - dragStartY;
+      const atTop = meta.positionY >= meta.maxPositionY - EDGE_EPS;
+      const atBottom = meta.positionY <= meta.minPositionY + EDGE_EPS;
+      const wantsHandoff = (atTop && totalDelta > EDGE_SNAP_PX) || (atBottom && totalDelta < -EDGE_SNAP_PX);
+
+      if (wantsHandoff) {
+        released = true;
+        lastY = clientY;
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }
+
+    function onTouchStart(e: TouchEvent) {
+      if (e.touches.length === 1) beginDrag(e.touches[0].clientY);
+    }
+    function onTouchMove(e: TouchEvent) {
+      if (e.touches.length === 1) handleMove(e, e.touches[0].clientY);
+    }
+    function onMouseDown(e: MouseEvent) {
+      if (e.button === 0) beginDrag(e.clientY);
+    }
+    function onMouseMove(e: MouseEvent) {
+      handleMove(e, e.clientY);
+    }
+    function onWheel(e: WheelEvent) {
+      const meta = metaRef.current;
+      if (!meta) return;
+      const zoomingIn = e.deltaY < 0;
+      const zoomingOut = e.deltaY > 0;
+      const atMax = meta.scale >= MAX_SCALE - SCALE_EPS;
+      const atMin = meta.scale <= MIN_SCALE + SCALE_EPS;
+      if ((zoomingIn && atMax) || (zoomingOut && atMin)) {
+        e.stopPropagation();
+      }
+    }
+
+    el.addEventListener('touchstart', onTouchStart, { capture: true, passive: true });
+    el.addEventListener('touchmove', onTouchMove, { capture: true, passive: false });
+    el.addEventListener('touchend', endDrag, { capture: true, passive: true });
+    el.addEventListener('touchcancel', endDrag, { capture: true, passive: true });
+    el.addEventListener('mousedown', onMouseDown, { capture: true });
+    window.addEventListener('mousemove', onMouseMove, { capture: true });
+    window.addEventListener('mouseup', endDrag, { capture: true });
+    el.addEventListener('wheel', onWheel, { capture: true, passive: true });
+
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart, true);
+      el.removeEventListener('touchmove', onTouchMove, true);
+      el.removeEventListener('touchend', endDrag, true);
+      el.removeEventListener('touchcancel', endDrag, true);
+      el.removeEventListener('mousedown', onMouseDown, true);
+      window.removeEventListener('mousemove', onMouseMove, true);
+      window.removeEventListener('mouseup', endDrag, true);
+      el.removeEventListener('wheel', onWheel, true);
+    };
+  }, [viewportRef, active]);
+
+  return metaRef;
+}
+
 export default function WishWall({ initialTickets }: { initialTickets: TicketEntry[] }) {
   const [tickets, setTickets] = useState(initialTickets);
 
@@ -106,6 +251,17 @@ export default function WishWall({ initialTickets }: { initialTickets: TicketEnt
   });
 
   const { placements, wallWidth, wallHeight } = useMemo(() => computeWall(tickets), [tickets]);
+
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const metaRef = useEdgeScrollHandoff(viewportRef, tickets.length > 0);
+  const syncMeta = (ref: { instance: { bounds: { minPositionY: number; maxPositionY: number } | null } }, state: { scale: number; positionY: number }) => {
+    metaRef.current = {
+      scale: state.scale,
+      positionY: state.positionY,
+      minPositionY: ref.instance.bounds?.minPositionY ?? 0,
+      maxPositionY: ref.instance.bounds?.maxPositionY ?? 0,
+    };
+  };
 
   return (
     <div className="mx-auto max-w-6xl px-5 pb-16 sm:px-8 sm:pb-20">
@@ -122,13 +278,25 @@ export default function WishWall({ initialTickets }: { initialTickets: TicketEnt
       </motion.div>
       <p className="mt-3 text-sm text-charcoal/50">Pinch or scroll to zoom, drag to explore — updates live as wishes come in.</p>
 
-      <div className="hairline mt-6 h-[420px] overflow-hidden" style={{ backgroundColor: WALL_BACKGROUND.backgroundColor }}>
+      <div
+        ref={viewportRef}
+        className="hairline mt-6 h-[420px] overflow-hidden"
+        style={{ backgroundColor: WALL_BACKGROUND.backgroundColor }}
+      >
         {tickets.length === 0 ? (
           <div className="flex h-full items-center justify-center text-sm text-charcoal/40">
             Be the first to leave a wish above 💌
           </div>
         ) : (
-          <TransformWrapper minScale={0.3} maxScale={3} initialScale={0.7} centerOnInit wheel={{ step: 0.1 }}>
+          <TransformWrapper
+            minScale={MIN_SCALE}
+            maxScale={MAX_SCALE}
+            initialScale={0.7}
+            centerOnInit
+            wheel={{ step: 0.1 }}
+            onInit={(ref) => syncMeta(ref, ref.state)}
+            onTransformed={(ref, state) => syncMeta(ref, state)}
+          >
             <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
               <div className="relative" style={{ width: wallWidth, height: wallHeight, ...WALL_BACKGROUND }}>
                 {tickets.map((t) => {
