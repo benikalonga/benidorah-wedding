@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: OG_TITLE,
     description: OG_DESCRIPTION,
-    images: [{ url: '/images/couple/hero-poster.jpg', width: 1920, height: 1080 }],
+    images: [{ url: '/images/couple/hero-poster.jpg', width: 3761, height: 4702 }],
     videos: [
       {
         url: OG_VIDEO_URL,
