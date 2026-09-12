@@ -71,10 +71,13 @@ export default function GuestsPage() {
   const filtered = useMemo(() => {
     if (!guests) return [];
     const q = query.trim().toLowerCase();
-    if (!q) return guests;
-    return guests.filter(
-      (g) => g.fullName.toLowerCase().includes(q) || g.partnerName?.toLowerCase().includes(q) || g.phoneNumber.includes(q)
-    );
+    const list = q
+      ? guests.filter(
+          (g) =>
+            g.fullName.toLowerCase().includes(q) || g.partnerName?.toLowerCase().includes(q) || g.phoneNumber.includes(q)
+        )
+      : guests;
+    return [...list].sort((a, b) => a.fullName.localeCompare(b.fullName));
   }, [guests, query]);
 
   function openAdd() {
@@ -215,7 +218,7 @@ export default function GuestsPage() {
                     <Td className="text-charcoal/40">{i + 1}</Td>
                     <Td className="font-medium">
                       <div className="flex items-center gap-2">
-                        {g.type === 'couple' && <Badge tone="gold">Couple</Badge>}
+                        {g.type === 'couple' && <Badge tone="green">Couple</Badge>}
                         <span>
                           {g.fullName}
                           {g.partnerName ? ` & ${g.partnerName}` : ''}
@@ -251,7 +254,7 @@ export default function GuestsPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-charcoal/40">{i + 1}.</span>
-                      {g.type === 'couple' && <Badge tone="gold">Couple</Badge>}
+                      {g.type === 'couple' && <Badge tone="green">Couple</Badge>}
                       <p className="text-sm font-medium text-onyx">
                         {g.fullName}
                         {g.partnerName ? ` & ${g.partnerName}` : ''}
