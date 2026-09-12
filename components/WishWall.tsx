@@ -145,12 +145,29 @@ interface TransformMeta {
  * is left completely alone — only the specific "pushing past an already-
  * maxed edge" case hands off.
  */
-function useEdgeScrollHandoff(viewportRef: React.RefObject<HTMLDivElement>, active: boolean) {
+function useEdgeScrollHandoff(
+  viewportRef: React.RefObject<HTMLDivElement>,
+  active: boolean,
+  onDebugUpdate?: (lines: string[]) => void
+) {
   const metaRef = useRef<TransformMeta | null>(null);
+  const onDebugUpdateRef = useRef(onDebugUpdate);
+  onDebugUpdateRef.current = onDebugUpdate;
 
   useEffect(() => {
     const el = viewportRef.current;
     if (!el || !active) return;
+
+    // TEMPORARY: visible trace of every touch event this hook sees, so we
+    // can see on a real phone (which can't be driven from here) exactly
+    // where the boundary/handoff decision is going wrong. Remove once the
+    // mobile drag-to-page-scroll issue is confirmed fixed.
+    const trace: string[] = [];
+    function logDebug(line: string) {
+      trace.push(line);
+      if (trace.length > 40) trace.shift();
+      onDebugUpdateRef.current?.([...trace]);
+    }
 
     let dragActive = false;
     let released = false;
@@ -193,9 +210,11 @@ function useEdgeScrollHandoff(viewportRef: React.RefObject<HTMLDivElement>, acti
       lastY = clientY;
       lastMoveTime = performance.now();
       velocity = 0;
+      if (touch) logDebug(`start y=${clientY.toFixed(0)}`);
     }
 
     function endDrag() {
+      if (isTouch) logDebug(`end released=${released} v=${velocity.toFixed(3)}`);
       if (released && isTouch && Math.abs(velocity) > FLING_MIN_VELOCITY) {
         // Native touch-scroll keeps coasting after the finger lifts — our
         // manual takeover needs to fake that momentum too, or handing off
@@ -224,12 +243,22 @@ function useEdgeScrollHandoff(viewportRef: React.RefObject<HTMLDivElement>, acti
       }
 
       const meta = metaRef.current;
-      if (!meta) return;
+      if (!meta) {
+        if (isTouch) logDebug(`move y=${clientY.toFixed(0)} — no meta yet!`);
+        return;
+      }
 
       const totalDelta = clientY - dragStartY;
       const atTop = meta.positionY >= meta.maxPositionY - EDGE_EPS;
       const atBottom = meta.positionY <= meta.minPositionY + EDGE_EPS;
       const wantsHandoff = (atTop && totalDelta > EDGE_SNAP_PX) || (atBottom && totalDelta < -EDGE_SNAP_PX);
+
+      if (isTouch) {
+        logDebug(
+          `move y=${clientY.toFixed(0)} Δ=${totalDelta.toFixed(0)} posY=${meta.positionY.toFixed(1)} ` +
+            `min=${meta.minPositionY.toFixed(1)} max=${meta.maxPositionY.toFixed(1)} top=${atTop} bot=${atBottom} handoff=${wantsHandoff}`
+        );
+      }
 
       if (wantsHandoff) {
         released = true;
@@ -303,7 +332,8 @@ export default function WishWall({ initialTickets }: { initialTickets: TicketEnt
   const { placements, wallWidth, wallHeight } = useMemo(() => computeWall(tickets), [tickets]);
 
   const viewportRef = useRef<HTMLDivElement>(null);
-  const metaRef = useEdgeScrollHandoff(viewportRef, tickets.length > 0);
+  const [debugLines, setDebugLines] = useState<string[]>([]);
+  const metaRef = useEdgeScrollHandoff(viewportRef, tickets.length > 0, setDebugLines);
   const syncMeta = (ref: { instance: { bounds: { minPositionY: number; maxPositionY: number } | null } }, state: { scale: number; positionY: number }) => {
     metaRef.current = {
       scale: state.scale,
@@ -315,6 +345,13 @@ export default function WishWall({ initialTickets }: { initialTickets: TicketEnt
 
   return (
     <div className="mx-auto max-w-6xl px-5 pb-16 sm:px-8 sm:pb-20">
+      {/* TEMPORARY debug readout for diagnosing the mobile drag-to-page-
+          scroll handoff — remove once confirmed fixed on a real phone. */}
+      {debugLines.length > 0 && (
+        <pre className="mb-2 max-h-40 overflow-auto whitespace-pre-wrap rounded bg-black/90 p-2 text-[10px] leading-tight text-lime-300">
+          {debugLines.join('\n')}
+        </pre>
+      )}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
