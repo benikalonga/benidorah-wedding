@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { buildSaveTheDateWaLink } from '@/lib/save-the-date';
 
 interface TableOption {
   id: string;
@@ -206,6 +207,24 @@ export default function GuestsPage() {
                     >
                       📲 Send invite
                     </button>
+                    <a
+                      href={buildSaveTheDateWaLink(g, 'en')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-full bg-emerald-600/10 px-3 py-1 text-xs font-medium text-emerald-700"
+                      title="Open WhatsApp with an English save-the-date message pre-filled — attach the video yourself before sending"
+                    >
+                      💌 Save-the-date (EN)
+                    </a>
+                    <a
+                      href={buildSaveTheDateWaLink(g, 'fr')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-full bg-emerald-600/10 px-3 py-1 text-xs font-medium text-emerald-700"
+                      title="Ouvrir WhatsApp avec un message de save-the-date en français pré-rempli — joignez la vidéo vous-même avant l'envoi"
+                    >
+                      💌 Save-the-date (FR)
+                    </a>
                     <button
                       onClick={() => {
                         setEditingId(g.id);
