@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import PageHeader from '@/components/admin/ui/PageHeader';
 import Button from '@/components/admin/ui/Button';
 import Dialog from '@/components/admin/ui/Dialog';
 import { useConfirm } from '@/components/admin/ui/ConfirmDialog';
@@ -98,22 +99,24 @@ export default function TablesPage() {
   }
 
   return (
-    <div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="section-title text-2xl text-onyx">Tables</h1>
-        <Button variant="gold" icon={<IconPlus width={16} height={16} />} onClick={openAdd}>
-          Add table
-        </Button>
-      </div>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Tables"
+        action={
+          <Button variant="gold" icon={<IconPlus width={16} height={16} />} onClick={openAdd}>
+            Add table
+          </Button>
+        }
+      />
 
       {tables === null ? (
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <Skeleton className="h-32 w-full" />
           <Skeleton className="h-32 w-full" />
           <Skeleton className="h-32 w-full" />
         </div>
       ) : tables.length === 0 ? (
-        <div className="mt-6">
+        <div>
           <EmptyState
             icon={<IconTable width={40} height={40} />}
             title="No tables yet"
@@ -126,7 +129,7 @@ export default function TablesPage() {
           />
         </div>
       ) : (
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {tables.map((t) => {
             const full = t.guests.length >= t.capacity;
             return (

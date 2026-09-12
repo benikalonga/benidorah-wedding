@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import PageHeader from '@/components/admin/ui/PageHeader';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/admin/ui/Table';
 import Badge from '@/components/admin/ui/Badge';
 import Card from '@/components/admin/ui/Card';
@@ -55,26 +56,26 @@ export default function InvitedPage() {
   }, [guests, query]);
 
   return (
-    <div>
-      <h1 className="section-title text-2xl text-onyx">Invited &amp; RSVP Tracking</h1>
+    <div className="flex flex-col gap-6">
+      <PageHeader title="Invited & RSVP Tracking" />
 
-      <div className="relative mt-4 max-w-sm">
+      <div className="relative max-w-sm">
         <IconSearch width={16} height={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/40" />
         <Input placeholder="Search by name…" value={query} onChange={(e) => setQuery(e.target.value)} className="pl-9" />
       </div>
 
       {guests === null ? (
-        <div className="mt-6 space-y-2">
+        <div className="space-y-2">
           <Skeleton className="h-12 w-full" />
           <Skeleton className="h-12 w-full" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="mt-6">
+        <div>
           <EmptyState icon={<IconMail width={40} height={40} />} title="No guests match" />
         </div>
       ) : (
         <>
-          <div className="mt-6 hidden md:block">
+          <div className="hidden md:block">
             <Table>
               <Thead>
                 <Tr>
@@ -108,7 +109,7 @@ export default function InvitedPage() {
             </Table>
           </div>
 
-          <div className="mt-6 space-y-3 md:hidden">
+          <div className="space-y-3 md:hidden">
             {filtered.map((g) => (
               <Card key={g.id} padded={false} className="p-4">
                 <div className="flex items-start justify-between gap-2">

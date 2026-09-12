@@ -3,6 +3,7 @@
 import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
+import PageHeader from '@/components/admin/ui/PageHeader';
 import Button from '@/components/admin/ui/Button';
 import Card from '@/components/admin/ui/Card';
 import { Field, Input } from '@/components/admin/ui/form';
@@ -50,16 +51,16 @@ function SettingsForm() {
   }
 
   return (
-    <div>
-      <h1 className="section-title text-2xl text-onyx">Account Settings</h1>
+    <div className="flex flex-col gap-6">
+      <PageHeader title="Account Settings" />
 
       {forced && (
-        <div className="mt-4 max-w-sm rounded-xl bg-champagne-gold/15 p-4 text-sm text-onyx">
+        <div className="max-w-sm rounded-xl bg-champagne-gold/15 p-4 text-sm text-onyx">
           For security, you must set a new password before continuing.
         </div>
       )}
 
-      <Card className="mt-6 max-w-sm">
+      <Card className="max-w-sm">
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <Field label="Current password" required>
             <Input

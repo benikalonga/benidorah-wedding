@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import PageHeader from '@/components/admin/ui/PageHeader';
 import Button from '@/components/admin/ui/Button';
 import Badge from '@/components/admin/ui/Badge';
 import Card from '@/components/admin/ui/Card';
@@ -55,21 +56,21 @@ export default function AdminMomentsPage() {
   }
 
   return (
-    <div>
-      <h1 className="section-title text-2xl text-onyx">Moments Moderation</h1>
+    <div className="flex flex-col gap-6">
+      <PageHeader title="Moments Moderation" />
 
       {moments === null ? (
-        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
           {Array.from({ length: 8 }).map((_, i) => (
             <Skeleton key={i} className="aspect-square w-full" />
           ))}
         </div>
       ) : moments.length === 0 ? (
-        <div className="mt-6">
+        <div>
           <EmptyState icon={<IconImage width={40} height={40} />} title="No moments uploaded yet" />
         </div>
       ) : (
-        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
           {moments.map((m) => (
             <Card key={m.id} padded={false} className="overflow-hidden">
               <div className="relative aspect-square w-full bg-cream">

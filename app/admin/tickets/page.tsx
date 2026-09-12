@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import PageHeader from '@/components/admin/ui/PageHeader';
 import Button from '@/components/admin/ui/Button';
 import Badge from '@/components/admin/ui/Badge';
 import Card from '@/components/admin/ui/Card';
@@ -44,21 +45,21 @@ export default function AdminTicketsPage() {
   }
 
   return (
-    <div>
-      <h1 className="section-title text-2xl text-onyx">Wish Wall Tickets</h1>
+    <div className="flex flex-col gap-6">
+      <PageHeader title="Wish Wall Tickets" />
 
       {tickets === null ? (
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <Skeleton className="h-28 w-full" />
           <Skeleton className="h-28 w-full" />
           <Skeleton className="h-28 w-full" />
         </div>
       ) : tickets.length === 0 ? (
-        <div className="mt-6">
+        <div>
           <EmptyState icon={<IconTicket width={40} height={40} />} title="No wishes on the wall yet" />
         </div>
       ) : (
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {tickets.map((t) => (
             <Card key={t.id} className="relative">
               <div className="absolute right-4 top-4">

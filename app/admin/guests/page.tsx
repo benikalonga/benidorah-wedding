@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { buildSaveTheDateWaLink } from '@/lib/save-the-date';
+import PageHeader from '@/components/admin/ui/PageHeader';
 import Button from '@/components/admin/ui/Button';
 import Dialog from '@/components/admin/ui/Dialog';
 import { useConfirm } from '@/components/admin/ui/ConfirmDialog';
@@ -183,16 +184,18 @@ export default function GuestsPage() {
   }
 
   return (
-    <div>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="section-title text-2xl text-onyx">Guests</h1>
-        <Button variant="gold" icon={<IconPlus width={16} height={16} />} onClick={openAdd}>
-          Add guest
-        </Button>
-      </div>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Guests"
+        action={
+          <Button variant="gold" icon={<IconPlus width={16} height={16} />} onClick={openAdd}>
+            Add guest
+          </Button>
+        }
+      />
 
       {stats && (
-        <div className="mt-4 flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3">
           <Card padded={false} className="px-4 py-2.5">
             <p className="text-[11px] uppercase tracking-wide text-charcoal/50">Total guests</p>
             <p className="section-title text-lg text-onyx">{stats.totalGuests}</p>
@@ -208,7 +211,7 @@ export default function GuestsPage() {
         </div>
       )}
 
-      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative max-w-sm sm:flex-1">
           <IconSearch width={16} height={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/40" />
           <Input placeholder="Search by name or phone…" value={query} onChange={(e) => setQuery(e.target.value)} className="pl-9" />
@@ -237,13 +240,13 @@ export default function GuestsPage() {
       </div>
 
       {guests === null ? (
-        <div className="mt-6 space-y-2">
+        <div className="space-y-2">
           <Skeleton className="h-12 w-full" />
           <Skeleton className="h-12 w-full" />
           <Skeleton className="h-12 w-full" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="mt-6">
+        <div>
           <EmptyState
             icon={<IconUsers width={40} height={40} />}
             title={hasActiveFilter ? 'No guests match your search/filters' : 'No guests yet'}
@@ -260,7 +263,7 @@ export default function GuestsPage() {
       ) : (
         <>
           {/* Desktop table */}
-          <div className="mt-6 hidden md:block">
+          <div className="hidden md:block">
             <Table>
               <Thead>
                 <Tr>
@@ -308,7 +311,7 @@ export default function GuestsPage() {
           </div>
 
           {/* Mobile card list */}
-          <div className="mt-6 space-y-3 md:hidden">
+          <div className="space-y-3 md:hidden">
             {filtered.map((g, i) => (
               <Card key={g.id} padded={false} className="p-4">
                 <div className="flex items-start justify-between gap-2">

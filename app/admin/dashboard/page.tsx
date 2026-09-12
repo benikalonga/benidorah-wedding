@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import PageHeader from '@/components/admin/ui/PageHeader';
 import Card from '@/components/admin/ui/Card';
 import Skeleton from '@/components/admin/ui/Skeleton';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/admin/ui/Table';
@@ -27,7 +28,7 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
 
 function StatGroup({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="mt-8 first:mt-0">
+    <section>
       <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-charcoal/45">{title}</h2>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">{children}</div>
     </section>
@@ -44,11 +45,11 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div>
-      <h1 className="section-title text-2xl text-onyx">Dashboard</h1>
+    <div className="flex flex-col gap-8">
+      <PageHeader title="Dashboard" />
 
       {!stats ? (
-        <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <Skeleton key={i} className="h-20 w-full" />
           ))}
@@ -82,31 +83,35 @@ export default function DashboardPage() {
             <StatCard label="Pending RSVPs" value={stats.rsvp.pending} />
           </StatGroup>
 
-          <section className="mt-8">
+          <section>
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-charcoal/45">Table occupancy</h2>
-            <Table>
-              <Thead>
-                <Tr>
-                  <Th>Table</Th>
-                  <Th>Occupied</Th>
-                  <Th>Capacity</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {stats.tables.map((t) => {
-                  const full = t.occupied >= t.capacity;
-                  return (
-                    <Tr key={t.tableNumber}>
-                      <Td className="font-medium">Table {t.tableNumber}</Td>
-                      <Td>{t.occupied}</Td>
-                      <Td>
-                        <Badge tone={full ? 'gold' : 'neutral'}>{t.capacity} seats</Badge>
-                      </Td>
-                    </Tr>
-                  );
-                })}
-              </Tbody>
-            </Table>
+            {/* Capped width — a 3-column table stretched across the full
+                page width just reads as empty space either side of it. */}
+            <div className="max-w-xl">
+              <Table>
+                <Thead>
+                  <Tr>
+                    <Th>Table</Th>
+                    <Th>Occupied</Th>
+                    <Th>Capacity</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {stats.tables.map((t) => {
+                    const full = t.occupied >= t.capacity;
+                    return (
+                      <Tr key={t.tableNumber}>
+                        <Td className="font-medium">Table {t.tableNumber}</Td>
+                        <Td>{t.occupied}</Td>
+                        <Td>
+                          <Badge tone={full ? 'gold' : 'neutral'}>{t.capacity} seats</Badge>
+                        </Td>
+                      </Tr>
+                    );
+                  })}
+                </Tbody>
+              </Table>
+            </div>
           </section>
         </>
       )}
