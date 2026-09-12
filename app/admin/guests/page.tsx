@@ -1,7 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import { buildSaveTheDateWaLink } from '@/lib/save-the-date';
+import Button from '@/components/admin/ui/Button';
+import Dialog from '@/components/admin/ui/Dialog';
+import { useConfirm } from '@/components/admin/ui/ConfirmDialog';
+import DropdownMenu from '@/components/admin/ui/DropdownMenu';
+import { Field, Input, Select } from '@/components/admin/ui/form';
+import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/admin/ui/Table';
+import Badge from '@/components/admin/ui/Badge';
+import Card from '@/components/admin/ui/Card';
+import EmptyState from '@/components/admin/ui/EmptyState';
+import Skeleton from '@/components/admin/ui/Skeleton';
+import { IconPlus, IconSearch, IconMail, IconEdit, IconTrash, IconUsers } from '@/components/admin/ui/icons';
 
 interface TableOption {
   id: string;
@@ -33,12 +45,15 @@ const emptyForm = {
 };
 
 export default function GuestsPage() {
-  const [guests, setGuests] = useState<GuestRow[]>([]);
+  const confirm = useConfirm();
+  const [guests, setGuests] = useState<GuestRow[] | null>(null);
   const [tables, setTables] = useState<TableOption[]>([]);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [query, setQuery] = useState('');
 
   async function load() {
     const [g, t] = await Promise.all([
@@ -53,208 +68,259 @@ export default function GuestsPage() {
     load();
   }, []);
 
+  const filtered = useMemo(() => {
+    if (!guests) return [];
+    const q = query.trim().toLowerCase();
+    if (!q) return guests;
+    return guests.filter(
+      (g) => g.fullName.toLowerCase().includes(q) || g.partnerName?.toLowerCase().includes(q) || g.phoneNumber.includes(q)
+    );
+  }, [guests, query]);
+
+  function openAdd() {
+    setEditingId(null);
+    setForm(emptyForm);
+    setError(null);
+    setDialogOpen(true);
+  }
+
+  function openEdit(g: GuestRow) {
+    setEditingId(g.id);
+    setForm({
+      type: g.type,
+      fullName: g.fullName,
+      partnerName: g.partnerName || '',
+      phoneNumber: g.phoneNumber,
+      email: g.email || '',
+      guestSide: g.guestSide,
+      tableId: g.tableId,
+    });
+    setError(null);
+    setDialogOpen(true);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setSaving(true);
     const url = editingId ? `/api/admin/guests/${editingId}` : '/api/admin/guests';
     const method = editingId ? 'PATCH' : 'POST';
-    const res = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    });
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      setError(data.error || 'Failed to save guest');
-      return;
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || 'Failed to save guest');
+        return;
+      }
+      setDialogOpen(false);
+      toast.success(editingId ? 'Guest updated' : 'Guest added');
+      load();
+    } finally {
+      setSaving(false);
     }
-    setForm(emptyForm);
-    setEditingId(null);
+  }
+
+  async function handleDelete(g: GuestRow) {
+    const ok = await confirm({
+      title: `Delete ${g.fullName}?`,
+      description: 'This cannot be undone — their RSVP and moments (if any) will be removed too.',
+      confirmLabel: 'Delete',
+      danger: true,
+    });
+    if (!ok) return;
+    await fetch(`/api/admin/guests/${g.id}`, { method: 'DELETE' });
+    toast.success('Guest deleted');
     load();
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm('Delete this guest? This cannot be undone.')) return;
-    await fetch(`/api/admin/guests/${id}`, { method: 'DELETE' });
-    load();
-  }
-
-  async function handleSendInvite(id: string) {
-    setNotice(null);
-    const res = await fetch(`/api/admin/guests/${id}/send-invite`, { method: 'POST' });
+  async function handleSendInvite(g: GuestRow) {
+    const res = await fetch(`/api/admin/guests/${g.id}/send-invite`, { method: 'POST' });
     const data = await res.json();
     if (res.ok) {
-      setNotice(data.mocked ? `Invite logged (mock mode — no WhatsApp credentials set): ${data.inviteUrl}` : 'Invite sent!');
+      toast.success(data.mocked ? `Invite logged (mock mode): ${data.inviteUrl}` : 'Invite sent!');
       load();
     } else {
-      setNotice(data.error || 'Failed to send invite');
+      toast.error(data.error || 'Failed to send invite');
     }
+  }
+
+  function guestActions(g: GuestRow) {
+    return [
+      { label: 'Send invite', icon: <IconMail width={16} height={16} />, onSelect: () => handleSendInvite(g) },
+      { label: 'Save-the-date (EN)', href: buildSaveTheDateWaLink(g, 'en'), target: '_blank' },
+      { label: 'Save-the-date (FR)', href: buildSaveTheDateWaLink(g, 'fr'), target: '_blank' },
+      { label: 'Edit', icon: <IconEdit width={16} height={16} />, onSelect: () => openEdit(g) },
+      { label: 'Delete', icon: <IconTrash width={16} height={16} />, onSelect: () => handleDelete(g), danger: true },
+    ];
   }
 
   return (
     <div>
-      <h1 className="section-title text-2xl text-onyx">Guests</h1>
-
-      <form onSubmit={handleSubmit} className="mt-4 grid grid-cols-2 gap-3 rounded-2xl border border-onyx/10 bg-white p-5 md:grid-cols-3">
-        <select
-          value={form.type}
-          onChange={(e) => setForm({ ...form, type: e.target.value as any })}
-          className="rounded border border-onyx/10 px-2 py-1.5 text-sm"
-        >
-          <option value="single">Single</option>
-          <option value="couple">Couple</option>
-        </select>
-        <input
-          required
-          placeholder="Full name"
-          value={form.fullName}
-          onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-          className="rounded border border-onyx/10 px-2 py-1.5 text-sm"
-        />
-        {form.type === 'couple' && (
-          <input
-            placeholder="Partner name"
-            value={form.partnerName}
-            onChange={(e) => setForm({ ...form, partnerName: e.target.value })}
-            className="rounded border border-onyx/10 px-2 py-1.5 text-sm"
-          />
-        )}
-        <input
-          required
-          placeholder="Phone (e.g. +27...)"
-          value={form.phoneNumber}
-          onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
-          className="rounded border border-onyx/10 px-2 py-1.5 text-sm"
-        />
-        <input
-          type="email"
-          placeholder="Email (optional)"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-          className="rounded border border-onyx/10 px-2 py-1.5 text-sm"
-        />
-        <select
-          value={form.guestSide}
-          onChange={(e) => setForm({ ...form, guestSide: e.target.value as any })}
-          className="rounded border border-onyx/10 px-2 py-1.5 text-sm"
-        >
-          <option value="groom">Groom's side</option>
-          <option value="bride">Bride's side</option>
-        </select>
-        <select
-          required
-          value={form.tableId}
-          onChange={(e) => setForm({ ...form, tableId: e.target.value })}
-          className="rounded border border-onyx/10 px-2 py-1.5 text-sm"
-        >
-          <option value="">Select table…</option>
-          {tables.map((t) => (
-            <option key={t.id} value={t.id}>
-              Table {t.tableNumber}
-            </option>
-          ))}
-        </select>
-        <div className="col-span-full flex items-center gap-3">
-          <button type="submit" className="rounded-full bg-royal-blue px-4 py-2 text-sm font-semibold text-ivory">
-            {editingId ? 'Update guest' : 'Add guest'}
-          </button>
-          {editingId && (
-            <button
-              type="button"
-              onClick={() => {
-                setEditingId(null);
-                setForm(emptyForm);
-              }}
-              className="text-sm text-charcoal/60"
-            >
-              Cancel edit
-            </button>
-          )}
-          {error && <p className="text-sm text-red-700">{error}</p>}
-        </div>
-      </form>
-
-      {notice && <p className="mt-3 rounded-lg bg-champagne-gold/20 p-3 text-sm text-onyx">{notice}</p>}
-
-      <div className="mt-6 overflow-x-auto rounded-xl border border-onyx/10 bg-white">
-        <table className="w-full min-w-[900px] text-left text-sm">
-          <thead className="bg-ivory text-xs uppercase text-charcoal/50">
-            <tr>
-              <th className="px-3 py-2">Name</th>
-              <th className="px-3 py-2">Type</th>
-              <th className="px-3 py-2">Phone</th>
-              <th className="px-3 py-2">Side</th>
-              <th className="px-3 py-2">Table</th>
-              <th className="px-3 py-2">Invite sent</th>
-              <th className="px-3 py-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {guests.map((g) => (
-              <tr key={g.id} className="border-t border-onyx/5">
-                <td className="px-3 py-2">{g.fullName}{g.partnerName ? ` & ${g.partnerName}` : ''}</td>
-                <td className="px-3 py-2 capitalize">{g.type}</td>
-                <td className="px-3 py-2">{g.phoneNumber}</td>
-                <td className="px-3 py-2 capitalize">{g.guestSide}</td>
-                <td className="px-3 py-2">Table {g.table?.tableNumber}</td>
-                <td className="px-3 py-2">{g.inviteSentAt ? new Date(g.inviteSentAt).toLocaleDateString() : '—'}</td>
-                <td className="px-3 py-2">
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={() => handleSendInvite(g.id)}
-                      className="rounded-full bg-green-600/10 px-3 py-1 text-xs font-medium text-green-700"
-                      title="Send invite via WhatsApp"
-                    >
-                      📲 Send invite
-                    </button>
-                    <a
-                      href={buildSaveTheDateWaLink(g, 'en')}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rounded-full bg-emerald-600/10 px-3 py-1 text-xs font-medium text-emerald-700"
-                      title="Open WhatsApp with an English save-the-date message pre-filled — attach the video yourself before sending"
-                    >
-                      💌 Save-the-date (EN)
-                    </a>
-                    <a
-                      href={buildSaveTheDateWaLink(g, 'fr')}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rounded-full bg-emerald-600/10 px-3 py-1 text-xs font-medium text-emerald-700"
-                      title="Ouvrir WhatsApp avec un message de save-the-date en français pré-rempli — joignez la vidéo vous-même avant l'envoi"
-                    >
-                      💌 Save-the-date (FR)
-                    </a>
-                    <button
-                      onClick={() => {
-                        setEditingId(g.id);
-                        setForm({
-                          type: g.type,
-                          fullName: g.fullName,
-                          partnerName: g.partnerName || '',
-                          phoneNumber: g.phoneNumber,
-                          email: g.email || '',
-                          guestSide: g.guestSide,
-                          tableId: g.tableId,
-                        });
-                      }}
-                      className="rounded-full bg-royal-blue/10 px-3 py-1 text-xs font-medium text-royal-blue"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(g.id)}
-                      className="rounded-full bg-red-600/10 px-3 py-1 text-xs font-medium text-red-700"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="section-title text-2xl text-onyx">Guests</h1>
+        <Button variant="gold" icon={<IconPlus width={16} height={16} />} onClick={openAdd}>
+          Add guest
+        </Button>
       </div>
+
+      <div className="relative mt-4 max-w-sm">
+        <IconSearch width={16} height={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/40" />
+        <Input placeholder="Search by name or phone…" value={query} onChange={(e) => setQuery(e.target.value)} className="pl-9" />
+      </div>
+
+      {guests === null ? (
+        <div className="mt-6 space-y-2">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="mt-6">
+          <EmptyState
+            icon={<IconUsers width={40} height={40} />}
+            title={query ? 'No guests match your search' : 'No guests yet'}
+            description={query ? undefined : 'Add your first guest to start building the list.'}
+            action={
+              !query && (
+                <Button variant="gold" icon={<IconPlus width={16} height={16} />} onClick={openAdd}>
+                  Add guest
+                </Button>
+              )
+            }
+          />
+        </div>
+      ) : (
+        <>
+          {/* Desktop table */}
+          <div className="mt-6 hidden md:block">
+            <Table>
+              <Thead>
+                <Tr>
+                  <Th>Name</Th>
+                  <Th>Type</Th>
+                  <Th>Phone</Th>
+                  <Th>Side</Th>
+                  <Th>Table</Th>
+                  <Th>Invite sent</Th>
+                  <Th className="w-10" />
+                </Tr>
+              </Thead>
+              <Tbody>
+                {filtered.map((g) => (
+                  <Tr key={g.id}>
+                    <Td className="font-medium">
+                      {g.fullName}
+                      {g.partnerName ? ` & ${g.partnerName}` : ''}
+                    </Td>
+                    <Td>
+                      <Badge tone={g.type === 'couple' ? 'gold' : 'neutral'}>{g.type}</Badge>
+                    </Td>
+                    <Td className="text-charcoal/70">{g.phoneNumber}</Td>
+                    <Td>
+                      <Badge tone={g.guestSide === 'groom' ? 'blue' : 'gold'}>{g.guestSide}</Badge>
+                    </Td>
+                    <Td className="text-charcoal/70">Table {g.table?.tableNumber}</Td>
+                    <Td>
+                      {g.inviteSentAt ? (
+                        <Badge tone="green">{new Date(g.inviteSentAt).toLocaleDateString()}</Badge>
+                      ) : (
+                        <span className="text-charcoal/35">—</span>
+                      )}
+                    </Td>
+                    <Td>
+                      <DropdownMenu items={guestActions(g)} label={`Actions for ${g.fullName}`} />
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </div>
+
+          {/* Mobile card list */}
+          <div className="mt-6 space-y-3 md:hidden">
+            {filtered.map((g) => (
+              <Card key={g.id} padded={false} className="p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-medium text-onyx">
+                      {g.fullName}
+                      {g.partnerName ? ` & ${g.partnerName}` : ''}
+                    </p>
+                    <p className="mt-0.5 text-xs text-charcoal/60">{g.phoneNumber}</p>
+                  </div>
+                  <DropdownMenu items={guestActions(g)} label={`Actions for ${g.fullName}`} />
+                </div>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  <Badge tone={g.type === 'couple' ? 'gold' : 'neutral'}>{g.type}</Badge>
+                  <Badge tone={g.guestSide === 'groom' ? 'blue' : 'gold'}>{g.guestSide}</Badge>
+                  <Badge tone="neutral">Table {g.table?.tableNumber}</Badge>
+                  {g.inviteSentAt && <Badge tone="green">Invited {new Date(g.inviteSentAt).toLocaleDateString()}</Badge>}
+                </div>
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
+
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        title={editingId ? 'Edit guest' : 'Add guest'}
+        footer={
+          <>
+            <Button variant="ghost" type="button" onClick={() => setDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" type="submit" form="guest-form" loading={saving}>
+              {editingId ? 'Save changes' : 'Add guest'}
+            </Button>
+          </>
+        }
+      >
+        <form id="guest-form" onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label="Type">
+            <Select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as any })}>
+              <option value="single">Single</option>
+              <option value="couple">Couple</option>
+            </Select>
+          </Field>
+          <Field label="Guest side">
+            <Select value={form.guestSide} onChange={(e) => setForm({ ...form, guestSide: e.target.value as any })}>
+              <option value="groom">Groom&apos;s side</option>
+              <option value="bride">Bride&apos;s side</option>
+            </Select>
+          </Field>
+          <Field label="Full name" required className="sm:col-span-2">
+            <Input required value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} />
+          </Field>
+          {form.type === 'couple' && (
+            <Field label="Partner name" className="sm:col-span-2">
+              <Input value={form.partnerName} onChange={(e) => setForm({ ...form, partnerName: e.target.value })} />
+            </Field>
+          )}
+          <Field label="Phone" required hint="e.g. +27...">
+            <Input required value={form.phoneNumber} onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })} />
+          </Field>
+          <Field label="Email (optional)">
+            <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          </Field>
+          <Field label="Table" required className="sm:col-span-2">
+            <Select required value={form.tableId} onChange={(e) => setForm({ ...form, tableId: e.target.value })}>
+              <option value="">Select table…</option>
+              {tables.map((t) => (
+                <option key={t.id} value={t.id}>
+                  Table {t.tableNumber}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          {error && <p className="text-sm text-red-600 sm:col-span-2">{error}</p>}
+        </form>
+      </Dialog>
     </div>
   );
 }

@@ -7,9 +7,9 @@ import { IconMoreVertical } from './icons';
 export interface MenuItem {
   label: string;
   icon?: ReactNode;
-  onSelect: () => void;
   danger?: boolean;
-  /** Render as a plain link instead of a button (e.g. an external wa.me href). */
+  /** Either provide onSelect (a normal action) or href (renders as a plain link — e.g. an external wa.me href). */
+  onSelect?: () => void;
   href?: string;
   target?: string;
 }
