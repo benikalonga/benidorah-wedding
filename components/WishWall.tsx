@@ -147,6 +147,14 @@ export default function WishWall({ initialTickets }: { initialTickets: TicketEnt
                         transform: `translate(-50%, -50%) rotate(${p.rotation}deg)`,
                       }}
                     >
+                      <span
+                        aria-hidden
+                        className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full"
+                        style={{
+                          background: 'radial-gradient(circle at 35% 30%, #fff6d8, #d4a017 55%, #7a5a0d 100%)',
+                          boxShadow: '0 2px 3px rgba(0,0,0,0.45)',
+                        }}
+                      />
                       <p className="line-clamp-4 font-hand text-lg leading-tight text-black">{t.message}</p>
                       <p className="text-right text-xs font-semibold text-black/80">— {t.displayName || 'Anonymous'}</p>
                     </div>
