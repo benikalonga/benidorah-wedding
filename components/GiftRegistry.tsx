@@ -23,7 +23,7 @@ export default function GiftRegistry({
   gifts: GiftEntry[];
   guestId: string | null;
 }) {
-  const [showRegistry, setShowRegistry] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const [items, setItems] = useState(gifts);
   const [contributingId, setContributingId] = useState<string | null>(null);
   const [amount, setAmount] = useState("");
@@ -289,75 +289,76 @@ export default function GiftRegistry({
             from the list below.
           </p>
 
-          <button
-            onClick={() => setShowRegistry((v) => !v)}
-            className="btn-outline self-start px-8 py-3.5 text-xs uppercase tracking-widest"
-          >
-            {showRegistry ? "Hide gift registry" : "View gift registry →"}
-          </button>
-
           {status && <p className="text-sm text-royal-blue">{status}</p>}
 
-          <AnimatePresence>
-            {showRegistry && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                className="grid gap-5 overflow-hidden sm:grid-cols-2"
-              >
-                {items.map((gift) => (
-                  <div
-                    key={gift.id}
-                    className="hairline flex flex-col overflow-hidden"
+          <div className="relative">
+            <motion.div
+              animate={{ maxHeight: expanded ? 4000 : 460 }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="grid gap-5 overflow-hidden sm:grid-cols-2"
+            >
+              {items.map((gift) => (
+                <div
+                  key={gift.id}
+                  className="hairline flex flex-col overflow-hidden"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setViewingId(gift.id)}
+                    className="block text-left"
+                    aria-label={`View ${gift.name}`}
                   >
+                    <div className="relative h-36 w-full bg-cream">
+                      {gift.imageUrl && (
+                        <Image
+                          src={gift.imageUrl}
+                          alt={gift.name}
+                          fill
+                          className="object-cover"
+                        />
+                      )}
+                    </div>
+                  </button>
+                  <div className="flex flex-1 flex-col gap-2 p-4">
                     <button
                       type="button"
                       onClick={() => setViewingId(gift.id)}
-                      className="block text-left"
-                      aria-label={`View ${gift.name}`}
+                      className="text-left"
                     >
-                      <div className="relative h-36 w-full bg-cream">
-                        {gift.imageUrl && (
-                          <Image
-                            src={gift.imageUrl}
-                            alt={gift.name}
-                            fill
-                            className="object-cover"
-                          />
-                        )}
-                      </div>
-                    </button>
-                    <div className="flex flex-1 flex-col gap-2 p-4">
-                      <button
-                        type="button"
-                        onClick={() => setViewingId(gift.id)}
-                        className="text-left"
-                      >
-                        <h3 className="section-title text-base text-onyx">
-                          {gift.name}
-                        </h3>
-                        {gift.description && (
-                          <p className="text-xs text-charcoal/60">
-                            {gift.description}
-                          </p>
-                        )}
-                        <p className="section-title text-lg text-royal-blue">
-                          R{Number(gift.priceZar).toLocaleString("en-ZA")}{" "}
-                          <span className="text-xs font-normal text-charcoal/40">
-                            · ${Number(gift.priceUsd).toLocaleString("en-US")}
-                          </span>
+                      <h3 className="section-title text-base text-onyx">
+                        {gift.name}
+                      </h3>
+                      {gift.description && (
+                        <p className="text-xs text-charcoal/60">
+                          {gift.description}
                         </p>
-                      </button>
+                      )}
+                      <p className="section-title text-lg text-royal-blue">
+                        R{Number(gift.priceZar).toLocaleString("en-ZA")}{" "}
+                        <span className="text-xs font-normal text-charcoal/40">
+                          · ${Number(gift.priceUsd).toLocaleString("en-US")}
+                        </span>
+                      </p>
+                    </button>
 
-                      {renderGiftActions(gift)}
-                    </div>
+                    {renderGiftActions(gift)}
                   </div>
-                ))}
-              </motion.div>
+                </div>
+              ))}
+            </motion.div>
+
+            {!expanded && (
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-40 items-end justify-center bg-gradient-to-t from-onyx via-onyx/70 to-transparent pb-6">
+                <button
+                  type="button"
+                  onClick={() => setExpanded(true)}
+                  className="btn-gold pointer-events-auto px-8 py-3 text-xs uppercase tracking-widest"
+                >
+                  View more →
+                </button>
+              </div>
             )}
-          </AnimatePresence>
+          </div>
         </div>
 
         <AnimatePresence>
