@@ -49,8 +49,11 @@ export function sanitizeText(input: string): string {
 }
 
 // Vivid sticky-note palette for the Wish Wall — blue, orange, green,
-// yellow, purple, always paired with black text (see WishWall.tsx).
-const WISH_WALL_COLORS = ['#3B6DF6', '#FB923C', '#2ECC71', '#FFD60A', '#A855F7'];
+// yellow, purple, always paired with black text (see WishWall.tsx). Kept
+// light enough (nothing below ~55% luminance) that black text stays
+// clearly readable on every one — don't add a darker shade here without
+// checking that.
+const WISH_WALL_COLORS = ['#60A5FA', '#FB923C', '#4ADE80', '#FFD60A', '#A78BFA'];
 export function randomWishColor(): string {
   return WISH_WALL_COLORS[Math.floor(Math.random() * WISH_WALL_COLORS.length)];
 }
