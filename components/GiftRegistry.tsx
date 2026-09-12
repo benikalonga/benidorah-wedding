@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
-import { SITE_COPY } from '@/lib/content';
-import SectionHeader from './SectionHeader';
+import { useState } from "react";
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
+import { SITE_COPY } from "@/lib/content";
+import SectionHeader from "./SectionHeader";
 
 export interface GiftEntry {
   id: string;
@@ -13,15 +13,21 @@ export interface GiftEntry {
   imageUrl: string | null;
   priceZar: string;
   priceUsd: string;
-  status: 'available' | 'booked' | 'paid';
+  status: "available" | "booked" | "paid";
 }
 
-export default function GiftRegistry({ gifts, guestId }: { gifts: GiftEntry[]; guestId: string | null }) {
+export default function GiftRegistry({
+  gifts,
+  guestId,
+}: {
+  gifts: GiftEntry[];
+  guestId: string | null;
+}) {
   const [showRegistry, setShowRegistry] = useState(false);
   const [items, setItems] = useState(gifts);
   const [contributingId, setContributingId] = useState<string | null>(null);
-  const [amount, setAmount] = useState('');
-  const [contributorName, setContributorName] = useState('');
+  const [amount, setAmount] = useState("");
+  const [contributorName, setContributorName] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -49,18 +55,18 @@ export default function GiftRegistry({ gifts, guestId }: { gifts: GiftEntry[]; g
       // it still works without a secure context, which is exactly the
       // gap the async Clipboard API leaves on a plain-HTTP LAN address.
       try {
-        const textarea = document.createElement('textarea');
+        const textarea = document.createElement("textarea");
         textarea.value = text;
-        textarea.setAttribute('readonly', '');
-        textarea.style.position = 'fixed';
-        textarea.style.top = '0';
-        textarea.style.left = '-9999px';
-        textarea.style.opacity = '0';
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.top = "0";
+        textarea.style.left = "-9999px";
+        textarea.style.opacity = "0";
         document.body.appendChild(textarea);
         textarea.focus();
         textarea.select();
         textarea.setSelectionRange(0, text.length);
-        success = document.execCommand('copy');
+        success = document.execCommand("copy");
         document.body.removeChild(textarea);
       } catch {
         success = false;
@@ -75,40 +81,54 @@ export default function GiftRegistry({ gifts, guestId }: { gifts: GiftEntry[]; g
 
   async function handleBookIt(id: string) {
     const res = await fetch(`/api/gifts/${id}/reserve`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ guestId }),
     });
     if (res.ok) {
-      setItems((prev) => prev.map((g) => (g.id === id ? { ...g, status: 'booked' } : g)));
+      setItems((prev) =>
+        prev.map((g) => (g.id === id ? { ...g, status: "booked" } : g)),
+      );
     } else {
       const data = await res.json().catch(() => ({}));
-      setStatus(data.error || 'Could not claim this gift — someone may have just booked it.');
+      setStatus(
+        data.error ||
+          "Could not claim this gift — someone may have just booked it.",
+      );
     }
   }
 
   async function handleContribute(id: string) {
     const res = await fetch(`/api/gifts/${id}/contribute`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ guestId, amountZar: Number(amount), contributorName }),
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        guestId,
+        amountZar: Number(amount),
+        contributorName,
+      }),
     });
     if (res.ok) {
-      setStatus('Thank you — your contribution has been recorded.');
+      setStatus("Thank you — your contribution has been recorded.");
       setContributingId(null);
-      setAmount('');
-      setContributorName('');
+      setAmount("");
+      setContributorName("");
     } else {
-      setStatus('Something went wrong recording your contribution — please try again.');
+      setStatus(
+        "Something went wrong recording your contribution — please try again.",
+      );
     }
   }
 
   return (
-    <section id="gifts" className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
+    <section
+      id="gifts"
+      className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20"
+    >
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-80px' }}
+        viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
         <SectionHeader index="04" eyebrow="With Love" title="Gift Registry" />
@@ -124,8 +144,8 @@ export default function GiftRegistry({ gifts, guestId }: { gifts: GiftEntry[]; g
         >
           <div className="bg-onyx p-8 text-ivory sm:p-10">
             <p className="text-lg leading-relaxed text-ivory/85">
-              Having you there is the best gift of all. If you'd love to spoil us a little too, a contribution
-              toward our new home together would mean the world.
+              Your presence will be the best gift of all. If you'd love to spoil
+              us a little too, you are welcome to do so .
             </p>
           </div>
 
@@ -133,7 +153,9 @@ export default function GiftRegistry({ gifts, guestId }: { gifts: GiftEntry[]; g
 
           <dl className="grid grid-cols-2 gap-y-3 bg-ivory p-8 text-sm sm:p-10">
             <dt className="text-charcoal/50">Account Name</dt>
-            <dd className="text-right font-medium text-onyx">{bank.accountName}</dd>
+            <dd className="text-right font-medium text-onyx">
+              {bank.accountName}
+            </dd>
             <dt className="text-charcoal/50">Account Number</dt>
             <dd className="text-right font-medium text-onyx">
               <button
@@ -144,11 +166,29 @@ export default function GiftRegistry({ gifts, guestId }: { gifts: GiftEntry[]; g
               >
                 <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-charcoal/25 transition-colors group-hover:border-champagne-gold">
                   {copied ? (
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <path d="M20 6 9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <path
+                        d="M20 6 9 17l-5-5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   ) : (
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
                       <rect x="9" y="9" width="12" height="12" rx="1.5" />
                       <path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
                     </svg>
@@ -158,24 +198,31 @@ export default function GiftRegistry({ gifts, guestId }: { gifts: GiftEntry[]; g
               </button>
             </dd>
             <dt className="text-charcoal/50">Account Type</dt>
-            <dd className="text-right font-medium text-onyx">{bank.accountType}</dd>
+            <dd className="text-right font-medium text-onyx">
+              {bank.accountType}
+            </dd>
             <dt className="text-charcoal/50">Bank</dt>
-            <dd className="text-right font-medium text-onyx">{bank.bankName}</dd>
+            <dd className="text-right font-medium text-onyx">
+              {bank.bankName}
+            </dd>
             <dt className="text-charcoal/50">Branch Code</dt>
-            <dd className="text-right font-medium text-onyx">{bank.branchCode}</dd>
+            <dd className="text-right font-medium text-onyx">
+              {bank.branchCode}
+            </dd>
           </dl>
         </motion.div>
 
         <div className="flex flex-col gap-6">
           <p className="text-sm text-charcoal/60">
-            You're also welcome to bring a gift along on the day, or pick one from the list below.
+            You're also welcome to bring a gift along on the day, or pick one
+            from the list below.
           </p>
 
           <button
             onClick={() => setShowRegistry((v) => !v)}
             className="btn-outline self-start px-8 py-3.5 text-xs uppercase tracking-widest"
           >
-            {showRegistry ? 'Hide gift registry' : 'View gift registry →'}
+            {showRegistry ? "Hide gift registry" : "View gift registry →"}
           </button>
 
           {status && <p className="text-sm text-royal-blue">{status}</p>}
@@ -184,32 +231,55 @@ export default function GiftRegistry({ gifts, guestId }: { gifts: GiftEntry[]; g
             {showRegistry && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
+                animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                 className="grid gap-5 overflow-hidden sm:grid-cols-2"
               >
                 {items.map((gift) => (
-                  <div key={gift.id} className="hairline flex flex-col overflow-hidden">
+                  <div
+                    key={gift.id}
+                    className="hairline flex flex-col overflow-hidden"
+                  >
                     <div className="relative h-36 w-full bg-cream">
-                      {gift.imageUrl && <Image src={gift.imageUrl} alt={gift.name} fill className="object-cover" />}
+                      {gift.imageUrl && (
+                        <Image
+                          src={gift.imageUrl}
+                          alt={gift.name}
+                          fill
+                          className="object-cover"
+                        />
+                      )}
                     </div>
                     <div className="flex flex-1 flex-col gap-2 p-4">
-                      <h3 className="section-title text-base text-onyx">{gift.name}</h3>
-                      {gift.description && <p className="text-xs text-charcoal/60">{gift.description}</p>}
+                      <h3 className="section-title text-base text-onyx">
+                        {gift.name}
+                      </h3>
+                      {gift.description && (
+                        <p className="text-xs text-charcoal/60">
+                          {gift.description}
+                        </p>
+                      )}
                       <p className="section-title text-lg text-royal-blue">
-                        R{Number(gift.priceZar).toLocaleString('en-ZA')}{' '}
-                        <span className="text-xs font-normal text-charcoal/40">· ${Number(gift.priceUsd).toLocaleString('en-US')}</span>
+                        R{Number(gift.priceZar).toLocaleString("en-ZA")}{" "}
+                        <span className="text-xs font-normal text-charcoal/40">
+                          · ${Number(gift.priceUsd).toLocaleString("en-US")}
+                        </span>
                       </p>
 
                       <div className="mt-auto flex flex-col gap-2 pt-2">
-                        {gift.status === 'available' ? (
-                          <button onClick={() => handleBookIt(gift.id)} className="btn-gold px-4 py-2 text-[11px] uppercase tracking-widest">
+                        {gift.status === "available" ? (
+                          <button
+                            onClick={() => handleBookIt(gift.id)}
+                            className="btn-gold px-4 py-2 text-[11px] uppercase tracking-widest"
+                          >
                             I will buy it
                           </button>
                         ) : (
                           <span className="border border-charcoal/15 px-4 py-2 text-center text-[11px] uppercase tracking-widest text-charcoal/50">
-                            {gift.status === 'paid' ? 'Received with thanks' : 'Already claimed'}
+                            {gift.status === "paid"
+                              ? "Received with thanks"
+                              : "Already claimed"}
                           </span>
                         )}
 
@@ -219,7 +289,9 @@ export default function GiftRegistry({ gifts, guestId }: { gifts: GiftEntry[]; g
                               type="text"
                               placeholder="Your name (optional)"
                               value={contributorName}
-                              onChange={(e) => setContributorName(e.target.value)}
+                              onChange={(e) =>
+                                setContributorName(e.target.value)
+                              }
                               className="field-underline text-xs"
                             />
                             <input
@@ -229,12 +301,18 @@ export default function GiftRegistry({ gifts, guestId }: { gifts: GiftEntry[]; g
                               onChange={(e) => setAmount(e.target.value)}
                               className="field-underline text-xs"
                             />
-                            <button onClick={() => handleContribute(gift.id)} className="btn-primary px-3 py-2 text-[11px] uppercase tracking-widest">
+                            <button
+                              onClick={() => handleContribute(gift.id)}
+                              className="btn-primary px-3 py-2 text-[11px] uppercase tracking-widest"
+                            >
                               Confirm contribution
                             </button>
                           </div>
                         ) : (
-                          <button onClick={() => setContributingId(gift.id)} className="text-left text-[11px] uppercase tracking-widest text-champagne-gold underline underline-offset-4">
+                          <button
+                            onClick={() => setContributingId(gift.id)}
+                            className="text-left text-[11px] uppercase tracking-widest text-champagne-gold underline underline-offset-4"
+                          >
                             Make a deposit toward this
                           </button>
                         )}

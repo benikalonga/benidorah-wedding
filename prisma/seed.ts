@@ -27,22 +27,26 @@ const ADMIN_SEEDS = [
   { email: 'daniella@bnd.com', name: 'Daniella' },
 ];
 
+// Kitchen/home appliances only (per the couple's request) — every entry
+// priced at R1000 or more, and every entry has a real photo checked into
+// public/gift-registry/ (see the imageUrl paths below).
 const GIFT_SEEDS = [
-  { name: 'Stand Mixer', description: 'A do-it-all kitchen stand mixer.', priceZar: 5999, priceUsd: 330 },
-  { name: 'Air Fryer', description: 'Large-capacity dual-basket air fryer.', priceZar: 2799, priceUsd: 155 },
-  { name: 'Espresso Machine', description: 'Semi-automatic espresso machine with milk frother.', priceZar: 7499, priceUsd: 415 },
-  { name: 'Cookware Set', description: '10-piece non-stick pot and pan set.', priceZar: 3499, priceUsd: 195 },
-  { name: 'Blender', description: 'High-powered blender for smoothies and soups.', priceZar: 1899, priceUsd: 105 },
-  { name: 'Microwave Oven', description: '30L convection microwave.', priceZar: 3299, priceUsd: 183 },
-  { name: 'Toaster & Kettle Set', description: 'Matching 4-slice toaster and kettle.', priceZar: 1599, priceUsd: 89 },
-  { name: 'Vacuum Cleaner', description: 'Cordless stick vacuum with HEPA filter.', priceZar: 4599, priceUsd: 255 },
-  { name: 'Dinner Set (Set of 12)', description: 'Fine porcelain dinner set for 12.', priceZar: 2999, priceUsd: 166 },
-  { name: 'Bedding Set', description: 'Egyptian cotton bedding, queen size.', priceZar: 1999, priceUsd: 111 },
-  { name: 'Smart TV 55"', description: '55-inch 4K smart television.', priceZar: 9999, priceUsd: 555 },
-  { name: 'Air Conditioner', description: 'Inverter split-unit air conditioner.', priceZar: 8999, priceUsd: 500 },
-  { name: 'Dishwasher', description: 'Freestanding 13-place-setting dishwasher.', priceZar: 7999, priceUsd: 444 },
-  { name: 'Wine Cooler', description: '20-bottle dual-zone wine cooler.', priceZar: 3999, priceUsd: 222 },
-  { name: 'Home Theatre Soundbar', description: 'Soundbar with wireless subwoofer.', priceZar: 4999, priceUsd: 277 },
+  { name: 'Microwave', description: '30L convection microwave oven.', priceZar: 2499, priceUsd: 139, imageUrl: '/gift-registry/microwave.jpg' },
+  { name: 'Rice Cooker', description: 'Automatic rice cooker with keep-warm function.', priceZar: 1299, priceUsd: 72, imageUrl: '/gift-registry/rice-cooker.jpg' },
+  { name: 'Slow Cooker', description: 'Ceramic-pot slow cooker for stews and casseroles.', priceZar: 1199, priceUsd: 67, imageUrl: '/gift-registry/slow-cooker.jpg' },
+  { name: 'Kettle', description: 'Cordless electric kettle, rapid boil.', priceZar: 1099, priceUsd: 61, imageUrl: '/gift-registry/kettle.jpg' },
+  { name: 'Toaster', description: '2-slice electric toaster with browning control.', priceZar: 1199, priceUsd: 67, imageUrl: '/gift-registry/toaster.jpg' },
+  { name: 'Griller', description: 'Electric contact griller for quick, easy meals.', priceZar: 1499, priceUsd: 83, imageUrl: '/gift-registry/griller.jpg' },
+  { name: 'Air Fryer', description: 'Large-capacity air fryer for healthier everyday cooking.', priceZar: 2799, priceUsd: 155, imageUrl: '/gift-registry/air-fryer.jpg' },
+  { name: 'Deep Fryer', description: 'Electric deep fryer with adjustable temperature control.', priceZar: 1899, priceUsd: 105, imageUrl: '/gift-registry/deep-fryer.jpg' },
+  { name: 'Blender', description: 'High-powered blender for smoothies and soups.', priceZar: 1699, priceUsd: 94, imageUrl: '/gift-registry/blender.jpg' },
+  { name: 'Steamer', description: 'Multi-tier bamboo steamer set for stovetop cooking.', priceZar: 1399, priceUsd: 78, imageUrl: '/gift-registry/steamer.jpg' },
+  { name: 'Waffle Maker', description: 'Non-stick waffle maker for weekend breakfasts.', priceZar: 1299, priceUsd: 72, imageUrl: '/gift-registry/waffle-maker.jpg' },
+  { name: 'Vacuum Cleaner', description: 'Cordless stick vacuum with HEPA filter.', priceZar: 3999, priceUsd: 222, imageUrl: '/gift-registry/vacuum-cleaner.jpg' },
+  { name: 'Electric Pan', description: 'Electric frying pan with even, adjustable heat.', priceZar: 1599, priceUsd: 89, imageUrl: '/gift-registry/electric-pan.jpg' },
+  { name: 'Coffee Machine', description: 'Espresso machine with built-in milk frother.', priceZar: 3499, priceUsd: 194, imageUrl: '/gift-registry/coffee-machine.jpg' },
+  { name: 'Multi Food Processor', description: 'All-in-one food processor — chop, blend, mix, and more.', priceZar: 2999, priceUsd: 166, imageUrl: '/gift-registry/food-processor.jpg' },
+  { name: 'Sandwich Maker', description: 'Toastie/sandwich press for a quick hot lunch.', priceZar: 1099, priceUsd: 61, imageUrl: '/gift-registry/sandwich-maker.jpg' },
 ];
 
 const HISTORY_SEEDS = [
@@ -161,6 +165,13 @@ async function main() {
   }).catch(() => null);
 
   console.log('Seeding gift registry…');
+  // Clear out any gift items from an older registry list (e.g. the
+  // earlier placeholder set) that aren't part of the current one, so
+  // re-running the seed doesn't leave stale entries alongside the real
+  // list. Only removes items by name that are no longer in GIFT_SEEDS.
+  const currentNames = GIFT_SEEDS.map((g) => g.name);
+  await prisma.giftItem.deleteMany({ where: { name: { notIn: currentNames } } });
+
   for (let i = 0; i < GIFT_SEEDS.length; i++) {
     const g = GIFT_SEEDS[i];
     const existing = await prisma.giftItem.findFirst({ where: { name: g.name } });
@@ -169,7 +180,24 @@ async function main() {
         data: {
           name: g.name,
           description: g.description,
-          imageUrl: null,
+          imageUrl: g.imageUrl,
+          priceZar: g.priceZar,
+          priceUsd: g.priceUsd,
+          sortOrder: i,
+        },
+      });
+    } else {
+      // A handful of names (Air Fryer, Blender, Vacuum Cleaner) also
+      // existed in the older placeholder list — update their content to
+      // match the current one rather than leaving the old description/
+      // price/imageUrl in place. Deliberately NOT touching `status` or
+      // `bookedByGuestId` here, since those reflect real guest actions,
+      // not seed data.
+      await prisma.giftItem.update({
+        where: { id: existing.id },
+        data: {
+          description: g.description,
+          imageUrl: g.imageUrl,
           priceZar: g.priceZar,
           priceUsd: g.priceUsd,
           sortOrder: i,
