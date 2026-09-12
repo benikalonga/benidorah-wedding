@@ -200,8 +200,8 @@ export default function GuestsPage() {
             <Table>
               <Thead>
                 <Tr>
+                  <Th className="w-12">No</Th>
                   <Th>Name</Th>
-                  <Th>Type</Th>
                   <Th>Phone</Th>
                   <Th>Side</Th>
                   <Th>Table</Th>
@@ -210,14 +210,17 @@ export default function GuestsPage() {
                 </Tr>
               </Thead>
               <Tbody>
-                {filtered.map((g) => (
+                {filtered.map((g, i) => (
                   <Tr key={g.id}>
+                    <Td className="text-charcoal/40">{i + 1}</Td>
                     <Td className="font-medium">
-                      {g.fullName}
-                      {g.partnerName ? ` & ${g.partnerName}` : ''}
-                    </Td>
-                    <Td>
-                      <Badge tone={g.type === 'couple' ? 'gold' : 'neutral'}>{g.type}</Badge>
+                      <div className="flex items-center gap-2">
+                        {g.type === 'couple' && <Badge tone="gold">Couple</Badge>}
+                        <span>
+                          {g.fullName}
+                          {g.partnerName ? ` & ${g.partnerName}` : ''}
+                        </span>
+                      </div>
                     </Td>
                     <Td className="text-charcoal/70">{g.phoneNumber}</Td>
                     <Td>
@@ -242,20 +245,23 @@ export default function GuestsPage() {
 
           {/* Mobile card list */}
           <div className="mt-6 space-y-3 md:hidden">
-            {filtered.map((g) => (
+            {filtered.map((g, i) => (
               <Card key={g.id} padded={false} className="p-4">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="text-sm font-medium text-onyx">
-                      {g.fullName}
-                      {g.partnerName ? ` & ${g.partnerName}` : ''}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-charcoal/40">{i + 1}.</span>
+                      {g.type === 'couple' && <Badge tone="gold">Couple</Badge>}
+                      <p className="text-sm font-medium text-onyx">
+                        {g.fullName}
+                        {g.partnerName ? ` & ${g.partnerName}` : ''}
+                      </p>
+                    </div>
                     <p className="mt-0.5 text-xs text-charcoal/60">{g.phoneNumber}</p>
                   </div>
                   <DropdownMenu items={guestActions(g)} label={`Actions for ${g.fullName}`} />
                 </div>
                 <div className="mt-3 flex flex-wrap gap-1.5">
-                  <Badge tone={g.type === 'couple' ? 'gold' : 'neutral'}>{g.type}</Badge>
                   <Badge tone={g.guestSide === 'groom' ? 'blue' : 'gold'}>{g.guestSide}</Badge>
                   <Badge tone="neutral">Table {g.table?.tableNumber}</Badge>
                   {g.inviteSentAt && <Badge tone="green">Invited {new Date(g.inviteSentAt).toLocaleDateString()}</Badge>}
