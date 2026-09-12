@@ -105,6 +105,12 @@ const EDGE_SNAP_PX = 26;
 const EDGE_EPS = 1;
 // Float tolerance for "is the zoom already sitting at min/max scale".
 const SCALE_EPS = 0.002;
+// Friction applied per animation frame to the fling we hand off to the
+// page after a touch drag is released past an edge — matches the feel of
+// native touch-scroll momentum instead of stopping dead the instant the
+// finger lifts.
+const FLING_FRICTION_PER_FRAME = 0.94;
+const FLING_MIN_VELOCITY = 0.02; // px/ms — below this the fling just stops
 
 interface TransformMeta {
   scale: number;
@@ -150,25 +156,67 @@ function useEdgeScrollHandoff(viewportRef: React.RefObject<HTMLDivElement>, acti
     let released = false;
     let dragStartY = 0;
     let lastY = 0;
+    let lastMoveTime = 0;
+    let velocity = 0; // px/ms, tracked only while released, for the touch fling on release
+    let isTouch = false;
+    let flingRaf = 0;
 
-    function beginDrag(clientY: number) {
+    function stopFling() {
+      if (flingRaf) cancelAnimationFrame(flingRaf);
+      flingRaf = 0;
+    }
+
+    function startFling(v0: number) {
+      stopFling();
+      let v = v0;
+      let last = performance.now();
+      function step(now: number) {
+        const dt = Math.max(1, now - last);
+        last = now;
+        window.scrollBy({ top: -v * dt });
+        v *= Math.pow(FLING_FRICTION_PER_FRAME, dt / 16.67);
+        if (Math.abs(v) > FLING_MIN_VELOCITY) {
+          flingRaf = requestAnimationFrame(step);
+        } else {
+          flingRaf = 0;
+        }
+      }
+      flingRaf = requestAnimationFrame(step);
+    }
+
+    function beginDrag(clientY: number, touch: boolean) {
+      stopFling();
       dragActive = true;
       released = false;
+      isTouch = touch;
       dragStartY = clientY;
       lastY = clientY;
+      lastMoveTime = performance.now();
+      velocity = 0;
     }
 
     function endDrag() {
+      if (released && isTouch && Math.abs(velocity) > FLING_MIN_VELOCITY) {
+        // Native touch-scroll keeps coasting after the finger lifts — our
+        // manual takeover needs to fake that momentum too, or handing off
+        // right at the edge feels like it "barely scrolls" compared to
+        // scrolling the page directly.
+        startFling(velocity);
+      }
       dragActive = false;
       released = false;
     }
 
     function handleMove(e: TouchEvent | MouseEvent, clientY: number) {
       if (!dragActive) return;
+      const now = performance.now();
 
       if (released) {
+        const dt = Math.max(1, now - lastMoveTime);
         const dy = clientY - lastY;
+        velocity = dy / dt;
         lastY = clientY;
+        lastMoveTime = now;
         window.scrollBy({ top: -dy });
         e.preventDefault();
         e.stopPropagation();
@@ -186,19 +234,20 @@ function useEdgeScrollHandoff(viewportRef: React.RefObject<HTMLDivElement>, acti
       if (wantsHandoff) {
         released = true;
         lastY = clientY;
+        lastMoveTime = now;
         e.preventDefault();
         e.stopPropagation();
       }
     }
 
     function onTouchStart(e: TouchEvent) {
-      if (e.touches.length === 1) beginDrag(e.touches[0].clientY);
+      if (e.touches.length === 1) beginDrag(e.touches[0].clientY, true);
     }
     function onTouchMove(e: TouchEvent) {
       if (e.touches.length === 1) handleMove(e, e.touches[0].clientY);
     }
     function onMouseDown(e: MouseEvent) {
-      if (e.button === 0) beginDrag(e.clientY);
+      if (e.button === 0) beginDrag(e.clientY, false);
     }
     function onMouseMove(e: MouseEvent) {
       handleMove(e, e.clientY);
@@ -225,6 +274,7 @@ function useEdgeScrollHandoff(viewportRef: React.RefObject<HTMLDivElement>, acti
     el.addEventListener('wheel', onWheel, { capture: true, passive: true });
 
     return () => {
+      stopFling();
       el.removeEventListener('touchstart', onTouchStart, true);
       el.removeEventListener('touchmove', onTouchMove, true);
       el.removeEventListener('touchend', endDrag, true);
