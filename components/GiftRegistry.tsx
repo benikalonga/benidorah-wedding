@@ -124,8 +124,8 @@ export default function GiftRegistry({ gifts, guestId }: { gifts: GiftEntry[]; g
         >
           <div className="bg-onyx p-8 text-ivory sm:p-10">
             <p className="text-lg leading-relaxed text-ivory/85">
-              Your presence at our wedding is the greatest gift of all. If you'd like to help us start our new home
-              together, a contribution toward our future means the world to us.
+              Having you there is the best gift of all. If you'd love to spoil us a little too, a contribution
+              toward our new home together would mean the world.
             </p>
           </div>
 
