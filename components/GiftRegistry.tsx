@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { SITE_COPY } from "@/lib/content";
@@ -31,8 +31,22 @@ export default function GiftRegistry({
   const [status, setStatus] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [viewingId, setViewingId] = useState<string | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const { bank } = SITE_COPY;
+
+  // Collapsing the list shrinks it from ~4000px back down to 260px —
+  // without this, whatever scroll position the page was at (likely deep
+  // inside the now-gone items) stays put, stranding the viewport over
+  // blank space below the list. Scroll back to the top of the list
+  // whenever "Show less" is the action being taken.
+  function handleToggleExpanded() {
+    const collapsing = expanded;
+    setExpanded(!expanded);
+    if (collapsing) {
+      listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
   const viewingGift = viewingId
     ? (items.find((g) => g.id === viewingId) ?? null)
     : null;
@@ -220,7 +234,7 @@ export default function GiftRegistry({
           <div className="bg-onyx p-8 text-ivory sm:p-10">
             <p className="text-lg leading-relaxed text-ivory/85">
               Your presence will be the best gift of all. If you'd love to spoil
-              us a little too, you are welcome to do so .
+              us a little too, you are welcome to do so.
             </p>
           </div>
 
@@ -295,7 +309,7 @@ export default function GiftRegistry({
 
           {status && <p className="text-sm text-royal-blue">{status}</p>}
 
-          <div className="relative">
+          <div ref={listRef} className="relative" style={{ scrollMarginTop: 88 }}>
             <motion.div
               animate={{ maxHeight: expanded ? 4000 : 260 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -351,10 +365,10 @@ export default function GiftRegistry({
               ))}
             </motion.div>
 
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-32 items-end justify-center bg-gradient-to-t from-ivory/90 via-ivory/50 to-transparent pb-6">
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-32 items-end justify-center bg-gradient-to-t from-onyx/70 via-onyx/50 to-transparent pb-6">
               <button
                 type="button"
-                onClick={() => setExpanded(!expanded)}
+                onClick={handleToggleExpanded}
                 className="btn-gold pointer-events-auto px-8 py-3 text-xs uppercase tracking-widest"
               >
                 {expanded ? "Show less" : "Show all gifts →"}
