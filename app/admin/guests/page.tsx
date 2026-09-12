@@ -54,6 +54,9 @@ export default function GuestsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [query, setQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'single' | 'couple'>('all');
+  const [sideFilter, setSideFilter] = useState<'all' | 'groom' | 'bride'>('all');
+  const [tableFilter, setTableFilter] = useState<'all' | string>('all');
 
   async function load() {
     const [g, t] = await Promise.all([
@@ -71,14 +74,32 @@ export default function GuestsPage() {
   const filtered = useMemo(() => {
     if (!guests) return [];
     const q = query.trim().toLowerCase();
-    const list = q
-      ? guests.filter(
-          (g) =>
-            g.fullName.toLowerCase().includes(q) || g.partnerName?.toLowerCase().includes(q) || g.phoneNumber.includes(q)
-        )
-      : guests;
+    const list = guests.filter((g) => {
+      if (typeFilter !== 'all' && g.type !== typeFilter) return false;
+      if (sideFilter !== 'all' && g.guestSide !== sideFilter) return false;
+      if (tableFilter !== 'all' && g.tableId !== tableFilter) return false;
+      if (!q) return true;
+      return g.fullName.toLowerCase().includes(q) || g.partnerName?.toLowerCase().includes(q) || g.phoneNumber.includes(q);
+    });
     return [...list].sort((a, b) => a.fullName.localeCompare(b.fullName));
-  }, [guests, query]);
+  }, [guests, query, typeFilter, sideFilter, tableFilter]);
+
+  const hasActiveFilter = !!query || typeFilter !== 'all' || sideFilter !== 'all' || tableFilter !== 'all';
+
+  // Headcount stats for the whole list (unaffected by the filters above,
+  // which are just for narrowing what's shown in the table) — a couple
+  // entry counts as 2 people toward the total, but as 1 entry for the
+  // couple/single breakdown.
+  const stats = useMemo(() => {
+    if (!guests) return null;
+    const coupleCount = guests.filter((g) => g.type === 'couple').length;
+    const singleCount = guests.length - coupleCount;
+    return {
+      totalGuests: coupleCount * 2 + singleCount,
+      coupleCount,
+      singleCount,
+    };
+  }, [guests]);
 
   function openAdd() {
     setEditingId(null);
@@ -170,9 +191,49 @@ export default function GuestsPage() {
         </Button>
       </div>
 
-      <div className="relative mt-4 max-w-sm">
-        <IconSearch width={16} height={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/40" />
-        <Input placeholder="Search by name or phone…" value={query} onChange={(e) => setQuery(e.target.value)} className="pl-9" />
+      {stats && (
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Card padded={false} className="px-4 py-2.5">
+            <p className="text-[11px] uppercase tracking-wide text-charcoal/50">Total guests</p>
+            <p className="section-title text-lg text-onyx">{stats.totalGuests}</p>
+          </Card>
+          <Card padded={false} className="px-4 py-2.5">
+            <p className="text-[11px] uppercase tracking-wide text-charcoal/50">Couple entries</p>
+            <p className="section-title text-lg text-onyx">{stats.coupleCount}</p>
+          </Card>
+          <Card padded={false} className="px-4 py-2.5">
+            <p className="text-[11px] uppercase tracking-wide text-charcoal/50">Single entries</p>
+            <p className="section-title text-lg text-onyx">{stats.singleCount}</p>
+          </Card>
+        </div>
+      )}
+
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative max-w-sm sm:flex-1">
+          <IconSearch width={16} height={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/40" />
+          <Input placeholder="Search by name or phone…" value={query} onChange={(e) => setQuery(e.target.value)} className="pl-9" />
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value as any)} className="w-auto min-w-[8.5rem]">
+            <option value="all">All types</option>
+            <option value="single">Single</option>
+            <option value="couple">Couple</option>
+          </Select>
+          <Select value={sideFilter} onChange={(e) => setSideFilter(e.target.value as any)} className="w-auto min-w-[8.5rem]">
+            <option value="all">All sides</option>
+            <option value="groom">Groom&apos;s side</option>
+            <option value="bride">Bride&apos;s side</option>
+          </Select>
+          <Select value={tableFilter} onChange={(e) => setTableFilter(e.target.value)} className="w-auto min-w-[8.5rem]">
+            <option value="all">All tables</option>
+            {tables.map((t) => (
+              <option key={t.id} value={t.id}>
+                Table {t.tableNumber}
+              </option>
+            ))}
+          </Select>
+        </div>
       </div>
 
       {guests === null ? (
@@ -185,10 +246,10 @@ export default function GuestsPage() {
         <div className="mt-6">
           <EmptyState
             icon={<IconUsers width={40} height={40} />}
-            title={query ? 'No guests match your search' : 'No guests yet'}
-            description={query ? undefined : 'Add your first guest to start building the list.'}
+            title={hasActiveFilter ? 'No guests match your search/filters' : 'No guests yet'}
+            description={hasActiveFilter ? undefined : 'Add your first guest to start building the list.'}
             action={
-              !query && (
+              !hasActiveFilter && (
                 <Button variant="gold" icon={<IconPlus width={16} height={16} />} onClick={openAdd}>
                   Add guest
                 </Button>
