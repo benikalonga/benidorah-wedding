@@ -1,6 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Card from '@/components/admin/ui/Card';
+import Skeleton from '@/components/admin/ui/Skeleton';
+import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/admin/ui/Table';
+import Badge from '@/components/admin/ui/Badge';
 
 interface Stats {
   guests: { total: number; groomSide: number; brideSide: number };
@@ -14,10 +18,19 @@ interface Stats {
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-2xl border border-onyx/10 bg-white p-5 shadow-sm">
-      <p className="text-xs uppercase tracking-wide text-charcoal/50">{label}</p>
-      <p className="section-title mt-1 text-2xl text-onyx">{value}</p>
-    </div>
+    <Card className="p-5">
+      <p className="text-[11px] font-medium uppercase tracking-wide text-charcoal/50">{label}</p>
+      <p className="section-title mt-1.5 text-2xl text-onyx">{value}</p>
+    </Card>
+  );
+}
+
+function StatGroup({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="mt-8 first:mt-0">
+      <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-charcoal/45">{title}</h2>
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">{children}</div>
+    </section>
   );
 }
 
@@ -30,54 +43,73 @@ export default function DashboardPage() {
       .then(setStats);
   }, []);
 
-  if (!stats) return <p className="text-sm text-charcoal/60">Loading dashboard…</p>;
-
   return (
     <div>
       <h1 className="section-title text-2xl text-onyx">Dashboard</h1>
 
-      <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-        <StatCard label="Total guests" value={stats.guests.total} />
-        <StatCard label="Groom's side" value={stats.guests.groomSide} />
-        <StatCard label="Bride's side" value={stats.guests.brideSide} />
-        <StatCard label="Link open rate" value={`${stats.linkOpenRate.opened} / ${stats.linkOpenRate.total}`} />
+      {!stats ? (
+        <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton key={i} className="h-20 w-full" />
+          ))}
+        </div>
+      ) : (
+        <>
+          <StatGroup title="Guests">
+            <StatCard label="Total guests" value={stats.guests.total} />
+            <StatCard label="Groom's side" value={stats.guests.groomSide} />
+            <StatCard label="Bride's side" value={stats.guests.brideSide} />
+            <StatCard label="Link open rate" value={`${stats.linkOpenRate.opened} / ${stats.linkOpenRate.total}`} />
+          </StatGroup>
 
-        <StatCard label="RSVP'd" value={stats.rsvp.responded} />
-        <StatCard label="Attending (full)" value={stats.rsvp.attendingYes} />
-        <StatCard label="One only" value={stats.rsvp.attendingOneOnly} />
-        <StatCard label="Declined" value={stats.rsvp.declined} />
-        <StatCard label="Pending" value={stats.rsvp.pending} />
+          <StatGroup title="RSVPs">
+            <StatCard label="RSVP'd" value={stats.rsvp.responded} />
+            <StatCard label="Attending (full)" value={stats.rsvp.attendingYes} />
+            <StatCard label="One only" value={stats.rsvp.attendingOneOnly} />
+            <StatCard label="Declined" value={stats.rsvp.declined} />
+          </StatGroup>
 
-        <StatCard label="Gifts available" value={stats.gifts.available} />
-        <StatCard label="Gifts booked" value={stats.gifts.booked} />
-        <StatCard label="Gifts paid" value={stats.gifts.paid} />
-        <StatCard label="Value pledged (ZAR)" value={`R${stats.gifts.totalValuePledgedZar.toLocaleString('en-ZA')}`} />
+          <StatGroup title="Gifts">
+            <StatCard label="Available" value={stats.gifts.available} />
+            <StatCard label="Booked" value={stats.gifts.booked} />
+            <StatCard label="Paid" value={stats.gifts.paid} />
+            <StatCard label="Value pledged (ZAR)" value={`R${stats.gifts.totalValuePledgedZar.toLocaleString('en-ZA')}`} />
+          </StatGroup>
 
-        <StatCard label="Moments uploaded" value={stats.moments} />
-        <StatCard label="Wish wall tickets" value={stats.tickets} />
-      </div>
+          <StatGroup title="Content">
+            <StatCard label="Moments uploaded" value={stats.moments} />
+            <StatCard label="Wish wall tickets" value={stats.tickets} />
+            <StatCard label="Pending RSVPs" value={stats.rsvp.pending} />
+          </StatGroup>
 
-      <h2 className="section-title mt-8 text-lg text-onyx">Table occupancy</h2>
-      <div className="mt-3 overflow-x-auto rounded-xl border border-onyx/10 bg-white">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-ivory text-xs uppercase text-charcoal/50">
-            <tr>
-              <th className="px-4 py-2">Table</th>
-              <th className="px-4 py-2">Occupied</th>
-              <th className="px-4 py-2">Capacity</th>
-            </tr>
-          </thead>
-          <tbody>
-            {stats.tables.map((t) => (
-              <tr key={t.tableNumber} className="border-t border-onyx/5">
-                <td className="px-4 py-2">Table {t.tableNumber}</td>
-                <td className="px-4 py-2">{t.occupied}</td>
-                <td className="px-4 py-2">{t.capacity}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          <section className="mt-8">
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-charcoal/45">Table occupancy</h2>
+            <Table>
+              <Thead>
+                <Tr>
+                  <Th>Table</Th>
+                  <Th>Occupied</Th>
+                  <Th>Capacity</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {stats.tables.map((t) => {
+                  const full = t.occupied >= t.capacity;
+                  return (
+                    <Tr key={t.tableNumber}>
+                      <Td className="font-medium">Table {t.tableNumber}</Td>
+                      <Td>{t.occupied}</Td>
+                      <Td>
+                        <Badge tone={full ? 'gold' : 'neutral'}>{t.capacity} seats</Badge>
+                      </Td>
+                    </Tr>
+                  );
+                })}
+              </Tbody>
+            </Table>
+          </section>
+        </>
+      )}
     </div>
   );
 }

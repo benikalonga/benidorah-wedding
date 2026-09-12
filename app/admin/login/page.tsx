@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Button from '@/components/admin/ui/Button';
+import { Field, Input } from '@/components/admin/ui/form';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
@@ -38,31 +40,31 @@ export default function AdminLoginPage() {
         <h1 className="section-title text-center text-2xl text-ivory">Admin Login</h1>
         <p className="mt-1 text-center text-xs text-ivory/60">Beni &amp; Dorah wedding platform</p>
 
-        <div className="mt-6 flex flex-col gap-3">
-          <input
-            type="email"
-            required
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-ivory placeholder:text-ivory/40"
-          />
-          <input
-            type="password"
-            required
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-ivory placeholder:text-ivory/40"
-          />
+        <div className="mt-6 flex flex-col gap-4">
+          <Field label="Email" className="[&_span]:text-ivory/60">
+            <Input
+              type="email"
+              required
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="border-white/20 bg-white/10 text-ivory placeholder:text-ivory/40 focus:border-champagne-gold focus:ring-champagne-gold/20"
+            />
+          </Field>
+          <Field label="Password" className="[&_span]:text-ivory/60">
+            <Input
+              type="password"
+              required
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="border-white/20 bg-white/10 text-ivory placeholder:text-ivory/40 focus:border-champagne-gold focus:ring-champagne-gold/20"
+            />
+          </Field>
           {error && <p className="text-xs text-red-400">{error}</p>}
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-2 rounded-full bg-champagne-gold px-4 py-2.5 text-sm font-semibold text-onyx disabled:opacity-60"
-          >
+          <Button variant="gold" type="submit" loading={loading} className="mt-1 w-full">
             {loading ? 'Signing in…' : 'Sign in'}
-          </button>
+          </Button>
         </div>
       </form>
     </div>
