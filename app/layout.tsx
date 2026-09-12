@@ -2,20 +2,46 @@ import type { Metadata, Viewport } from 'next';
 import { displayFont, sansFont, handFont } from '@/lib/fonts';
 import './globals.css';
 
+// Shown when this link is pasted into WhatsApp, iMessage, Slack, X, etc.
+// Most platforms (WhatsApp and iMessage especially) only ever render the
+// static `images` thumbnail below, no matter what video metadata is
+// present — there's no way to force a genuine video preview everywhere.
+// The `videos` entry is honored by the handful of platforms that do
+// support inline unfurling (Discord, Slack, some link-preview bots), as
+// a bonus on top of the image, not a replacement for it.
+const OG_TITLE = 'Beni & Dorah — 23 December 2026';
+const OG_DESCRIPTION =
+  'Two hearts, one beautiful forever — join us as we say "I do" at Suitability Gardens, De Deur.';
+const SITE_URL = process.env.SITE_URL || 'https://benidorah.com';
+// `metadataBase` auto-resolves relative `openGraph.images` to absolute
+// URLs, but not `openGraph.videos` — social crawlers need an absolute
+// URL regardless, so this one is built explicitly.
+const OG_VIDEO_URL = new URL('/api/media/hero-main', SITE_URL).toString();
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.SITE_URL || 'https://benidorah.com'),
-  title: "Beni & Dorah — 23 December 2026",
-  description: "Join Beni & Dorah as they celebrate their wedding on 23 December 2026 at Suitability Gardens, De Deur, South Africa.",
+  metadataBase: new URL(SITE_URL),
+  title: OG_TITLE,
+  description: OG_DESCRIPTION,
   manifest: '/manifest.json',
   openGraph: {
-    title: 'Beni & Dorah — 23 December 2026',
-    description: "Join us as we celebrate our wedding — RSVP, gallery, and more.",
-    images: ['/images/couple/hero-poster.jpg'],
+    title: OG_TITLE,
+    description: OG_DESCRIPTION,
+    images: [{ url: '/images/couple/hero-poster.jpg', width: 1920, height: 1080 }],
+    videos: [
+      {
+        url: OG_VIDEO_URL,
+        secureUrl: OG_VIDEO_URL,
+        type: 'video/mp4',
+        width: 1920,
+        height: 1080,
+      },
+    ],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Beni & Dorah — 23 December 2026',
+    title: OG_TITLE,
+    description: OG_DESCRIPTION,
     images: ['/images/couple/hero-poster.jpg'],
   },
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'Beni & Dorah' },
