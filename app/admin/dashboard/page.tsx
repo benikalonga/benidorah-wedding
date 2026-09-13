@@ -136,6 +136,7 @@ export default function DashboardPage() {
                 <StatCard label="Attending (full)" value={stats.rsvp.attendingYes} href="/admin/invited?attending=yes" />
                 <StatCard label="One only" value={stats.rsvp.attendingOneOnly} href="/admin/invited?attending=one_only" />
                 <StatCard label="Declined" value={stats.rsvp.declined} href="/admin/invited?attending=declined" />
+                <StatCard label="Present guests" value={stats.presentGuests} href="/admin/invited?present=yes" />
               </>
             }
             chart={
@@ -177,7 +178,6 @@ export default function DashboardPage() {
             <StatCard label="Moments uploaded" value={stats.moments} href="/admin/moments" />
             <StatCard label="Wish wall tickets" value={stats.tickets} href="/admin/tickets" />
             <StatCard label="Pending RSVPs" value={stats.rsvp.pending} href="/admin/invited?attending=pending" />
-            <StatCard label="Present guests" value={stats.presentGuests} href="/admin/invited?present=yes" />
           </StatGroup>
 
           <section>
