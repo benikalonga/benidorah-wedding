@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import PageHeader from '@/components/admin/ui/PageHeader';
 import Button from '@/components/admin/ui/Button';
@@ -24,7 +25,17 @@ interface TableRow {
 const emptyForm = { tableNumber: '', capacity: '10' };
 
 export default function TablesPage() {
+  return (
+    <Suspense fallback={null}>
+      <TablesPageInner />
+    </Suspense>
+  );
+}
+
+function TablesPageInner() {
   const confirm = useConfirm();
+  const searchParams = useSearchParams();
+  const highlight = searchParams.get('highlight');
   const [tables, setTables] = useState<TableRow[] | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -40,6 +51,13 @@ export default function TablesPage() {
   useEffect(() => {
     load();
   }, []);
+
+  // Deep-linked from the Dashboard's table occupancy list — scroll the
+  // matching card into view and highlight it once the tables have loaded.
+  useEffect(() => {
+    if (!highlight || !tables) return;
+    document.getElementById(`table-${highlight}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [highlight, tables]);
 
   function openAdd() {
     setEditingId(null);
@@ -132,8 +150,13 @@ export default function TablesPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {tables.map((t) => {
             const full = t.guests.length >= t.capacity;
+            const isHighlighted = highlight === String(t.tableNumber);
             return (
-              <Card key={t.id}>
+              <Card
+                key={t.id}
+                id={`table-${t.tableNumber}`}
+                className={isHighlighted ? 'ring-2 ring-champagne-gold transition-shadow' : 'transition-shadow'}
+              >
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="section-title text-lg text-onyx">Table {t.tableNumber}</h3>

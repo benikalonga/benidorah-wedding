@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { buildSaveTheDateWaLink } from '@/lib/save-the-date';
 import PageHeader from '@/components/admin/ui/PageHeader';
@@ -46,7 +47,16 @@ const emptyForm = {
 };
 
 export default function GuestsPage() {
+  return (
+    <Suspense fallback={null}>
+      <GuestsPageInner />
+    </Suspense>
+  );
+}
+
+function GuestsPageInner() {
   const confirm = useConfirm();
+  const searchParams = useSearchParams();
   const [guests, setGuests] = useState<GuestRow[] | null>(null);
   const [tables, setTables] = useState<TableOption[]>([]);
   const [form, setForm] = useState(emptyForm);
@@ -71,6 +81,15 @@ export default function GuestsPage() {
   useEffect(() => {
     load();
   }, []);
+
+  // Deep-linked from the Dashboard (e.g. clicking "Groom's side") — pick
+  // up ?side= and preset the matching filter dropdown. Re-runs if the
+  // query string itself changes (following one dashboard link after
+  // another without the page unmounting).
+  useEffect(() => {
+    const side = searchParams.get('side');
+    if (side === 'groom' || side === 'bride') setSideFilter(side);
+  }, [searchParams]);
 
   const filtered = useMemo(() => {
     if (!guests) return [];

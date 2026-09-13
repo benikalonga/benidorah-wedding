@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import PageHeader from '@/components/admin/ui/PageHeader';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/admin/ui/Table';
 import Badge from '@/components/admin/ui/Badge';
 import Card from '@/components/admin/ui/Card';
 import EmptyState from '@/components/admin/ui/EmptyState';
 import Skeleton from '@/components/admin/ui/Skeleton';
-import { Input } from '@/components/admin/ui/form';
+import { Input, Select } from '@/components/admin/ui/form';
 import { IconMail, IconSearch } from '@/components/admin/ui/icons';
 
 interface GuestRow {
@@ -24,23 +25,44 @@ interface GuestRow {
   } | null;
 }
 
+type AttendingFilter = 'all' | 'responded' | 'yes' | 'one_only' | 'declined' | 'pending';
+
+function isDeclined(status?: string) {
+  return status === 'no' || status === 'none';
+}
+
+function isPending(g: GuestRow) {
+  return !g.rsvp || g.rsvp.attending === 'pending';
+}
+
 function attendingTone(status?: string): 'green' | 'gold' | 'red' | 'neutral' {
   if (status === 'yes') return 'green';
   if (status === 'one_only') return 'gold';
-  if (status === 'none') return 'red';
+  if (isDeclined(status)) return 'red';
   return 'neutral';
 }
 
 function attendingLabel(status?: string) {
   if (status === 'yes') return 'Attending';
   if (status === 'one_only') return 'One only';
-  if (status === 'none') return 'Declined';
+  if (isDeclined(status)) return 'Declined';
   return 'Pending';
 }
 
 export default function InvitedPage() {
+  return (
+    <Suspense fallback={null}>
+      <InvitedPageInner />
+    </Suspense>
+  );
+}
+
+function InvitedPageInner() {
+  const searchParams = useSearchParams();
   const [guests, setGuests] = useState<GuestRow[] | null>(null);
   const [query, setQuery] = useState('');
+  const [attendingFilter, setAttendingFilter] = useState<AttendingFilter>('all');
+  const [openedFilter, setOpenedFilter] = useState<'all' | 'yes' | 'no'>('all');
 
   useEffect(() => {
     fetch('/api/admin/guests')
@@ -48,20 +70,68 @@ export default function InvitedPage() {
       .then((d) => setGuests(d.guests || []));
   }, []);
 
+  // Deep-linked from the Dashboard — ?attending= and ?opened= preset the
+  // matching filter dropdowns below.
+  useEffect(() => {
+    const attending = searchParams.get('attending');
+    if (attending && ['responded', 'yes', 'one_only', 'declined', 'pending'].includes(attending)) {
+      setAttendingFilter(attending as AttendingFilter);
+    }
+    const opened = searchParams.get('opened');
+    if (opened === 'yes' || opened === 'no') setOpenedFilter(opened);
+  }, [searchParams]);
+
   const filtered = useMemo(() => {
     if (!guests) return [];
     const q = query.trim().toLowerCase();
-    if (!q) return guests;
-    return guests.filter((g) => g.fullName.toLowerCase().includes(q) || g.partnerName?.toLowerCase().includes(q));
-  }, [guests, query]);
+    return guests.filter((g) => {
+      if (attendingFilter === 'responded' && isPending(g)) return false;
+      if (attendingFilter === 'pending' && !isPending(g)) return false;
+      if (attendingFilter === 'yes' && g.rsvp?.attending !== 'yes') return false;
+      if (attendingFilter === 'one_only' && g.rsvp?.attending !== 'one_only') return false;
+      if (attendingFilter === 'declined' && !isDeclined(g.rsvp?.attending)) return false;
+      if (openedFilter === 'yes' && !g.linkOpenedAt) return false;
+      if (openedFilter === 'no' && g.linkOpenedAt) return false;
+      if (!q) return true;
+      return g.fullName.toLowerCase().includes(q) || g.partnerName?.toLowerCase().includes(q);
+    });
+  }, [guests, query, attendingFilter, openedFilter]);
+
+  const hasActiveFilter = !!query || attendingFilter !== 'all' || openedFilter !== 'all';
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title="Invited & RSVP Tracking" />
 
-      <div className="relative max-w-sm">
-        <IconSearch width={16} height={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/40" />
-        <Input placeholder="Search by name…" value={query} onChange={(e) => setQuery(e.target.value)} className="pl-9" />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative max-w-sm sm:flex-1">
+          <IconSearch width={16} height={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/40" />
+          <Input placeholder="Search by name…" value={query} onChange={(e) => setQuery(e.target.value)} className="pl-9" />
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Select
+            value={attendingFilter}
+            onChange={(e) => setAttendingFilter(e.target.value as AttendingFilter)}
+            className="w-auto min-w-[9rem]"
+          >
+            <option value="all">All RSVP statuses</option>
+            <option value="responded">RSVP&apos;d</option>
+            <option value="yes">Attending (full)</option>
+            <option value="one_only">One only</option>
+            <option value="declined">Declined</option>
+            <option value="pending">Pending</option>
+          </Select>
+          <Select
+            value={openedFilter}
+            onChange={(e) => setOpenedFilter(e.target.value as 'all' | 'yes' | 'no')}
+            className="w-auto min-w-[8.5rem]"
+          >
+            <option value="all">Link opened or not</option>
+            <option value="yes">Link opened</option>
+            <option value="no">Link not opened</option>
+          </Select>
+        </div>
       </div>
 
       {guests === null ? (
@@ -71,7 +141,10 @@ export default function InvitedPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div>
-          <EmptyState icon={<IconMail width={40} height={40} />} title="No guests match" />
+          <EmptyState
+            icon={<IconMail width={40} height={40} />}
+            title={hasActiveFilter ? 'No guests match your search/filters' : 'No guests match'}
+          />
         </div>
       ) : (
         <>
