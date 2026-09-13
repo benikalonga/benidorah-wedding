@@ -19,12 +19,21 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (pathname.startsWith('/admin')) {
-    if (PUBLIC_ADMIN_PATHS.some((p) => pathname.startsWith(p))) {
-      return NextResponse.next();
-    }
     const cookieName = process.env.SESSION_COOKIE_NAME || 'benidorah_admin_session';
     const token = req.cookies.get(cookieName)?.value;
     const session = token ? await verifySessionToken(token) : null;
+
+    if (PUBLIC_ADMIN_PATHS.some((p) => pathname.startsWith(p))) {
+      // An already-authenticated admin hitting /admin/login (e.g. via a
+      // stale bookmark or browser back-button) would otherwise render the
+      // login page nested inside AdminShell — send them on instead of
+      // showing that broken layout.
+      if (session) {
+        const dest = session.mustChangePassword ? '/admin/settings?forced=1' : '/admin/dashboard';
+        return NextResponse.redirect(new URL(dest, req.url));
+      }
+      return NextResponse.next();
+    }
 
     if (!session) {
       const loginUrl = new URL('/admin/login', req.url);
