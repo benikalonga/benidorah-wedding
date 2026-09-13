@@ -36,7 +36,7 @@ export const loginSchema = z.object({
 
 export const passwordResetSchema = z.object({
   currentPassword: z.string().min(1),
-  newPassword: z.string().min(10),
+  newPassword: z.string().min(8),
 });
 
 /** Very small sanitizer for free-text fields rendered on the public Wish Wall / Moments feed. */

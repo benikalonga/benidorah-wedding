@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import PageHeader from '@/components/admin/ui/PageHeader';
 import Button from '@/components/admin/ui/Button';
@@ -11,21 +11,35 @@ import { Field, Input } from '@/components/admin/ui/form';
 function SettingsForm() {
   const params = useSearchParams();
   const forced = params.get('forced') === '1';
-  const router = useRouter();
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{
+    current?: string;
+    new?: string;
+    confirm?: string;
+    general?: string;
+  }>({});
   const [saving, setSaving] = useState(false);
+
+  function validate(): boolean {
+    const errors: typeof fieldErrors = {};
+    if (!currentPassword) errors.current = 'Enter your current password';
+    if (newPassword.length < 8) {
+      errors.new = 'Password must be at least 8 characters, with upper, lower case and a number.';
+    } else if (!/[a-z]/.test(newPassword) || !/[A-Z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+      errors.new = 'Password must include upper case, lower case and a number.';
+    }
+    if (confirmPassword !== newPassword) errors.confirm = 'New passwords do not match';
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
-    if (newPassword !== confirmPassword) {
-      setError('New passwords do not match');
-      return;
-    }
+    if (!validate()) return;
+
     setSaving(true);
     try {
       const res = await fetch('/api/admin/password', {
@@ -35,16 +49,20 @@ function SettingsForm() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || 'Failed to change password');
+        if (res.status === 401) {
+          setFieldErrors({ current: data.error || 'Current password is incorrect' });
+        } else if (res.status === 400) {
+          setFieldErrors({ new: data.error || 'That password is not strong enough.' });
+        } else {
+          setFieldErrors({ general: data.error || 'Failed to change password' });
+        }
         return;
       }
       toast.success('Password updated');
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      if (forced) {
-        setTimeout(() => router.push('/admin/dashboard'), 800);
-      }
+      // Full reload (not a soft client-side navigation) so every part of
+      // the shell — session cookie, sidebar email, forced-password banner
+      // — re-syncs from the server with the freshly issued session.
+      window.location.href = forced ? '/admin/dashboard' : '/admin/settings';
     } finally {
       setSaving(false);
     }
@@ -61,33 +79,47 @@ function SettingsForm() {
       )}
 
       <Card className="max-w-sm">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <Field label="Current password" required>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+          <Field label="Current password" required error={fieldErrors.current}>
             <Input
               type="password"
               required
               value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
+              onChange={(e) => {
+                setCurrentPassword(e.target.value);
+                setFieldErrors((prev) => ({ ...prev, current: undefined, general: undefined }));
+              }}
             />
           </Field>
-          <Field label="New password" required hint="At least 10 characters, with upper, lower case and a number.">
+          <Field
+            label="New password"
+            required
+            error={fieldErrors.new}
+            hint="At least 8 characters, with upper, lower case and a number."
+          >
             <Input
               type="password"
               required
-              minLength={10}
+              minLength={8}
               value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
+              onChange={(e) => {
+                setNewPassword(e.target.value);
+                setFieldErrors((prev) => ({ ...prev, new: undefined, general: undefined }));
+              }}
             />
           </Field>
-          <Field label="Confirm new password" required>
+          <Field label="Confirm new password" required error={fieldErrors.confirm}>
             <Input
               type="password"
               required
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                setFieldErrors((prev) => ({ ...prev, confirm: undefined, general: undefined }));
+              }}
             />
           </Field>
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {fieldErrors.general && <p className="text-sm text-red-600">{fieldErrors.general}</p>}
           <Button variant="primary" type="submit" loading={saving} className="mt-1 self-start">
             Update password
           </Button>

@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
 
   if (!isPasswordStrongEnough(parsed.data.newPassword)) {
     return NextResponse.json(
-      { error: 'Password must be at least 10 characters and include upper, lower case letters and a number.' },
+      { error: 'Password must be at least 8 characters and include upper, lower case letters and a number.' },
       { status: 400 }
     );
   }

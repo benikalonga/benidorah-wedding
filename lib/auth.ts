@@ -17,7 +17,7 @@ export async function verifyPassword(plain: string, hash: string) {
 /** Minimum password strength enforced on the forced first-login reset and any later change. */
 export function isPasswordStrongEnough(password: string): boolean {
   return (
-    password.length >= 10 &&
+    password.length >= 8 &&
     /[a-z]/.test(password) &&
     /[A-Z]/.test(password) &&
     /[0-9]/.test(password)
