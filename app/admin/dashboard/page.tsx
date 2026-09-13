@@ -28,6 +28,7 @@ const COLOR = {
   green: '#16A34A',
   red: '#DC2626',
   stone: '#8A8579',
+  teal: '#0F766E',
 };
 
 function StatCard({ label, value, href }: { label: string; value: string | number; href?: string }) {
@@ -142,11 +143,13 @@ export default function DashboardPage() {
             chart={
               <DonutChart
                 centerLabel="invited"
+                total={stats.guests.total}
                 data={[
                   { name: 'Attending', value: stats.rsvp.attendingYes, color: COLOR.green, href: '/admin/invited?attending=yes' },
                   { name: 'One only', value: stats.rsvp.attendingOneOnly, color: COLOR.gold, href: '/admin/invited?attending=one_only' },
                   { name: 'Declined', value: stats.rsvp.declined, color: COLOR.red, href: '/admin/invited?attending=declined' },
                   { name: 'Pending', value: stats.rsvp.pending, color: COLOR.stone, href: '/admin/invited?attending=pending' },
+                  { name: 'Present', value: stats.presentGuests, color: COLOR.teal, href: '/admin/invited?present=yes' },
                 ]}
               />
             }

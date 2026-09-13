@@ -31,9 +31,18 @@ const tooltipStyle = {
 };
 
 /** Donut chart with a total in the center — click a slice to jump to its filtered admin page. */
-export function DonutChart({ data, centerLabel }: { data: ChartSlice[]; centerLabel?: string }) {
+export function DonutChart({
+  data,
+  centerLabel,
+  total: totalOverride,
+}: {
+  data: ChartSlice[];
+  centerLabel?: string;
+  /** Center number to display — defaults to the sum of all slice values. Pass this when a slice (e.g. "Present") isn't part of the same 100% breakdown as the rest, so the center count stays accurate. */
+  total?: number;
+}) {
   const router = useRouter();
-  const total = data.reduce((sum, d) => sum + d.value, 0);
+  const total = totalOverride ?? data.reduce((sum, d) => sum + d.value, 0);
 
   return (
     <div className="relative">
