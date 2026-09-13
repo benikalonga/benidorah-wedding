@@ -321,7 +321,7 @@ function GuestsPageInner() {
               <Thead>
                 <Tr>
                   <Th className="w-12">No</Th>
-                  <Th className="w-48">Name</Th>
+                  <Th className="min-w-[12rem]">Name</Th>
                   <Th>Phone</Th>
                   <Th>Side</Th>
                   <Th>Table</Th>
@@ -333,7 +333,7 @@ function GuestsPageInner() {
                 {filtered.map((g, i) => (
                   <Tr key={g.id}>
                     <Td className="text-charcoal/40">{i + 1}</Td>
-                    <Td className="w-48 font-medium">
+                    <Td className="min-w-[12rem] font-medium">
                       <div className="flex items-center gap-2">
                         {g.type === 'couple' && <Badge tone="green">Couple</Badge>}
                         <span>
