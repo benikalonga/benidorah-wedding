@@ -1,19 +1,27 @@
-'use client';
+"use client";
 
-import { Suspense, useEffect, useMemo, useState } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { toast } from 'sonner';
-import PageHeader from '@/components/admin/ui/PageHeader';
-import Button from '@/components/admin/ui/Button';
-import Dialog from '@/components/admin/ui/Dialog';
-import { useConfirm } from '@/components/admin/ui/ConfirmDialog';
-import { Field, Input, Select } from '@/components/admin/ui/form';
-import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/admin/ui/Table';
-import Badge from '@/components/admin/ui/Badge';
-import Card from '@/components/admin/ui/Card';
-import EmptyState from '@/components/admin/ui/EmptyState';
-import Skeleton from '@/components/admin/ui/Skeleton';
-import { IconPlus, IconSearch, IconWhatsApp, IconEdit, IconTrash, IconUsers } from '@/components/admin/ui/icons';
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
+import { buildSaveTheDateWaLink } from "@/lib/save-the-date";
+import PageHeader from "@/components/admin/ui/PageHeader";
+import Button from "@/components/admin/ui/Button";
+import Dialog from "@/components/admin/ui/Dialog";
+import { useConfirm } from "@/components/admin/ui/ConfirmDialog";
+import { Field, Input, Select } from "@/components/admin/ui/form";
+import { Table, Thead, Tbody, Tr, Th, Td } from "@/components/admin/ui/Table";
+import Badge from "@/components/admin/ui/Badge";
+import Card from "@/components/admin/ui/Card";
+import EmptyState from "@/components/admin/ui/EmptyState";
+import Skeleton from "@/components/admin/ui/Skeleton";
+import {
+  IconPlus,
+  IconSearch,
+  IconWhatsApp,
+  IconEdit,
+  IconTrash,
+  IconUsers,
+} from "@/components/admin/ui/icons";
 
 interface TableOption {
   id: string;
@@ -22,12 +30,12 @@ interface TableOption {
 
 interface GuestRow {
   id: string;
-  type: 'single' | 'couple';
+  type: "single" | "couple";
   fullName: string;
   partnerName: string | null;
   phoneNumber: string;
   email: string | null;
-  guestSide: 'groom' | 'bride';
+  guestSide: "groom" | "bride";
   tableId: string;
   table: { tableNumber: number };
   userHashCode: string;
@@ -35,13 +43,13 @@ interface GuestRow {
 }
 
 const emptyForm = {
-  type: 'single' as 'single' | 'couple',
-  fullName: '',
-  partnerName: '',
-  phoneNumber: '',
-  email: '',
-  guestSide: 'groom' as 'groom' | 'bride',
-  tableId: '',
+  type: "single" as "single" | "couple",
+  fullName: "",
+  partnerName: "",
+  phoneNumber: "",
+  email: "",
+  guestSide: "groom" as "groom" | "bride",
+  tableId: "",
 };
 
 export default function GuestsPage() {
@@ -64,19 +72,27 @@ function GuestsPageInner() {
   const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [query, setQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState<'all' | 'single' | 'couple'>('all');
-  const [sideFilter, setSideFilter] = useState<'all' | 'groom' | 'bride'>('all');
-  const [tableFilter, setTableFilter] = useState<'all' | string>('all');
-  const [sendingId, setSendingId] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState<"all" | "single" | "couple">(
+    "all",
+  );
+  const [sideFilter, setSideFilter] = useState<"all" | "groom" | "bride">(
+    "all",
+  );
+  const [tableFilter, setTableFilter] = useState<"all" | string>("all");
 
   async function load() {
     const [g, t] = await Promise.all([
-      fetch('/api/admin/guests').then((r) => r.json()),
-      fetch('/api/admin/tables').then((r) => r.json()),
+      fetch("/api/admin/guests").then((r) => r.json()),
+      fetch("/api/admin/tables").then((r) => r.json()),
     ]);
     setGuests(g.guests || []);
-    setTables((t.tables || []).map((x: any) => ({ id: x.id, tableNumber: x.tableNumber })));
+    setTables(
+      (t.tables || []).map((x: any) => ({
+        id: x.id,
+        tableNumber: x.tableNumber,
+      })),
+    );
   }
 
   useEffect(() => {
@@ -89,9 +105,9 @@ function GuestsPageInner() {
   // (following one dashboard link after another without the page
   // unmounting).
   useEffect(() => {
-    const side = searchParams.get('side');
-    if (side === 'groom' || side === 'bride') setSideFilter(side);
-    const table = searchParams.get('table');
+    const side = searchParams.get("side");
+    if (side === "groom" || side === "bride") setSideFilter(side);
+    const table = searchParams.get("table");
     if (table) setTableFilter(table);
   }, [searchParams]);
 
@@ -99,22 +115,30 @@ function GuestsPageInner() {
     if (!guests) return [];
     const q = query.trim().toLowerCase();
     const list = guests.filter((g) => {
-      if (typeFilter !== 'all' && g.type !== typeFilter) return false;
-      if (sideFilter !== 'all' && g.guestSide !== sideFilter) return false;
-      if (tableFilter !== 'all' && g.tableId !== tableFilter) return false;
+      if (typeFilter !== "all" && g.type !== typeFilter) return false;
+      if (sideFilter !== "all" && g.guestSide !== sideFilter) return false;
+      if (tableFilter !== "all" && g.tableId !== tableFilter) return false;
       if (!q) return true;
-      return g.fullName.toLowerCase().includes(q) || g.partnerName?.toLowerCase().includes(q) || g.phoneNumber.includes(q);
+      return (
+        g.fullName.toLowerCase().includes(q) ||
+        g.partnerName?.toLowerCase().includes(q) ||
+        g.phoneNumber.includes(q)
+      );
     });
     return [...list].sort((a, b) => a.fullName.localeCompare(b.fullName));
   }, [guests, query, typeFilter, sideFilter, tableFilter]);
 
-  const hasActiveFilter = !!query || typeFilter !== 'all' || sideFilter !== 'all' || tableFilter !== 'all';
+  const hasActiveFilter =
+    !!query ||
+    typeFilter !== "all" ||
+    sideFilter !== "all" ||
+    tableFilter !== "all";
 
   function resetFilters() {
-    setQuery('');
-    setTypeFilter('all');
-    setSideFilter('all');
-    setTableFilter('all');
+    setQuery("");
+    setTypeFilter("all");
+    setSideFilter("all");
+    setTableFilter("all");
     router.replace(pathname);
   }
 
@@ -124,7 +148,7 @@ function GuestsPageInner() {
   // couple/single breakdown.
   const stats = useMemo(() => {
     if (!guests) return null;
-    const coupleCount = guests.filter((g) => g.type === 'couple').length;
+    const coupleCount = guests.filter((g) => g.type === "couple").length;
     const singleCount = guests.length - coupleCount;
     return {
       totalGuests: coupleCount * 2 + singleCount,
@@ -145,9 +169,9 @@ function GuestsPageInner() {
     setForm({
       type: g.type,
       fullName: g.fullName,
-      partnerName: g.partnerName || '',
+      partnerName: g.partnerName || "",
       phoneNumber: g.phoneNumber,
-      email: g.email || '',
+      email: g.email || "",
       guestSide: g.guestSide,
       tableId: g.tableId,
     });
@@ -159,21 +183,23 @@ function GuestsPageInner() {
     e.preventDefault();
     setError(null);
     setSaving(true);
-    const url = editingId ? `/api/admin/guests/${editingId}` : '/api/admin/guests';
-    const method = editingId ? 'PATCH' : 'POST';
+    const url = editingId
+      ? `/api/admin/guests/${editingId}`
+      : "/api/admin/guests";
+    const method = editingId ? "PATCH" : "POST";
     try {
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error || 'Failed to save guest');
+        setError(data.error || "Failed to save guest");
         return;
       }
       setDialogOpen(false);
-      toast.success(editingId ? 'Guest updated' : 'Guest added');
+      toast.success(editingId ? "Guest updated" : "Guest added");
       load();
     } finally {
       setSaving(false);
@@ -183,30 +209,24 @@ function GuestsPageInner() {
   async function handleDelete(g: GuestRow) {
     const ok = await confirm({
       title: `Delete ${g.fullName}?`,
-      description: 'This cannot be undone — their RSVP and moments (if any) will be removed too.',
-      confirmLabel: 'Delete',
+      description:
+        "This cannot be undone — their RSVP and moments (if any) will be removed too.",
+      confirmLabel: "Delete",
       danger: true,
     });
     if (!ok) return;
-    await fetch(`/api/admin/guests/${g.id}`, { method: 'DELETE' });
-    toast.success('Guest deleted');
+    await fetch(`/api/admin/guests/${g.id}`, { method: "DELETE" });
+    toast.success("Guest deleted");
     load();
   }
 
-  async function handleSendInvite(g: GuestRow) {
-    setSendingId(g.id);
-    try {
-      const res = await fetch(`/api/admin/guests/${g.id}/send-invite`, { method: 'POST' });
-      const data = await res.json();
-      if (res.ok) {
-        toast.success(data.mocked ? `Invite logged (mock mode): ${data.inviteUrl}` : 'Invite sent!');
-        load();
-      } else {
-        toast.error(data.error || 'Failed to send invite');
-      }
-    } finally {
-      setSendingId(null);
-    }
+  function handleSaveTheDate(g: GuestRow) {
+    // A plain wa.me "click to chat" link, not the WhatsApp Cloud API — it
+    // just opens the admin's own WhatsApp with the message pre-filled, for
+    // them to review and send personally. No backend call, so this is
+    // separate from (and doesn't affect) the formal invite-sent tracking
+    // below, which stays tied to "Resend invite" on the Invited/RSVPs page.
+    window.open(buildSaveTheDateWaLink(g, "en"), "_blank", "noopener,noreferrer");
   }
 
   function GuestActions({ g }: { g: GuestRow }) {
@@ -216,15 +236,24 @@ function GuestsPageInner() {
           variant="outline"
           size="sm"
           icon={<IconWhatsApp width={14} height={14} />}
-          loading={sendingId === g.id}
-          onClick={() => handleSendInvite(g)}
+          onClick={() => handleSaveTheDate(g)}
         >
-          Invite
+          Save the date
         </Button>
-        <Button variant="outline" size="icon" aria-label={`Edit ${g.fullName}`} onClick={() => openEdit(g)}>
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label={`Edit ${g.fullName}`}
+          onClick={() => openEdit(g)}
+        >
           <IconEdit width={15} height={15} />
         </Button>
-        <Button variant="danger" size="icon" aria-label={`Delete ${g.fullName}`} onClick={() => handleDelete(g)}>
+        <Button
+          variant="danger"
+          size="icon"
+          aria-label={`Delete ${g.fullName}`}
+          onClick={() => handleDelete(g)}
+        >
           <IconTrash width={15} height={15} />
         </Button>
       </div>
@@ -239,21 +268,34 @@ function GuestsPageInner() {
           stats && (
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm text-charcoal/55">
               <span>
-                <span className="font-semibold text-onyx">{stats.totalGuests}</span> total
+                <span className="font-semibold text-onyx">
+                  {stats.totalGuests}
+                </span>{" "}
+                total
               </span>
               <span className="text-charcoal/30">·</span>
               <span>
-                <span className="font-semibold text-onyx">{stats.coupleCount}</span> couples
+                <span className="font-semibold text-onyx">
+                  {stats.coupleCount}
+                </span>{" "}
+                couples
               </span>
               <span className="text-charcoal/30">·</span>
               <span>
-                <span className="font-semibold text-onyx">{stats.singleCount}</span> singles
+                <span className="font-semibold text-onyx">
+                  {stats.singleCount}
+                </span>{" "}
+                singles
               </span>
             </div>
           )
         }
         action={
-          <Button variant="gold" icon={<IconPlus width={16} height={16} />} onClick={openAdd}>
+          <Button
+            variant="gold"
+            icon={<IconPlus width={16} height={16} />}
+            onClick={openAdd}
+          >
             Add guest
           </Button>
         }
@@ -261,22 +303,43 @@ function GuestsPageInner() {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative max-w-sm sm:flex-1">
-          <IconSearch width={16} height={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/40" />
-          <Input placeholder="Search by name or phone…" value={query} onChange={(e) => setQuery(e.target.value)} className="pl-9" />
+          <IconSearch
+            width={16}
+            height={16}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/40"
+          />
+          <Input
+            placeholder="Search by name or phone…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="pl-9"
+          />
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value as any)} className="w-auto min-w-[8.5rem]">
+          <Select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value as any)}
+            className="w-auto min-w-[8.5rem]"
+          >
             <option value="all">All types</option>
             <option value="single">Single</option>
             <option value="couple">Couple</option>
           </Select>
-          <Select value={sideFilter} onChange={(e) => setSideFilter(e.target.value as any)} className="w-auto min-w-[8.5rem]">
+          <Select
+            value={sideFilter}
+            onChange={(e) => setSideFilter(e.target.value as any)}
+            className="w-auto min-w-[8.5rem]"
+          >
             <option value="all">All sides</option>
             <option value="groom">Groom&apos;s side</option>
             <option value="bride">Bride&apos;s side</option>
           </Select>
-          <Select value={tableFilter} onChange={(e) => setTableFilter(e.target.value)} className="w-auto min-w-[8.5rem]">
+          <Select
+            value={tableFilter}
+            onChange={(e) => setTableFilter(e.target.value)}
+            className="w-auto min-w-[8.5rem]"
+          >
             <option value="all">All tables</option>
             {tables.map((t) => (
               <option key={t.id} value={t.id}>
@@ -302,11 +365,23 @@ function GuestsPageInner() {
         <div>
           <EmptyState
             icon={<IconUsers width={40} height={40} />}
-            title={hasActiveFilter ? 'No guests match your search/filters' : 'No guests yet'}
-            description={hasActiveFilter ? undefined : 'Add your first guest to start building the list.'}
+            title={
+              hasActiveFilter
+                ? "No guests match your search/filters"
+                : "No guests yet"
+            }
+            description={
+              hasActiveFilter
+                ? undefined
+                : "Add your first guest to start building the list."
+            }
             action={
               !hasActiveFilter && (
-                <Button variant="gold" icon={<IconPlus width={16} height={16} />} onClick={openAdd}>
+                <Button
+                  variant="gold"
+                  icon={<IconPlus width={16} height={16} />}
+                  onClick={openAdd}
+                >
                   Add guest
                 </Button>
               )
@@ -335,21 +410,29 @@ function GuestsPageInner() {
                     <Td className="text-charcoal/40">{i + 1}</Td>
                     <Td className="min-w-[12rem] font-medium">
                       <div className="flex items-center gap-2">
-                        {g.type === 'couple' && <Badge tone="green">Couple</Badge>}
+                        {g.type === "couple" && (
+                          <Badge tone="green">Couple</Badge>
+                        )}
                         <span>
                           {g.fullName}
-                          {g.partnerName ? ` & ${g.partnerName}` : ''}
+                          {g.partnerName ? ` & ${g.partnerName}` : ""}
                         </span>
                       </div>
                     </Td>
                     <Td className="text-charcoal/70">{g.phoneNumber}</Td>
                     <Td>
-                      <Badge tone={g.guestSide === 'groom' ? 'blue' : 'gold'}>{g.guestSide}</Badge>
+                      <Badge tone={g.guestSide === "groom" ? "blue" : "gold"}>
+                        {g.guestSide}
+                      </Badge>
                     </Td>
-                    <Td className="text-charcoal/70">Table {g.table?.tableNumber}</Td>
+                    <Td className="text-charcoal/70">
+                      Table {g.table?.tableNumber}
+                    </Td>
                     <Td>
                       {g.inviteSentAt ? (
-                        <Badge tone="green">{new Date(g.inviteSentAt).toLocaleDateString()}</Badge>
+                        <Badge tone="green">
+                          {new Date(g.inviteSentAt).toLocaleDateString()}
+                        </Badge>
                       ) : (
                         <span className="text-charcoal/35">—</span>
                       )}
@@ -370,18 +453,26 @@ function GuestsPageInner() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-charcoal/40">{i + 1}.</span>
-                    {g.type === 'couple' && <Badge tone="green">Couple</Badge>}
+                    {g.type === "couple" && <Badge tone="green">Couple</Badge>}
                     <p className="text-sm font-medium text-onyx">
                       {g.fullName}
-                      {g.partnerName ? ` & ${g.partnerName}` : ''}
+                      {g.partnerName ? ` & ${g.partnerName}` : ""}
                     </p>
                   </div>
-                  <p className="mt-0.5 text-xs text-charcoal/60">{g.phoneNumber}</p>
+                  <p className="mt-0.5 text-xs text-charcoal/60">
+                    {g.phoneNumber}
+                  </p>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-1.5">
-                  <Badge tone={g.guestSide === 'groom' ? 'blue' : 'gold'}>{g.guestSide}</Badge>
+                  <Badge tone={g.guestSide === "groom" ? "blue" : "gold"}>
+                    {g.guestSide}
+                  </Badge>
                   <Badge tone="neutral">Table {g.table?.tableNumber}</Badge>
-                  {g.inviteSentAt && <Badge tone="green">Invited {new Date(g.inviteSentAt).toLocaleDateString()}</Badge>}
+                  {g.inviteSentAt && (
+                    <Badge tone="green">
+                      Invited {new Date(g.inviteSentAt).toLocaleDateString()}
+                    </Badge>
+                  )}
                 </div>
                 <div className="mt-3 border-t border-onyx/10 pt-3">
                   <GuestActions g={g} />
@@ -395,47 +486,93 @@ function GuestsPageInner() {
       <Dialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        title={editingId ? 'Edit guest' : 'Add guest'}
+        title={editingId ? "Edit guest" : "Add guest"}
         footer={
           <>
-            <Button variant="ghost" type="button" onClick={() => setDialogOpen(false)}>
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => setDialogOpen(false)}
+            >
               Cancel
             </Button>
-            <Button variant="primary" type="submit" form="guest-form" loading={saving}>
-              {editingId ? 'Save changes' : 'Add guest'}
+            <Button
+              variant="primary"
+              type="submit"
+              form="guest-form"
+              loading={saving}
+            >
+              {editingId ? "Save changes" : "Add guest"}
             </Button>
           </>
         }
       >
-        <form id="guest-form" onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <form
+          id="guest-form"
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+        >
           <Field label="Type">
-            <Select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as any })}>
+            <Select
+              value={form.type}
+              onChange={(e) =>
+                setForm({ ...form, type: e.target.value as any })
+              }
+            >
               <option value="single">Single</option>
               <option value="couple">Couple</option>
             </Select>
           </Field>
           <Field label="Guest side">
-            <Select value={form.guestSide} onChange={(e) => setForm({ ...form, guestSide: e.target.value as any })}>
+            <Select
+              value={form.guestSide}
+              onChange={(e) =>
+                setForm({ ...form, guestSide: e.target.value as any })
+              }
+            >
               <option value="groom">Groom&apos;s side</option>
               <option value="bride">Bride&apos;s side</option>
             </Select>
           </Field>
           <Field label="Full name" required className="sm:col-span-2">
-            <Input required value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} />
+            <Input
+              required
+              value={form.fullName}
+              onChange={(e) => setForm({ ...form, fullName: e.target.value })}
+            />
           </Field>
-          {form.type === 'couple' && (
+          {form.type === "couple" && (
             <Field label="Partner name" className="sm:col-span-2">
-              <Input value={form.partnerName} onChange={(e) => setForm({ ...form, partnerName: e.target.value })} />
+              <Input
+                value={form.partnerName}
+                onChange={(e) =>
+                  setForm({ ...form, partnerName: e.target.value })
+                }
+              />
             </Field>
           )}
           <Field label="Phone" required hint="e.g. +27...">
-            <Input required value={form.phoneNumber} onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })} />
+            <Input
+              required
+              value={form.phoneNumber}
+              onChange={(e) =>
+                setForm({ ...form, phoneNumber: e.target.value })
+              }
+            />
           </Field>
           <Field label="Email (optional)">
-            <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            <Input
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
           </Field>
           <Field label="Table" required className="sm:col-span-2">
-            <Select required value={form.tableId} onChange={(e) => setForm({ ...form, tableId: e.target.value })}>
+            <Select
+              required
+              value={form.tableId}
+              onChange={(e) => setForm({ ...form, tableId: e.target.value })}
+            >
               <option value="">Select table…</option>
               {tables.map((t) => (
                 <option key={t.id} value={t.id}>
@@ -444,7 +581,9 @@ function GuestsPageInner() {
               ))}
             </Select>
           </Field>
-          {error && <p className="text-sm text-red-600 sm:col-span-2">{error}</p>}
+          {error && (
+            <p className="text-sm text-red-600 sm:col-span-2">{error}</p>
+          )}
         </form>
       </Dialog>
     </div>

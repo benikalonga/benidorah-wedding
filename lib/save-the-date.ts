@@ -25,18 +25,21 @@ function greetingName(guest: SaveTheDateGuest): string {
   return guest.partnerName ? `Couple ${guest.fullName} & ${guest.partnerName}` : `Couple ${guest.fullName}`;
 }
 
-const WEDDING_DATE_LABEL = { en: '23 December 2026', fr: '23 décembre 2026' };
+// Deliberately just the month + year, not the exact day — this message
+// goes out before the formal invitation, which is where the precise date
+// (and the personal RSVP link) belongs.
+const WEDDING_DATE_LABEL = { en: 'December 2026', fr: 'décembre 2026' };
 
 const MESSAGE_BUILDERS: Record<SaveTheDateLocale, (name: string) => string> = {
   en: (name) =>
     `Hi ${name}! 💛✨ Beni & Dorah are getting married, and we would love for you to be there! 💍\n\n` +
-    `Please save the date — ${WEDDING_DATE_LABEL.en} at Suitability Gardens. A formal invitation with your ` +
+    `This is just a save the date — ${WEDDING_DATE_LABEL.en} at Suitability Gardens. A formal invitation with your ` +
     `personal link to confirm your attendance will follow soon.\n\n` +
     `We can't wait to celebrate this beautiful new chapter with you! 🥂`,
   fr: (name) =>
     `Bonjour ${name} ! 💛✨ Beni & Dorah se marient, et nous aimerions tellement vous compter parmi nous ! 💍\n\n` +
-    `Merci de retenir la date — le ${WEDDING_DATE_LABEL.fr} à Suitability Gardens. Une invitation officielle avec ` +
-    `votre lien personnel pour confirmer votre présence suivra bientôt.\n\n` +
+    `Ceci est juste une annonce — retenez la date de ${WEDDING_DATE_LABEL.fr} à Suitability Gardens. Une invitation ` +
+    `officielle avec votre lien personnel pour confirmer votre présence suivra bientôt.\n\n` +
     `Nous avons hâte de célébrer ce merveilleux nouveau chapitre avec vous ! 🥂`,
 };
 
