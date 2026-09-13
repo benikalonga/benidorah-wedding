@@ -117,6 +117,13 @@ function InvitedPageInner() {
 
   const hasActiveFilter = !!query || attendingFilter !== 'all' || openedFilter !== 'all' || presentFilter !== 'all';
 
+  // Headcount stats for the whole list (unaffected by the filters above).
+  const stats = useMemo(() => {
+    if (!guests) return null;
+    const responded = guests.filter((g) => !isPending(g)).length;
+    return { total: guests.length, responded, pending: guests.length - responded };
+  }, [guests]);
+
   function resetFilters() {
     setQuery('');
     setAttendingFilter('all');
@@ -200,7 +207,26 @@ function InvitedPageInner() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Invited & RSVP Tracking" />
+      <PageHeader
+        title="Invited & RSVP Tracking"
+        meta={
+          stats && (
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm text-charcoal/55">
+              <span>
+                <span className="font-semibold text-onyx">{stats.total}</span> total
+              </span>
+              <span className="text-charcoal/30">·</span>
+              <span>
+                <span className="font-semibold text-onyx">{stats.responded}</span> RSVP&apos;d
+              </span>
+              <span className="text-charcoal/30">·</span>
+              <span>
+                <span className="font-semibold text-onyx">{stats.pending}</span> pending
+              </span>
+            </div>
+          )
+        }
+      />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative max-w-sm sm:flex-1">
@@ -239,11 +265,9 @@ function InvitedPageInner() {
             <option value="yes">Present</option>
             <option value="no">Not present</option>
           </Select>
-          {hasActiveFilter && (
-            <Button variant="ghost" size="sm" onClick={resetFilters}>
-              Reset filters
-            </Button>
-          )}
+          <Button variant="ghost" size="sm" disabled={!hasActiveFilter} onClick={resetFilters}>
+            Clear filters
+          </Button>
         </div>
       </div>
 
