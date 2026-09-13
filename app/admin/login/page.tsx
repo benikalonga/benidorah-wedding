@@ -48,7 +48,7 @@ export default function AdminLoginPage() {
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="border-white/20 bg-white/10 text-ivory placeholder:text-ivory/40 focus:border-champagne-gold focus:ring-champagne-gold/20"
+              className="border-white/20 bg-white/10 !text-white placeholder:text-ivory/40 focus:border-champagne-gold focus:ring-champagne-gold/20"
             />
           </Field>
           <Field label="Password" className="[&_span]:text-ivory/60">
@@ -58,7 +58,7 @@ export default function AdminLoginPage() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="border-white/20 bg-white/10 text-ivory placeholder:text-ivory/40 focus:border-champagne-gold focus:ring-champagne-gold/20"
+              className="border-white/20 bg-white/10 !text-white placeholder:text-ivory/40 focus:border-champagne-gold focus:ring-champagne-gold/20"
             />
           </Field>
           {error && <p className="text-xs text-red-400">{error}</p>}
