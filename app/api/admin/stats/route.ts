@@ -21,6 +21,7 @@ export async function GET() {
     momentsCount,
     ticketsCount,
     openedCount,
+    presentCount,
   ] = await Promise.all([
     prisma.guest.count(),
     prisma.rsvp.count({ where: { attending: { not: 'pending' } } }),
@@ -36,6 +37,7 @@ export async function GET() {
     prisma.moment.count(),
     prisma.ticket.count(),
     prisma.guest.count({ where: { linkOpenedAt: { not: null } } }),
+    prisma.guest.count({ where: { presentAt: { not: null } } }),
   ]);
 
   const occupancyByTable = new Map(guestsByTable.map((g) => [g.tableId, g._count.id]));
@@ -68,5 +70,6 @@ export async function GET() {
     },
     moments: momentsCount,
     tickets: ticketsCount,
+    presentGuests: presentCount,
   });
 }

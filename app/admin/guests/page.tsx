@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { buildSaveTheDateWaLink } from '@/lib/save-the-date';
 import PageHeader from '@/components/admin/ui/PageHeader';
@@ -56,6 +56,8 @@ export default function GuestsPage() {
 
 function GuestsPageInner() {
   const confirm = useConfirm();
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [guests, setGuests] = useState<GuestRow[] | null>(null);
   const [tables, setTables] = useState<TableOption[]>([]);
@@ -105,6 +107,14 @@ function GuestsPageInner() {
   }, [guests, query, typeFilter, sideFilter, tableFilter]);
 
   const hasActiveFilter = !!query || typeFilter !== 'all' || sideFilter !== 'all' || tableFilter !== 'all';
+
+  function resetFilters() {
+    setQuery('');
+    setTypeFilter('all');
+    setSideFilter('all');
+    setTableFilter('all');
+    router.replace(pathname);
+  }
 
   // Headcount stats for the whole list (unaffected by the filters above,
   // which are just for narrowing what's shown in the table) — a couple
@@ -236,7 +246,7 @@ function GuestsPageInner() {
           <Input placeholder="Search by name or phone…" value={query} onChange={(e) => setQuery(e.target.value)} className="pl-9" />
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value as any)} className="w-auto min-w-[8.5rem]">
             <option value="all">All types</option>
             <option value="single">Single</option>
@@ -255,6 +265,11 @@ function GuestsPageInner() {
               </option>
             ))}
           </Select>
+          {hasActiveFilter && (
+            <Button variant="ghost" size="sm" onClick={resetFilters}>
+              Reset filters
+            </Button>
+          )}
         </div>
       </div>
 

@@ -17,6 +17,7 @@ interface Stats {
   gifts: { available: number; booked: number; paid: number; totalValuePledgedZar: number };
   moments: number;
   tickets: number;
+  presentGuests: number;
 }
 
 // Brand palette, reused across every chart on this page so slice/bar
@@ -176,6 +177,7 @@ export default function DashboardPage() {
             <StatCard label="Moments uploaded" value={stats.moments} href="/admin/moments" />
             <StatCard label="Wish wall tickets" value={stats.tickets} href="/admin/tickets" />
             <StatCard label="Pending RSVPs" value={stats.rsvp.pending} href="/admin/invited?attending=pending" />
+            <StatCard label="Present guests" value={stats.presentGuests} href="/admin/invited?present=yes" />
           </StatGroup>
 
           <section>
