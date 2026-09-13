@@ -3,7 +3,8 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { buildSaveTheDateWaLink } from "@/lib/save-the-date";
+import { buildSaveTheDateWaLink, type SaveTheDateLocale } from "@/lib/save-the-date";
+import WhatsAppSendButton from "@/components/admin/ui/WhatsAppSendButton";
 import PageHeader from "@/components/admin/ui/PageHeader";
 import Button from "@/components/admin/ui/Button";
 import Dialog from "@/components/admin/ui/Dialog";
@@ -17,7 +18,6 @@ import Skeleton from "@/components/admin/ui/Skeleton";
 import {
   IconPlus,
   IconSearch,
-  IconWhatsApp,
   IconEdit,
   IconTrash,
   IconUsers,
@@ -220,26 +220,19 @@ function GuestsPageInner() {
     load();
   }
 
-  function handleSaveTheDate(g: GuestRow) {
+  function handleSaveTheDate(g: GuestRow, locale: SaveTheDateLocale) {
     // A plain wa.me "click to chat" link, not the WhatsApp Cloud API — it
     // just opens the admin's own WhatsApp with the message pre-filled, for
     // them to review and send personally. No backend call, so this is
     // separate from (and doesn't affect) the formal invite-sent tracking
     // below, which stays tied to "Resend invite" on the Invited/RSVPs page.
-    window.open(buildSaveTheDateWaLink(g, "en"), "_blank", "noopener,noreferrer");
+    window.open(buildSaveTheDateWaLink(g, locale), "_blank", "noopener,noreferrer");
   }
 
   function GuestActions({ g }: { g: GuestRow }) {
     return (
       <div className="flex flex-nowrap items-center gap-1.5">
-        <Button
-          variant="outline"
-          size="sm"
-          icon={<IconWhatsApp width={14} height={14} />}
-          onClick={() => handleSaveTheDate(g)}
-        >
-          Save the date
-        </Button>
+        <WhatsAppSendButton label="Save the date" onSend={(locale) => handleSaveTheDate(g, locale)} />
         <Button
           variant="outline"
           size="icon"

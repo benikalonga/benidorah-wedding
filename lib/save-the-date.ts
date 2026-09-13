@@ -39,12 +39,12 @@ const MESSAGE_BUILDERS: Record<SaveTheDateLocale, (name: string) => string> = {
   en: (name) =>
     `Dear ${name}!\n\n` +
     `We've got exciting news - Beni & Dorah are getting married, and we'd love for you to be part of it!\n\nSave ` +
-    `the date for ${WEDDING_DATE_LABEL.en} at Suitability Gardens - a formal invitation is coming your way soon.`,
+    `the date for ${WEDDING_DATE_LABEL.en} at Suitability Gardens in Johannesburg, SA - and a formal invitation is coming your way soon.`,
   fr: (name) =>
     `Bonjour ${name} !\n\n` +
-    `Nous avons une excellente nouvelle — Beni & Dorah se marient, et nous aimerions tellement vous compter ` +
-    `parmi nous !\n\nRetenez la date de ${WEDDING_DATE_LABEL.fr} à Suitability Gardens — une invitation officielle ` +
-    `suivra très bientôt.`,
+    `Une excellente nouvelle — Beni & Dorah se marient, et nous aimerions tellement vous compter ` +
+    `parmi nous !\n\nRetenez la date de ${WEDDING_DATE_LABEL.fr} à Suitability Gardens à Johannesbourg, SA — une invitation officielle ` +
+    `vous sera envoyée bientôt.`,
 };
 
 export function buildSaveTheDateMessage(

@@ -3,9 +3,10 @@
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
-import { buildSaveTheDateWaLink } from '@/lib/save-the-date';
+import { buildSaveTheDateWaLink, type SaveTheDateLocale } from '@/lib/save-the-date';
 import PageHeader from '@/components/admin/ui/PageHeader';
 import Button from '@/components/admin/ui/Button';
+import WhatsAppSendButton from '@/components/admin/ui/WhatsAppSendButton';
 import { useConfirm } from '@/components/admin/ui/ConfirmDialog';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/admin/ui/Table';
 import Badge from '@/components/admin/ui/Badge';
@@ -13,7 +14,7 @@ import Card from '@/components/admin/ui/Card';
 import EmptyState from '@/components/admin/ui/EmptyState';
 import Skeleton from '@/components/admin/ui/Skeleton';
 import { Input, Select } from '@/components/admin/ui/form';
-import { IconMail, IconSearch, IconCheck, IconWhatsApp } from '@/components/admin/ui/icons';
+import { IconMail, IconSearch, IconCheck } from '@/components/admin/ui/icons';
 
 interface GuestRow {
   id: string;
@@ -134,13 +135,13 @@ function InvitedPageInner() {
     router.replace(pathname);
   }
 
-  function handleResend(g: GuestRow) {
+  function handleResend(g: GuestRow, locale: SaveTheDateLocale) {
     // Same as the Guests page's "Save the date" button — a plain wa.me
     // "click to chat" link, pre-filled and opened for the admin to review
     // and send personally. No backend call, so this doesn't touch
     // inviteSentAt or the "Link opened"/"Submitted" tracking on this page
     // at all; it's a save-the-date nudge, not the formal invite.
-    window.open(buildSaveTheDateWaLink(g, 'en'), '_blank', 'noopener,noreferrer');
+    window.open(buildSaveTheDateWaLink(g, locale), '_blank', 'noopener,noreferrer');
   }
 
   async function setPresent(g: GuestRow, present: boolean) {
@@ -173,14 +174,7 @@ function InvitedPageInner() {
   function GuestActions({ g }: { g: GuestRow }) {
     return (
       <div className="flex flex-nowrap items-center gap-1.5">
-        <Button
-          variant="outline"
-          size="sm"
-          icon={<IconWhatsApp width={14} height={14} />}
-          onClick={() => handleResend(g)}
-        >
-          Resend
-        </Button>
+        <WhatsAppSendButton label="Resend" onSend={(locale) => handleResend(g, locale)} />
         {g.presentAt ? (
           <button
             type="button"
