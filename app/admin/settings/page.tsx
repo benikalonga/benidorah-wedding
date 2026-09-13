@@ -41,31 +41,42 @@ function SettingsForm() {
     if (!validate()) return;
 
     setSaving(true);
+    let res: Response;
     try {
-      const res = await fetch('/api/admin/password', {
+      res = await fetch('/api/admin/password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentPassword, newPassword }),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        if (res.status === 401) {
-          setFieldErrors({ current: data.error || 'Current password is incorrect' });
-        } else if (res.status === 400) {
-          setFieldErrors({ new: data.error || 'That password is not strong enough.' });
-        } else {
-          setFieldErrors({ general: data.error || 'Failed to change password' });
-        }
-        return;
-      }
-      toast.success('Password updated');
-      // Full reload (not a soft client-side navigation) so every part of
-      // the shell — session cookie, sidebar email, forced-password banner
-      // — re-syncs from the server with the freshly issued session.
-      window.location.href = forced ? '/admin/dashboard' : '/admin/settings';
-    } finally {
+    } catch {
       setSaving(false);
+      setFieldErrors({ general: 'Network error — please try again.' });
+      return;
     }
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setSaving(false);
+      if (res.status === 401) {
+        setFieldErrors({ current: data.error || 'Current password is incorrect' });
+      } else if (res.status === 400) {
+        setFieldErrors({ new: data.error || 'That password is not strong enough.' });
+      } else {
+        setFieldErrors({ general: data.error || 'Failed to change password' });
+      }
+      return;
+    }
+
+    toast.success('Password updated');
+    // Full reload (not a soft client-side navigation) so every part of the
+    // shell — session cookie, sidebar email, forced-password banner — fully
+    // re-syncs from the server with the freshly issued session. A short
+    // delay first so the toast actually has time to render and be seen
+    // before the reload wipes the page out from under it; `saving` is left
+    // true (button stays disabled) since the page is about to unload anyway.
+    setTimeout(() => {
+      window.location.href = forced ? '/admin/dashboard' : '/admin/settings';
+    }, 900);
   }
 
   return (
