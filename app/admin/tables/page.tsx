@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import PageHeader from '@/components/admin/ui/PageHeader';
@@ -180,11 +181,11 @@ function TablesPageInner() {
                   />
                 </div>
                 {t.guests.length > 0 ? (
-                  <ul className="mt-3 space-y-1 text-sm text-charcoal/70">
-                    {t.guests.map((g) => (
-                      <li key={g.id}>{g.fullName}</li>
-                    ))}
-                  </ul>
+                  <Link href={`/admin/guests?table=${t.id}`} className="mt-3 block">
+                    <Button variant="outline" size="sm" className="w-full">
+                      View guests
+                    </Button>
+                  </Link>
                 ) : (
                   <p className="mt-3 text-xs text-charcoal/40">No guests seated yet.</p>
                 )}

@@ -84,13 +84,16 @@ function GuestsPageInner() {
     load();
   }, []);
 
-  // Deep-linked from the Dashboard (e.g. clicking "Groom's side") — pick
-  // up ?side= and preset the matching filter dropdown. Re-runs if the
-  // query string itself changes (following one dashboard link after
-  // another without the page unmounting).
+  // Deep-linked from the Dashboard (e.g. clicking "Groom's side") or the
+  // Tables page ("View guests") — pick up ?side= / ?table= and preset the
+  // matching filter dropdown. Re-runs if the query string itself changes
+  // (following one dashboard link after another without the page
+  // unmounting).
   useEffect(() => {
     const side = searchParams.get('side');
     if (side === 'groom' || side === 'bride') setSideFilter(side);
+    const table = searchParams.get('table');
+    if (table) setTableFilter(table);
   }, [searchParams]);
 
   const filtered = useMemo(() => {
