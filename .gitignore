@@ -21,3 +21,7 @@ uploads/*
 .vscode/
 coverage/
 *.tsbuildinfo
+
+# Database dumps — real guest PII (names, phone numbers, RSVPs), never commit these.
+*.sql
+*.dump
