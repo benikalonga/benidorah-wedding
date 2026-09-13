@@ -8,7 +8,7 @@ export async function GET() {
   if (!isSession(session)) return session;
 
   const tables = await prisma.table.findMany({
-    include: { guests: { select: { id: true, fullName: true } } },
+    include: { guests: { select: { id: true, fullName: true, type: true } } },
     orderBy: { tableNumber: 'asc' },
   });
   return NextResponse.json({ tables });

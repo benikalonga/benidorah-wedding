@@ -120,11 +120,19 @@ function InvitedPageInner() {
 
   const hasActiveFilter = !!query || attendingFilter !== 'all' || openedFilter !== 'all' || presentFilter !== 'all';
 
-  // Headcount stats for the whole list (unaffected by the filters above).
+  // Headcount stats for the whole list (unaffected by the filters above) —
+  // a couple is one guest row but two people, so it counts as 2 here, same
+  // as everywhere else guest counts are shown.
   const stats = useMemo(() => {
     if (!guests) return null;
-    const responded = guests.filter((g) => !isPending(g)).length;
-    return { total: guests.length, responded, pending: guests.length - responded };
+    let total = 0;
+    let responded = 0;
+    for (const g of guests) {
+      const heads = g.type === 'couple' ? 2 : 1;
+      total += heads;
+      if (!isPending(g)) responded += heads;
+    }
+    return { total, responded, pending: total - responded };
   }, [guests]);
 
   function resetFilters() {

@@ -20,10 +20,15 @@ interface TableRow {
   id: string;
   tableNumber: number;
   capacity: number;
-  guests: { id: string; fullName: string }[];
+  guests: { id: string; fullName: string; type: 'single' | 'couple' }[];
 }
 
 const emptyForm = { tableNumber: '', capacity: '10' };
+
+// A couple is one guest row but two physical seats.
+function seatedCount(guests: TableRow['guests']) {
+  return guests.reduce((sum, g) => sum + (g.type === 'couple' ? 2 : 1), 0);
+}
 
 export default function TablesPage() {
   return (
@@ -150,7 +155,8 @@ function TablesPageInner() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {tables.map((t) => {
-            const full = t.guests.length >= t.capacity;
+            const seated = seatedCount(t.guests);
+            const full = seated >= t.capacity;
             const isHighlighted = highlight === String(t.tableNumber);
             return (
               <Card
@@ -163,7 +169,7 @@ function TablesPageInner() {
                     <h3 className="section-title text-lg text-onyx">Table {t.tableNumber}</h3>
                     <div className="mt-1.5">
                       <Badge tone={full ? 'gold' : 'blue'}>
-                        {t.guests.length} / {t.capacity} seated
+                        {seated} / {t.capacity} seated
                       </Badge>
                     </div>
                   </div>
