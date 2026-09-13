@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
+import { buildSaveTheDateWaLink } from '@/lib/save-the-date';
 import PageHeader from '@/components/admin/ui/PageHeader';
 import Button from '@/components/admin/ui/Button';
 import { useConfirm } from '@/components/admin/ui/ConfirmDialog';
@@ -16,8 +17,10 @@ import { IconMail, IconSearch, IconCheck, IconWhatsApp } from '@/components/admi
 
 interface GuestRow {
   id: string;
+  type: 'single' | 'couple';
   fullName: string;
   partnerName: string | null;
+  phoneNumber: string;
   userHashCode: string;
   linkOpenedAt: string | null;
   presentAt: string | null;
@@ -72,7 +75,6 @@ function InvitedPageInner() {
   const [attendingFilter, setAttendingFilter] = useState<AttendingFilter>('all');
   const [openedFilter, setOpenedFilter] = useState<YesNoFilter>('all');
   const [presentFilter, setPresentFilter] = useState<YesNoFilter>('all');
-  const [resendingId, setResendingId] = useState<string | null>(null);
 
   function load() {
     return fetch('/api/admin/guests')
@@ -132,19 +134,13 @@ function InvitedPageInner() {
     router.replace(pathname);
   }
 
-  async function handleResendInvite(g: GuestRow) {
-    setResendingId(g.id);
-    try {
-      const res = await fetch(`/api/admin/guests/${g.id}/send-invite`, { method: 'POST' });
-      const data = await res.json();
-      if (res.ok) {
-        toast.success(data.mocked ? `Invite logged (mock mode): ${data.inviteUrl}` : 'Invite resent!');
-      } else {
-        toast.error(data.error || 'Failed to resend invite');
-      }
-    } finally {
-      setResendingId(null);
-    }
+  function handleResend(g: GuestRow) {
+    // Same as the Guests page's "Save the date" button — a plain wa.me
+    // "click to chat" link, pre-filled and opened for the admin to review
+    // and send personally. No backend call, so this doesn't touch
+    // inviteSentAt or the "Link opened"/"Submitted" tracking on this page
+    // at all; it's a save-the-date nudge, not the formal invite.
+    window.open(buildSaveTheDateWaLink(g, 'en'), '_blank', 'noopener,noreferrer');
   }
 
   async function setPresent(g: GuestRow, present: boolean) {
@@ -181,8 +177,7 @@ function InvitedPageInner() {
           variant="outline"
           size="sm"
           icon={<IconWhatsApp width={14} height={14} />}
-          loading={resendingId === g.id}
-          onClick={() => handleResendInvite(g)}
+          onClick={() => handleResend(g)}
         >
           Resend
         </Button>
