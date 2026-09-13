@@ -12,7 +12,7 @@ import Card from '@/components/admin/ui/Card';
 import EmptyState from '@/components/admin/ui/EmptyState';
 import Skeleton from '@/components/admin/ui/Skeleton';
 import { Input, Select } from '@/components/admin/ui/form';
-import { IconMail, IconSearch, IconCheck } from '@/components/admin/ui/icons';
+import { IconMail, IconSearch, IconCheck, IconWhatsApp } from '@/components/admin/ui/icons';
 
 interface GuestRow {
   id: string;
@@ -169,14 +169,15 @@ function InvitedPageInner() {
 
   function GuestActions({ g }: { g: GuestRow }) {
     return (
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div className="flex flex-nowrap items-center gap-1.5">
         <Button
           variant="outline"
           size="sm"
+          icon={<IconWhatsApp width={14} height={14} />}
           loading={resendingId === g.id}
           onClick={() => handleResendInvite(g)}
         >
-          Resend invite
+          Resend
         </Button>
         {g.presentAt ? (
           <button
@@ -190,7 +191,7 @@ function InvitedPageInner() {
           </button>
         ) : (
           <Button variant="outline" size="sm" icon={<IconCheck width={14} height={14} />} onClick={() => setPresent(g, true)}>
-            Mark present
+            Present
           </Button>
         )}
       </div>
@@ -264,7 +265,7 @@ function InvitedPageInner() {
             <Table>
               <Thead>
                 <Tr>
-                  <Th>Guest</Th>
+                  <Th className="min-w-[12rem]">Guest</Th>
                   <Th>Link opened</Th>
                   <Th>RSVP status</Th>
                   <Th>Allergy / comment</Th>
@@ -276,7 +277,7 @@ function InvitedPageInner() {
               <Tbody>
                 {filtered.map((g) => (
                   <Tr key={g.id}>
-                    <Td className="font-medium">
+                    <Td className="min-w-[12rem] font-medium">
                       {g.fullName}
                       {g.partnerName ? ` & ${g.partnerName}` : ''}
                     </Td>
@@ -284,10 +285,14 @@ function InvitedPageInner() {
                     <Td>
                       <Badge tone={attendingTone(g.rsvp?.attending)}>{attendingLabel(g.rsvp?.attending)}</Badge>
                     </Td>
-                    <Td className="max-w-[16rem] truncate text-charcoal/70">{g.rsvp?.allergyComment || '—'}</Td>
-                    <Td className="max-w-xs truncate text-charcoal/70">{g.rsvp?.wishText || '—'}</Td>
+                    <Td className="max-w-[8rem] truncate text-charcoal/70" title={g.rsvp?.allergyComment || undefined}>
+                      {g.rsvp?.allergyComment || '—'}
+                    </Td>
+                    <Td className="max-w-[8rem] truncate text-charcoal/70" title={g.rsvp?.wishText || undefined}>
+                      {g.rsvp?.wishText || '—'}
+                    </Td>
                     <Td className="whitespace-nowrap text-charcoal/70">
-                      {g.rsvp?.submittedAt ? new Date(g.rsvp.submittedAt).toLocaleString() : '—'}
+                      {g.rsvp?.submittedAt ? new Date(g.rsvp.submittedAt).toLocaleDateString() : '—'}
                     </Td>
                     <Td>
                       <GuestActions g={g} />
