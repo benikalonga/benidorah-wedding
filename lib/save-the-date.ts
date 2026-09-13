@@ -37,7 +37,7 @@ const WEDDING_DATE_LABEL = { en: "December 2026", fr: "décembre 2026" };
 // support), so plain text is the safe choice for this specific channel.
 const MESSAGE_BUILDERS: Record<SaveTheDateLocale, (name: string) => string> = {
   en: (name) =>
-    `Hi ${name}!\n\n` +
+    `Dear ${name}!\n\n` +
     `We've got exciting news - Beni & Dorah are getting married, and we'd love for you to be part of it!\n\nSave ` +
     `the date for ${WEDDING_DATE_LABEL.en} at Suitability Gardens - a formal invitation is coming your way soon.`,
   fr: (name) =>
