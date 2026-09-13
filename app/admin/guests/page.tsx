@@ -3,19 +3,17 @@
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
-import { buildSaveTheDateWaLink } from '@/lib/save-the-date';
 import PageHeader from '@/components/admin/ui/PageHeader';
 import Button from '@/components/admin/ui/Button';
 import Dialog from '@/components/admin/ui/Dialog';
 import { useConfirm } from '@/components/admin/ui/ConfirmDialog';
-import DropdownMenu from '@/components/admin/ui/DropdownMenu';
 import { Field, Input, Select } from '@/components/admin/ui/form';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/admin/ui/Table';
 import Badge from '@/components/admin/ui/Badge';
 import Card from '@/components/admin/ui/Card';
 import EmptyState from '@/components/admin/ui/EmptyState';
 import Skeleton from '@/components/admin/ui/Skeleton';
-import { IconPlus, IconSearch, IconMail, IconEdit, IconTrash, IconUsers } from '@/components/admin/ui/icons';
+import { IconPlus, IconSearch, IconWhatsApp, IconEdit, IconTrash, IconUsers } from '@/components/admin/ui/icons';
 
 interface TableOption {
   id: string;
@@ -70,6 +68,7 @@ function GuestsPageInner() {
   const [typeFilter, setTypeFilter] = useState<'all' | 'single' | 'couple'>('all');
   const [sideFilter, setSideFilter] = useState<'all' | 'groom' | 'bride'>('all');
   const [tableFilter, setTableFilter] = useState<'all' | string>('all');
+  const [sendingId, setSendingId] = useState<string | null>(null);
 
   async function load() {
     const [g, t] = await Promise.all([
@@ -195,24 +194,41 @@ function GuestsPageInner() {
   }
 
   async function handleSendInvite(g: GuestRow) {
-    const res = await fetch(`/api/admin/guests/${g.id}/send-invite`, { method: 'POST' });
-    const data = await res.json();
-    if (res.ok) {
-      toast.success(data.mocked ? `Invite logged (mock mode): ${data.inviteUrl}` : 'Invite sent!');
-      load();
-    } else {
-      toast.error(data.error || 'Failed to send invite');
+    setSendingId(g.id);
+    try {
+      const res = await fetch(`/api/admin/guests/${g.id}/send-invite`, { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(data.mocked ? `Invite logged (mock mode): ${data.inviteUrl}` : 'Invite sent!');
+        load();
+      } else {
+        toast.error(data.error || 'Failed to send invite');
+      }
+    } finally {
+      setSendingId(null);
     }
   }
 
-  function guestActions(g: GuestRow) {
-    return [
-      { label: 'Send invite', icon: <IconMail width={16} height={16} />, onSelect: () => handleSendInvite(g) },
-      { label: 'Save-the-date (EN)', href: buildSaveTheDateWaLink(g, 'en'), target: '_blank' },
-      { label: 'Save-the-date (FR)', href: buildSaveTheDateWaLink(g, 'fr'), target: '_blank' },
-      { label: 'Edit', icon: <IconEdit width={16} height={16} />, onSelect: () => openEdit(g) },
-      { label: 'Delete', icon: <IconTrash width={16} height={16} />, onSelect: () => handleDelete(g), danger: true },
-    ];
+  function GuestActions({ g }: { g: GuestRow }) {
+    return (
+      <div className="flex flex-nowrap items-center gap-1.5">
+        <Button
+          variant="outline"
+          size="sm"
+          icon={<IconWhatsApp width={14} height={14} />}
+          loading={sendingId === g.id}
+          onClick={() => handleSendInvite(g)}
+        >
+          Invite
+        </Button>
+        <Button variant="outline" size="icon" aria-label={`Edit ${g.fullName}`} onClick={() => openEdit(g)}>
+          <IconEdit width={15} height={15} />
+        </Button>
+        <Button variant="danger" size="icon" aria-label={`Delete ${g.fullName}`} onClick={() => handleDelete(g)}>
+          <IconTrash width={15} height={15} />
+        </Button>
+      </div>
+    );
   }
 
   return (
@@ -305,19 +321,19 @@ function GuestsPageInner() {
               <Thead>
                 <Tr>
                   <Th className="w-12">No</Th>
-                  <Th>Name</Th>
+                  <Th className="w-48">Name</Th>
                   <Th>Phone</Th>
                   <Th>Side</Th>
                   <Th>Table</Th>
                   <Th>Invite sent</Th>
-                  <Th className="w-10" />
+                  <Th>Actions</Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {filtered.map((g, i) => (
                   <Tr key={g.id}>
                     <Td className="text-charcoal/40">{i + 1}</Td>
-                    <Td className="font-medium">
+                    <Td className="w-48 font-medium">
                       <div className="flex items-center gap-2">
                         {g.type === 'couple' && <Badge tone="green">Couple</Badge>}
                         <span>
@@ -339,7 +355,7 @@ function GuestsPageInner() {
                       )}
                     </Td>
                     <Td>
-                      <DropdownMenu items={guestActions(g)} label={`Actions for ${g.fullName}`} />
+                      <GuestActions g={g} />
                     </Td>
                   </Tr>
                 ))}
@@ -351,24 +367,24 @@ function GuestsPageInner() {
           <div className="space-y-3 md:hidden">
             {filtered.map((g, i) => (
               <Card key={g.id} padded={false} className="p-4">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-charcoal/40">{i + 1}.</span>
-                      {g.type === 'couple' && <Badge tone="green">Couple</Badge>}
-                      <p className="text-sm font-medium text-onyx">
-                        {g.fullName}
-                        {g.partnerName ? ` & ${g.partnerName}` : ''}
-                      </p>
-                    </div>
-                    <p className="mt-0.5 text-xs text-charcoal/60">{g.phoneNumber}</p>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-charcoal/40">{i + 1}.</span>
+                    {g.type === 'couple' && <Badge tone="green">Couple</Badge>}
+                    <p className="text-sm font-medium text-onyx">
+                      {g.fullName}
+                      {g.partnerName ? ` & ${g.partnerName}` : ''}
+                    </p>
                   </div>
-                  <DropdownMenu items={guestActions(g)} label={`Actions for ${g.fullName}`} />
+                  <p className="mt-0.5 text-xs text-charcoal/60">{g.phoneNumber}</p>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   <Badge tone={g.guestSide === 'groom' ? 'blue' : 'gold'}>{g.guestSide}</Badge>
                   <Badge tone="neutral">Table {g.table?.tableNumber}</Badge>
                   {g.inviteSentAt && <Badge tone="green">Invited {new Date(g.inviteSentAt).toLocaleDateString()}</Badge>}
+                </div>
+                <div className="mt-3 border-t border-onyx/10 pt-3">
+                  <GuestActions g={g} />
                 </div>
               </Card>
             ))}
