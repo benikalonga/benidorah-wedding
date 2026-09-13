@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import PageHeader from '@/components/admin/ui/PageHeader';
 import Button from '@/components/admin/ui/Button';
 import Card from '@/components/admin/ui/Card';
-import { Field, Input } from '@/components/admin/ui/form';
+import { Field, PasswordInput } from '@/components/admin/ui/form';
 
 function SettingsForm() {
   const params = useSearchParams();
@@ -92,8 +92,7 @@ function SettingsForm() {
       <Card className="max-w-sm">
         <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
           <Field label="Current password" required error={fieldErrors.current}>
-            <Input
-              type="password"
+            <PasswordInput
               required
               value={currentPassword}
               onChange={(e) => {
@@ -108,8 +107,7 @@ function SettingsForm() {
             error={fieldErrors.new}
             hint="At least 8 characters, with upper, lower case and a number."
           >
-            <Input
-              type="password"
+            <PasswordInput
               required
               minLength={8}
               value={newPassword}
@@ -120,8 +118,7 @@ function SettingsForm() {
             />
           </Field>
           <Field label="Confirm new password" required error={fieldErrors.confirm}>
-            <Input
-              type="password"
+            <PasswordInput
               required
               value={confirmPassword}
               onChange={(e) => {

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/admin/ui/Button';
-import { Field, Input } from '@/components/admin/ui/form';
+import { Field, Input, PasswordInput } from '@/components/admin/ui/form';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
@@ -52,13 +52,13 @@ export default function AdminLoginPage() {
             />
           </Field>
           <Field label="Password" className="[&_span]:text-ivory/60">
-            <Input
-              type="password"
+            <PasswordInput
               required
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="border-white/20 bg-white/10 !text-white placeholder:text-ivory/40 focus:border-champagne-gold focus:ring-champagne-gold/20"
+              iconClassName="text-ivory/50 hover:text-ivory/80"
             />
           </Field>
           {error && <p className="text-xs text-red-400">{error}</p>}
