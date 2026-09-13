@@ -11,24 +11,26 @@
 // only pre-fill text, not attach media, so the hero video has to be
 // attached by hand in the chat after it opens, before hitting send.
 
-export type SaveTheDateLocale = 'en' | 'fr';
+export type SaveTheDateLocale = "en" | "fr";
 
 export interface SaveTheDateGuest {
   fullName: string;
   partnerName?: string | null;
-  type: 'single' | 'couple';
+  type: "single" | "couple";
   phoneNumber: string;
 }
 
 function greetingName(guest: SaveTheDateGuest): string {
-  if (guest.type !== 'couple') return guest.fullName;
-  return guest.partnerName ? `Couple ${guest.fullName} & ${guest.partnerName}` : `Couple ${guest.fullName}`;
+  if (guest.type !== "couple") return guest.fullName;
+  return guest.partnerName
+    ? `Couple ${guest.fullName} & ${guest.partnerName}`
+    : `Couple ${guest.fullName}`;
 }
 
 // Deliberately just the month + year, not the exact day — this message
 // goes out before the formal invitation, which is where the precise date
 // (and the personal RSVP link) belongs.
-const WEDDING_DATE_LABEL = { en: 'December 2026', fr: 'décembre 2026' };
+const WEDDING_DATE_LABEL = { en: "December 2026", fr: "décembre 2026" };
 
 // No emojis here — some come through as unreadable/mojibake once run
 // through wa.me's URL-encoded text parameter (varies by device/OS font
@@ -36,22 +38,28 @@ const WEDDING_DATE_LABEL = { en: 'December 2026', fr: 'décembre 2026' };
 const MESSAGE_BUILDERS: Record<SaveTheDateLocale, (name: string) => string> = {
   en: (name) =>
     `Hi ${name}!\n\n` +
-    `We've got exciting news — Beni & Dorah are getting married, and we'd love for you to be part of it! Save ` +
-    `the date for ${WEDDING_DATE_LABEL.en} at Suitability Gardens — a formal invitation is coming your way soon.`,
+    `We've got exciting news - Beni & Dorah are getting married, and we'd love for you to be part of it!\n\nSave ` +
+    `the date for ${WEDDING_DATE_LABEL.en} at Suitability Gardens - a formal invitation is coming your way soon.`,
   fr: (name) =>
     `Bonjour ${name} !\n\n` +
     `Nous avons une excellente nouvelle — Beni & Dorah se marient, et nous aimerions tellement vous compter ` +
-    `parmi nous ! Retenez la date de ${WEDDING_DATE_LABEL.fr} à Suitability Gardens — une invitation officielle ` +
+    `parmi nous !\n\nRetenez la date de ${WEDDING_DATE_LABEL.fr} à Suitability Gardens — une invitation officielle ` +
     `suivra très bientôt.`,
 };
 
-export function buildSaveTheDateMessage(guest: SaveTheDateGuest, locale: SaveTheDateLocale): string {
+export function buildSaveTheDateMessage(
+  guest: SaveTheDateGuest,
+  locale: SaveTheDateLocale,
+): string {
   return MESSAGE_BUILDERS[locale](greetingName(guest));
 }
 
 // wa.me expects digits only — country code first, no "+", spaces, or dashes.
-export function buildSaveTheDateWaLink(guest: SaveTheDateGuest, locale: SaveTheDateLocale): string {
-  const digits = guest.phoneNumber.replace(/\D/g, '');
+export function buildSaveTheDateWaLink(
+  guest: SaveTheDateGuest,
+  locale: SaveTheDateLocale,
+): string {
+  const digits = guest.phoneNumber.replace(/\D/g, "");
   const message = buildSaveTheDateMessage(guest, locale);
   return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
 }
