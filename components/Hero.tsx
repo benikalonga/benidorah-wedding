@@ -131,6 +131,10 @@ export default function Hero({
     }
   };
 
+  const handleScrollToHistory = () => {
+    document.getElementById("history")?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <>
       <HeroLoader visible={showLoader} progress={loadProgress} />
@@ -327,16 +331,30 @@ export default function Hero({
             </motion.div>
           </motion.div>
 
-          <motion.div
+          <motion.button
+            type="button"
+            onClick={handleScrollToHistory}
             style={{ opacity: scrollHintOpacity }}
-            className="pointer-events-none absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-3 text-champagne-gold"
+            className="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-champagne-gold"
+            aria-label="Scroll to our history"
           >
             <span className="eyebrow text-[10px] text-ivory/60">Scroll</span>
-            <span
-              className="h-10 w-px animate-chevron bg-champagne-gold"
+            <svg
+              className="animate-chevron"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
               aria-hidden
-            />
-          </motion.div>
+            >
+              <path d="M4 6.5 10 12l6-5.5" />
+              <path d="M4 12.5 10 18l6-5.5" />
+            </svg>
+          </motion.button>
         </div>
       </section>
     </>
