@@ -163,7 +163,7 @@ const HISTORY_SEEDS = [
     descriptionShort: "A birthday date turned into a yes.",
     descriptionFull:
       "I took her out to celebrate her birthday, and by the end of the night I asked her to be my girl. She said yes.",
-    eventDate: new Date("2024-06-15"),
+    eventDate: new Date("2024-06-01"),
     imagePath: "/images/couple/history-first-date.jpg",
   },
   {
