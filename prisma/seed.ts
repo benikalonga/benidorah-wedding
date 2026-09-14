@@ -56,6 +56,7 @@ const HISTORY_SEEDS = [
     descriptionFull:
       'We met at church — she was part of the choir, and the moment she sang I could tell there was something different about her. She welcomed me with such warmth, like we had been friends for years, and that first hello ended up being the start of forever.',
     eventDate: new Date('2023-06-15'),
+    imagePath: '/images/couple/history-first-hello.jpg',
   },
   {
     title: 'First Date',
@@ -219,9 +220,9 @@ async function main() {
           descriptionShort: h.descriptionShort,
           descriptionFull: h.descriptionFull,
           eventDate: h.eventDate,
-          thumbnailUrl: coupleImages[i % coupleImages.length],
+          thumbnailUrl: h.imagePath || coupleImages[i % coupleImages.length],
           sortOrder: i,
-          images: { create: [{ imageUrl: coupleImages[i % coupleImages.length] }] },
+          images: { create: [{ imageUrl: h.imagePath || coupleImages[i % coupleImages.length] }] },
         },
       });
     }
