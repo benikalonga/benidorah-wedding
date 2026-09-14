@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: OG_TITLE,
     description: OG_DESCRIPTION,
-    images: [{ url: '/images/couple/hero-poster.jpg', width: 3761, height: 4702 }],
+    images: [{ url: '/images/gallery/27.jpeg', width: 3123, height: 4160 }],
     videos: [
       {
         url: OG_VIDEO_URL,
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: OG_TITLE,
     description: OG_DESCRIPTION,
-    images: ['/images/couple/hero-poster.jpg'],
+    images: ['/images/gallery/27.jpeg'],
   },
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'Beni & Dorah' },
 };

@@ -389,17 +389,19 @@ async function main() {
     });
   }
 
-  // Extra gallery batch supplied directly by the couple (25 photos + one
-  // video, numbered 1-26 with #3 being the video). Backfilled item-by-item
-  // keyed by mediaUrl so re-running the seed never duplicates rows and new
-  // items in the batch still get added if this runs again later.
+  // Extra gallery batch supplied directly by the couple (26 photos + one
+  // video, numbered 1-27 with #3 being the video — #27 is the save-the-date
+  // portrait, also used as the OG/social share image, see app/layout.tsx).
+  // Backfilled item-by-item keyed by mediaUrl so re-running the seed never
+  // duplicates rows and new items in the batch still get added if this
+  // runs again later.
   console.log("Seeding additional gallery batch…");
   const galleryBatch: {
     url: string;
     type: "image" | "video";
     thumbnailUrl?: string;
   }[] = [];
-  for (let n = 1; n <= 26; n++) {
+  for (let n = 1; n <= 27; n++) {
     if (n === 3) {
       galleryBatch.push({
         url: "/images/gallery/3.mp4",
