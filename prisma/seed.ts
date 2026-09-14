@@ -389,12 +389,13 @@ async function main() {
     });
   }
 
-  // Extra gallery batch supplied directly by the couple (26 photos + one
-  // video, numbered 1-27 with #3 being the video — #27 is the save-the-date
-  // portrait, also used as the OG/social share image, see app/layout.tsx).
-  // Backfilled item-by-item keyed by mediaUrl so re-running the seed never
-  // duplicates rows and new items in the batch still get added if this
-  // runs again later.
+  // Extra gallery batch supplied directly by the couple, numbered 1-27 —
+  // #3 was a video (3.mp4 + 3-poster.jpg) but has since been removed from
+  // the gallery, so there's no file at that number; #27 is the
+  // save-the-date portrait, also used as the OG/social share image (see
+  // app/layout.tsx). Backfilled item-by-item keyed by mediaUrl so
+  // re-running the seed never duplicates rows and new items in the batch
+  // still get added if this runs again later.
   console.log("Seeding additional gallery batch…");
   const galleryBatch: {
     url: string;
@@ -402,15 +403,8 @@ async function main() {
     thumbnailUrl?: string;
   }[] = [];
   for (let n = 1; n <= 27; n++) {
-    if (n === 3) {
-      galleryBatch.push({
-        url: "/images/gallery/3.mp4",
-        type: "video",
-        thumbnailUrl: "/images/gallery/3-poster.jpg",
-      });
-    } else {
-      galleryBatch.push({ url: `/images/gallery/${n}.jpeg`, type: "image" });
-    }
+    if (n === 3) continue;
+    galleryBatch.push({ url: `/images/gallery/${n}.jpeg`, type: "image" });
   }
   for (const item of galleryBatch) {
     const existing = await prisma.galleryItem.findFirst({
