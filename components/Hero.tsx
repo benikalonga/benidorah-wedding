@@ -111,6 +111,18 @@ export default function Hero({
     [0.5, 0.92],
     [1.12, 1],
   );
+  // The second act's own LocaleToggle sits at the same screen corner as the
+  // opening top bar's — by design, so the control reads as "the same
+  // toggle" throughout the scroll. But both are mounted the whole time and
+  // only fade via opacity (not display), and this one is later in the DOM,
+  // so without gating its pointer-events it would sit on top and silently
+  // steal clicks meant for the top bar's toggle while fully invisible
+  // (harmless here since both just call the same setLocale, but wrong).
+  // Flipping pointer-events at the same threshold opacity starts from
+  // keeps only the actually-visible one hit-testable at any given scroll.
+  const placeholderInteractive = useTransform(scrollYProgress, (v) =>
+    v >= 0.5 ? "auto" : "none",
+  );
 
   const overlayOpacity = useTransform(
     scrollYProgress,
@@ -336,16 +348,21 @@ export default function Hero({
               it hands off to a second, quieter beat of copy (same content
               pattern as the opening one) before releasing into History.
               pointer-events-none for the same reason as the opening content
-              block above (see its comment) — only the Scroll button inside
-              opts back in with pointer-events-auto. */}
+              block above (see its comment) — the Scroll button opts back in
+              with pointer-events-auto, and the LocaleToggle uses
+              placeholderInteractive instead (see its own comment above)
+              since it needs to stop being clickable once faded out, not
+              just start being clickable once faded in. */}
           <motion.div
             style={{ opacity: placeholderOpacity }}
             className="pointer-events-none absolute inset-0 z-10 flex h-full flex-col items-center justify-center gap-6 px-6 text-center"
           >
-            <LocaleToggle
-              variant="dark"
-              className="pointer-events-auto absolute right-5 top-5 sm:right-8 sm:top-8"
-            />
+            <motion.div
+              style={{ pointerEvents: placeholderInteractive }}
+              className="absolute right-5 top-5 sm:right-8 sm:top-8"
+            >
+              <LocaleToggle variant="dark" />
+            </motion.div>
             <p className="eyebrow text-champagne-gold">{t("hero.saveTheDate")}</p>
             <p className="section-title max-w-xl text-2xl italic text-ivory sm:text-3xl md:text-4xl">
               {t("hero.tagline")}
