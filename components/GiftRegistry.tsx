@@ -7,6 +7,7 @@ import { SITE_COPY } from "@/lib/content";
 import SectionHeader from "./SectionHeader";
 import { useLocale } from "./LocaleProvider";
 import { pickDb } from "@/lib/i18n";
+import { useSocketEvent } from "@/lib/useSocket";
 
 export interface GiftEntry {
   id: string;
@@ -20,15 +21,25 @@ export interface GiftEntry {
   status: "available" | "booked" | "paid";
 }
 
-export default function GiftRegistry({ gifts }: { gifts: GiftEntry[] }) {
+export default function GiftRegistry({
+  gifts,
+  guestId,
+}: {
+  gifts: GiftEntry[];
+  guestId?: string | null;
+}) {
   const { locale, t } = useLocale();
   const [expanded, setExpanded] = useState(false);
-  const [items] = useState(gifts);
-  // Which gift's "Make a deposit" reveal (the bank account details) is
+  const [items, setItems] = useState(gifts);
+  // Which gift's "I will gift it" reveal (the bank account details) is
   // currently open — at most one at a time, same as the old contribute form.
   const [depositOpenId, setDepositOpenId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [viewingId, setViewingId] = useState<string | null>(null);
+  // Which gift is mid-flight claiming itself as "bringing cash on the
+  // day" — disables that button so a double-click can't fire two requests.
+  const [claimingId, setClaimingId] = useState<string | null>(null);
+  const [claimErrorId, setClaimErrorId] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
   const { bank } = SITE_COPY;
@@ -48,6 +59,18 @@ export default function GiftRegistry({ gifts }: { gifts: GiftEntry[] }) {
   const viewingGift = viewingId
     ? (items.find((g) => g.id === viewingId) ?? null)
     : null;
+
+  // The only thing ever broadcast for a gift is a successful claim (the
+  // reserve endpoint is the sole emitter), so any other guest's "I will
+  // bring cash on the day" click can just flip this client's copy to
+  // booked too — no need to refetch the whole list.
+  useSocketEvent<{ giftId: string }>("gift:updated", (payload) => {
+    setItems((prev) =>
+      prev.map((g) =>
+        g.id === payload.giftId ? { ...g, status: "booked" } : g,
+      ),
+    );
+  });
 
   // Lock page scroll while the gift popup is open, and let Escape close it.
   useEffect(() => {
@@ -107,6 +130,34 @@ export default function GiftRegistry({ gifts }: { gifts: GiftEntry[] }) {
     if (success) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  }
+
+  // Same atomic "claim it" endpoint the old "I will buy it" button used —
+  // an available→booked conditional update, so two guests clicking at once
+  // can't both win the same gift. Here it's reached via "I will bring cash
+  // on the day" rather than a deposit, but the claim itself is identical.
+  async function handleBringCash(id: string) {
+    setClaimErrorId(null);
+    setClaimingId(id);
+    try {
+      const res = await fetch(`/api/gifts/${id}/reserve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ guestId: guestId ?? null }),
+      });
+      if (res.ok) {
+        setItems((prev) =>
+          prev.map((g) => (g.id === id ? { ...g, status: "booked" } : g)),
+        );
+        setDepositOpenId(null);
+      } else {
+        setClaimErrorId(id);
+      }
+    } catch {
+      setClaimErrorId(id);
+    } finally {
+      setClaimingId(null);
     }
   }
 
@@ -194,6 +245,20 @@ export default function GiftRegistry({ gifts }: { gifts: GiftEntry[] }) {
         {depositOpenId === gift.id ? (
           <>
             {renderAccountDetails()}
+            {claimErrorId === gift.id && (
+              <p className="text-[11px] text-red-700">
+                {t("giftRegistry.claimError")}
+              </p>
+            )}
+            <button
+              onClick={() => handleBringCash(gift.id)}
+              disabled={claimingId === gift.id}
+              className="btn-gold px-4 py-2 text-[11px] uppercase tracking-widest disabled:opacity-60"
+            >
+              {claimingId === gift.id
+                ? t("giftRegistry.claiming")
+                : t("giftRegistry.bringCash")}
+            </button>
             <button
               onClick={() => setDepositOpenId(null)}
               className="text-left text-[11px] uppercase tracking-widest text-charcoal/40 underline underline-offset-4"
@@ -206,7 +271,7 @@ export default function GiftRegistry({ gifts }: { gifts: GiftEntry[] }) {
             onClick={() => setDepositOpenId(gift.id)}
             className="btn-gold px-4 py-2 text-[11px] uppercase tracking-widest"
           >
-            {t("giftRegistry.makeDeposit")}
+            {t("giftRegistry.iWillGiftIt")}
           </button>
         )}
       </div>

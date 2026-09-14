@@ -9,7 +9,7 @@ interface LocaleContextValue {
   locale: Locale;
   setLocale: (locale: Locale) => void;
   toggleLocale: () => void;
-  /** Dot-path lookup into lib/i18n's translations, e.g. t('giftRegistry.makeDeposit'). */
+  /** Dot-path lookup into lib/i18n's translations, e.g. t('giftRegistry.iWillGiftIt'). */
   t: (path: string) => string;
 }
 
