@@ -39,6 +39,13 @@ export const passwordResetSchema = z.object({
   newPassword: z.string().min(8),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email(),
+  defaultPassword: z.string().min(1),
+  newPassword: z.string().min(8),
+  confirmPassword: z.string().min(8),
+});
+
 /** Very small sanitizer for free-text fields rendered on the public Wish Wall / Moments feed. */
 export function sanitizeText(input: string): string {
   return input
