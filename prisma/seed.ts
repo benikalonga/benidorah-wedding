@@ -196,46 +196,16 @@ const HISTORY_SEEDS = [
     ],
   },
   {
-    title: "The Proposal",
-    descriptionShort: "He asked. She said yes.",
+    title: "The Wait For The Big Day",
+    descriptionShort: "Waiting for the big date.",
     descriptionFull:
-      "On a rooftop overlooking the city, with the sun setting behind us, Beni got down on one knee — and Dorah said yes before he could finish the question.",
-    eventDate: new Date("2025-06-15"),
-  },
-  {
-    title: "Meeting the Families",
-    descriptionShort: "Two families, one love.",
-    descriptionFull:
-      "Sunday lunches and long conversations brought our families together long before the wedding planning began.",
-    eventDate: new Date("2025-07-01"),
-  },
-  {
-    title: "The Engagement Shoot",
-    descriptionShort: "Capturing the moment.",
-    descriptionFull:
-      "Dressed in royal blue and classic black-tie, we spent an afternoon on a rooftop terrace capturing this chapter of our story.",
-    eventDate: new Date("2025-09-05"),
-  },
-  {
-    title: "Save the Date",
-    descriptionShort: "Telling the world.",
-    descriptionFull:
-      'We finally shared the news with everyone we love — 23 December 2026 is the day we say "I do."',
-    eventDate: new Date("2025-10-01"),
-  },
-  {
-    title: "Wedding Planning Begins",
-    descriptionShort: "Venues, vendors, vision boards.",
-    descriptionFull:
-      "From venue visits to menu tastings, every detail has been chosen with love for the day ahead.",
-    eventDate: new Date("2026-02-01"),
-  },
-  {
-    title: "The Wedding Day",
-    descriptionShort: "Forever begins.",
-    descriptionFull:
-      "The day we become husband and wife, surrounded by everyone who has walked this journey with us.",
+      "While waiting for the big day, we made the most of every moment together — date nights, spontaneous outings, and quiet days at home, filling the countdown with memories we will always cherish.",
     eventDate: new Date("2026-12-23"),
+    imagePath: "/images/couple/history-wait-for-big-day-1.jpg",
+    imagePaths: Array.from(
+      { length: 17 },
+      (_, i) => `/images/couple/history-wait-for-big-day-${i + 1}.jpg`,
+    ),
   },
 ];
 
