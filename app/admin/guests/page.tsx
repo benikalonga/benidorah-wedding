@@ -220,13 +220,23 @@ function GuestsPageInner() {
     load();
   }
 
-  function handleSaveTheDate(g: GuestRow, locale: SaveTheDateLocale) {
+  async function handleSaveTheDate(g: GuestRow, locale: SaveTheDateLocale) {
     // A plain wa.me "click to chat" link, not the WhatsApp Cloud API — it
     // just opens the admin's own WhatsApp with the message pre-filled, for
-    // them to review and send personally. No backend call, so this is
-    // separate from (and doesn't affect) the formal invite-sent tracking
-    // below, which stays tied to "Resend invite" on the Invited/RSVPs page.
+    // them to review and send personally. We still record the click as
+    // "save the date sent" below — there's no delivery receipt from wa.me,
+    // so this marks that the admin sent it, not that WhatsApp delivered it.
     window.open(buildSaveTheDateWaLink(g, locale), "_blank", "noopener,noreferrer");
+    const res = await fetch(`/api/admin/guests/${g.id}/save-the-date`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sent: true }),
+    });
+    if (!res.ok) {
+      toast.error("Opened WhatsApp, but couldn't record it as sent");
+      return;
+    }
+    load();
   }
 
   function GuestActions({ g }: { g: GuestRow }) {
@@ -393,7 +403,7 @@ function GuestsPageInner() {
                   <Th>Phone</Th>
                   <Th>Side</Th>
                   <Th>Table</Th>
-                  <Th>Invite sent</Th>
+                  <Th>Save the date sent</Th>
                   <Th>Actions</Th>
                 </Tr>
               </Thead>
@@ -463,7 +473,7 @@ function GuestsPageInner() {
                   <Badge tone="neutral">Table {g.table?.tableNumber}</Badge>
                   {g.inviteSentAt && (
                     <Badge tone="green">
-                      Invited {new Date(g.inviteSentAt).toLocaleDateString()}
+                      Save the date sent {new Date(g.inviteSentAt).toLocaleDateString()}
                     </Badge>
                   )}
                 </div>

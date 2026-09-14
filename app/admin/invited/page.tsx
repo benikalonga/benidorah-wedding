@@ -24,6 +24,7 @@ interface GuestRow {
   phoneNumber: string;
   userHashCode: string;
   linkOpenedAt: string | null;
+  inviteSentAt: string | null;
   presentAt: string | null;
   rsvp: {
     attending: string;
@@ -143,13 +144,23 @@ function InvitedPageInner() {
     router.replace(pathname);
   }
 
-  function handleResend(g: GuestRow, locale: SaveTheDateLocale) {
+  async function handleResend(g: GuestRow, locale: SaveTheDateLocale) {
     // Same as the Guests page's "Save the date" button — a plain wa.me
     // "click to chat" link, pre-filled and opened for the admin to review
-    // and send personally. No backend call, so this doesn't touch
-    // inviteSentAt or the "Link opened"/"Submitted" tracking on this page
-    // at all; it's a save-the-date nudge, not the formal invite.
+    // and send personally. We still record the click below as "save the
+    // date sent" — there's no delivery receipt from wa.me, so this marks
+    // that the admin sent it, not that WhatsApp delivered it.
     window.open(buildSaveTheDateWaLink(g, locale), '_blank', 'noopener,noreferrer');
+    const res = await fetch(`/api/admin/guests/${g.id}/save-the-date`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sent: true }),
+    });
+    if (!res.ok) {
+      toast.error("Opened WhatsApp, but couldn't record it as sent");
+      return;
+    }
+    load();
   }
 
   async function setPresent(g: GuestRow, present: boolean) {
@@ -287,6 +298,7 @@ function InvitedPageInner() {
               <Thead>
                 <Tr>
                   <Th className="min-w-[12rem]">Guest</Th>
+                  <Th>Save the date sent</Th>
                   <Th>Link opened</Th>
                   <Th>RSVP status</Th>
                   <Th>Allergy / comment</Th>
@@ -301,6 +313,13 @@ function InvitedPageInner() {
                     <Td className="min-w-[12rem] font-medium">
                       {g.fullName}
                       {g.partnerName ? ` & ${g.partnerName}` : ''}
+                    </Td>
+                    <Td>
+                      {g.inviteSentAt ? (
+                        <Badge tone="green">{new Date(g.inviteSentAt).toLocaleDateString()}</Badge>
+                      ) : (
+                        <span className="text-charcoal/35">—</span>
+                      )}
                     </Td>
                     <Td>{g.linkOpenedAt ? <Badge tone="green">Opened</Badge> : <Badge tone="neutral">Not yet</Badge>}</Td>
                     <Td>
@@ -335,6 +354,9 @@ function InvitedPageInner() {
                   <Badge tone={attendingTone(g.rsvp?.attending)}>{attendingLabel(g.rsvp?.attending)}</Badge>
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1.5">
+                  {g.inviteSentAt && (
+                    <Badge tone="green">Save the date sent {new Date(g.inviteSentAt).toLocaleDateString()}</Badge>
+                  )}
                   {g.linkOpenedAt ? <Badge tone="green">Link opened</Badge> : <Badge tone="neutral">Link not opened</Badge>}
                 </div>
                 {g.rsvp?.allergyComment && (
