@@ -168,10 +168,16 @@ const HISTORY_SEEDS = [
   },
   {
     title: "Made It Official",
-    descriptionShort: "We said yes to 'us'.",
+    descriptionShort: 'She officially said "Yes".',
     descriptionFull:
-      "After months of getting to know each other, we decided to stop wondering and start building something together.",
-    eventDate: new Date("2021-08-20"),
+      "With her family and closest friends secretly gathered around us, I got down on one knee and asked her to be my wife. She said yes in front of everyone who loves us most, and the whole rooftop erupted in cheers, tears, and sparklers.",
+    eventDate: new Date("2025-10-12"),
+    imagePaths: [
+      "/images/couple/history-made-it-official-1.jpg",
+      "/images/couple/history-made-it-official-2.jpg",
+      "/images/couple/history-made-it-official-3.jpg",
+      "/images/couple/history-made-it-official-4.jpg",
+    ],
   },
   {
     title: "Moving In Together",
@@ -344,20 +350,20 @@ async function main() {
       where: { title: h.title },
     });
     if (!existing) {
+      // Most items show a single photo everywhere; a few (e.g. the
+      // proposal) have a whole set shown in the "Read more" popup —
+      // imagePaths, when present, wins over the single imagePath/fallback.
+      const paths = h.imagePaths || [h.imagePath || coupleImages[i % coupleImages.length]];
       await prisma.historyItem.create({
         data: {
           title: h.title,
           descriptionShort: h.descriptionShort,
           descriptionFull: h.descriptionFull,
           eventDate: h.eventDate,
-          thumbnailUrl: h.imagePath || coupleImages[i % coupleImages.length],
+          thumbnailUrl: paths[0],
           sortOrder: i,
           images: {
-            create: [
-              {
-                imageUrl: h.imagePath || coupleImages[i % coupleImages.length],
-              },
-            ],
+            create: paths.map((imageUrl) => ({ imageUrl })),
           },
         },
       });
