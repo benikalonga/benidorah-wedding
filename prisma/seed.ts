@@ -53,8 +53,9 @@ const HISTORY_SEEDS = [
   {
     title: 'The First Hello',
     descriptionShort: 'Where it all began.',
-    descriptionFull: 'A chance introduction through mutual friends turned into hours of conversation neither of us wanted to end.',
-    eventDate: new Date('2021-03-14'),
+    descriptionFull:
+      'We met at church — she was part of the choir, and the moment she sang I could tell there was something different about her. She welcomed me with such warmth, like we had been friends for years, and that first hello ended up being the start of forever.',
+    eventDate: new Date('2023-06-15'),
   },
   {
     title: 'First Date',
