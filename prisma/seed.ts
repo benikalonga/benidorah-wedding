@@ -180,11 +180,20 @@ const HISTORY_SEEDS = [
     ],
   },
   {
-    title: "Moving In Together",
-    descriptionShort: "Our first home.",
+    title: "Traditionally Married",
+    descriptionShort: "I paid the Lobola.",
     descriptionFull:
-      "We found a little apartment that became the backdrop for countless memories, arguments over furniture, and quiet mornings.",
-    eventDate: new Date("2023-01-10"),
+      "Following tradition, I paid Lobola to her family, and in that moment she officially became my wife by custom. Both our families gathered together to celebrate — sharing food, laughter, and blessings for the road ahead.",
+    eventDate: new Date("2025-12-22"),
+    imagePath: "/images/couple/history-traditionally-married-2.jpg",
+    imagePaths: [
+      "/images/couple/history-traditionally-married-1.jpg",
+      "/images/couple/history-traditionally-married-2.jpg",
+      "/images/couple/history-traditionally-married-3.jpg",
+      "/images/couple/history-traditionally-married-4.jpg",
+      "/images/couple/history-traditionally-married-5.jpg",
+      "/images/couple/history-traditionally-married-6.jpg",
+    ],
   },
   {
     title: "The Proposal",
@@ -351,16 +360,22 @@ async function main() {
     });
     if (!existing) {
       // Most items show a single photo everywhere; a few (e.g. the
-      // proposal) have a whole set shown in the "Read more" popup —
-      // imagePaths, when present, wins over the single imagePath/fallback.
+      // proposal, the Lobola) have a whole set shown in the "Read more"
+      // popup — imagePaths, when present, wins over the single
+      // imagePath/fallback for the popup gallery. The card thumbnail is
+      // imagePath if given (the "main picture"), else the first popup
+      // photo, else the round-robin fallback — imagePath and imagePaths
+      // aren't always the same photo (the main picture doesn't have to be
+      // first in the popup order).
       const paths = h.imagePaths || [h.imagePath || coupleImages[i % coupleImages.length]];
+      const thumbnail = h.imagePath || paths[0];
       await prisma.historyItem.create({
         data: {
           title: h.title,
           descriptionShort: h.descriptionShort,
           descriptionFull: h.descriptionFull,
           eventDate: h.eventDate,
-          thumbnailUrl: paths[0],
+          thumbnailUrl: thumbnail,
           sortOrder: i,
           images: {
             create: paths.map((imageUrl) => ({ imageUrl })),
