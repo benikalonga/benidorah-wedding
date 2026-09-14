@@ -303,10 +303,9 @@ export default function GiftRegistry({
 
         <div className="flex flex-col gap-6">
           <p className="text-sm text-charcoal/60">
-            As a couple, our preference is a deposit toward a gift's value —
-            or its cash equivalent brought along on the day — rather than the
-            item itself, though you're still welcome to bring a physical
-            gift. Pick one from the list below.
+            As a couple, we'd prefer a deposit toward a gift's value or its
+            cash equivalent on the day — though a physical gift is still
+            welcome. Pick one from the list below.
           </p>
 
           {status && <p className="text-sm text-royal-blue">{status}</p>}
