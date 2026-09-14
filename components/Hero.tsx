@@ -13,6 +13,7 @@ import HeroLoader from "./HeroLoader";
 import { WEDDING_DATE_ISO, SITE_COPY } from "@/lib/content";
 import { onHeroVideoPauseRequest } from "@/lib/heroPlayback";
 import { useLocale } from "./LocaleProvider";
+import LocaleToggle from "./LocaleToggle";
 
 const MIN_LOADER_MS = 1100;
 const LOADER_TIMEOUT_MS = 6000;
@@ -277,6 +278,7 @@ export default function Hero({
                   />
                 </svg>
               </a>
+              <LocaleToggle variant="dark" />
             </div>
           </motion.div>
 
@@ -340,6 +342,10 @@ export default function Hero({
             style={{ opacity: placeholderOpacity }}
             className="pointer-events-none absolute inset-0 z-10 flex h-full flex-col items-center justify-center gap-6 px-6 text-center"
           >
+            <LocaleToggle
+              variant="dark"
+              className="pointer-events-auto absolute right-5 top-5 sm:right-8 sm:top-8"
+            />
             <p className="eyebrow text-champagne-gold">{t("hero.saveTheDate")}</p>
             <p className="section-title max-w-xl text-2xl italic text-ivory sm:text-3xl md:text-4xl">
               {t("hero.tagline")}
