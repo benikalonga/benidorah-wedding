@@ -85,6 +85,7 @@ export default async function WeddingPage({ guest }: { guest: (Guest & { rsvp: R
       />
       <DressCode />
       <ShareMoment
+        guest={guest ? { userHashCode: guest.userHashCode, fullName: guest.fullName } : null}
         initialMoments={moments.map((m) => ({
           id: m.id,
           uploaderName: m.uploaderName,

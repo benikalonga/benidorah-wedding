@@ -13,9 +13,23 @@ export interface MomentEntry {
   mediaType: 'image' | 'video';
 }
 
-export default function ShareMoment({ initialMoments }: { initialMoments: MomentEntry[] }) {
+interface GuestSummary {
+  userHashCode: string;
+  fullName: string;
+}
+
+export default function ShareMoment({
+  initialMoments,
+  guest,
+}: {
+  initialMoments: MomentEntry[];
+  // Only present when this page was rendered from a guest's own /[hash]
+  // link (see app/[hash]/page.tsx) — that's the only proof of "invited
+  // guest" this app has, so it also doubles as upload permission below.
+  guest: GuestSummary | null;
+}) {
   const [moments, setMoments] = useState(initialMoments);
-  const [uploaderName, setUploaderName] = useState('');
+  const [uploaderName, setUploaderName] = useState(guest?.fullName || '');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
@@ -30,13 +44,14 @@ export default function ShareMoment({ initialMoments }: { initialMoments: Moment
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !guest) return;
     setUploading(true);
     setError(null);
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('uploaderName', uploaderName || 'A guest');
+    formData.append('uploaderName', uploaderName || guest.fullName || 'A guest');
+    formData.append('userHashCode', guest.userHashCode);
 
     try {
       const res = await fetch('/api/moments', { method: 'POST', body: formData });
@@ -72,24 +87,33 @@ export default function ShareMoment({ initialMoments }: { initialMoments: Moment
         transition={{ duration: 0.6 }}
         className="hairline mt-10 flex max-w-md flex-col gap-4 p-6"
       >
-        <input
-          type="text"
-          placeholder="Your name"
-          value={uploaderName}
-          onChange={(e) => setUploaderName(e.target.value)}
-          className="field-underline"
-        />
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*,video/*"
-          capture="environment"
-          onChange={handleFileChange}
-          disabled={uploading}
-          className="text-sm text-charcoal/60 file:mr-3 file:border-0 file:bg-onyx file:px-3 file:py-1.5 file:text-xs file:uppercase file:tracking-widest file:text-ivory"
-        />
-        {uploading && <p className="text-xs text-charcoal/50">Uploading…</p>}
-        {error && <p className="text-xs text-red-700">{error}</p>}
+        {guest ? (
+          <>
+            <input
+              type="text"
+              placeholder="Your name"
+              value={uploaderName}
+              onChange={(e) => setUploaderName(e.target.value)}
+              className="field-underline"
+            />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,video/*"
+              capture="environment"
+              onChange={handleFileChange}
+              disabled={uploading}
+              className="text-sm text-charcoal/60 file:mr-3 file:border-0 file:bg-onyx file:px-3 file:py-1.5 file:text-xs file:uppercase file:tracking-widest file:text-ivory"
+            />
+            {uploading && <p className="text-xs text-charcoal/50">Uploading…</p>}
+            {error && <p className="text-xs text-red-700">{error}</p>}
+          </>
+        ) : (
+          <p className="text-sm text-charcoal/60">
+            Only invited guests can share a moment — open the personal invite link sent to you on
+            WhatsApp to upload your photos and videos here.
+          </p>
+        )}
       </motion.div>
 
       <div className="mt-10 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4">
