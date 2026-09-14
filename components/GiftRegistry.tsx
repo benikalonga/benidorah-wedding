@@ -16,19 +16,12 @@ export interface GiftEntry {
   status: "available" | "booked" | "paid";
 }
 
-export default function GiftRegistry({
-  gifts,
-  guestId,
-}: {
-  gifts: GiftEntry[];
-  guestId: string | null;
-}) {
+export default function GiftRegistry({ gifts }: { gifts: GiftEntry[] }) {
   const [expanded, setExpanded] = useState(false);
-  const [items, setItems] = useState(gifts);
-  const [contributingId, setContributingId] = useState<string | null>(null);
-  const [amount, setAmount] = useState("");
-  const [contributorName, setContributorName] = useState("");
-  const [status, setStatus] = useState<string | null>(null);
+  const [items] = useState(gifts);
+  // Which gift's "Make a deposit" reveal (the bank account details) is
+  // currently open — at most one at a time, same as the old contribute form.
+  const [depositOpenId, setDepositOpenId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [viewingId, setViewingId] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -112,97 +105,103 @@ export default function GiftRegistry({
     }
   }
 
-  async function handleBookIt(id: string) {
-    const res = await fetch(`/api/gifts/${id}/reserve`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ guestId }),
-    });
-    if (res.ok) {
-      setItems((prev) =>
-        prev.map((g) => (g.id === id ? { ...g, status: "booked" } : g)),
-      );
-    } else {
-      const data = await res.json().catch(() => ({}));
-      setStatus(
-        data.error ||
-          "Could not claim this gift — someone may have just booked it.",
-      );
-    }
-  }
-
-  async function handleContribute(id: string) {
-    const res = await fetch(`/api/gifts/${id}/contribute`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        guestId,
-        amountZar: Number(amount),
-        contributorName,
-      }),
-    });
-    if (res.ok) {
-      setStatus("Thank you — your contribution has been recorded.");
-      setContributingId(null);
-      setAmount("");
-      setContributorName("");
-    } else {
-      setStatus(
-        "Something went wrong recording your contribution — please try again.",
-      );
-    }
+  // The bank details block — shown once in the sidebar, and again inline
+  // whenever a "Make a deposit" button is opened (grid card or popup),
+  // so a guest never has to scroll away from a gift to see where to pay.
+  function renderAccountDetails() {
+    return (
+      <dl className="grid grid-cols-2 gap-y-2 bg-cream p-4 text-xs">
+        <dt className="text-charcoal/50">Account Name</dt>
+        <dd className="text-right font-medium text-onyx">
+          {bank.accountName}
+        </dd>
+        <dt className="text-charcoal/50">Account Number</dt>
+        <dd className="text-right font-medium text-onyx">
+          <button
+            onClick={handleCopyAccountNumber}
+            className="group inline-flex items-center gap-1.5 transition-colors hover:text-champagne-gold"
+            aria-label="Copy account number"
+            title="Click to copy account number"
+          >
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-charcoal/25 transition-colors group-hover:border-champagne-gold">
+              {copied ? (
+                <svg
+                  width="11"
+                  height="11"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
+                  <path
+                    d="M20 6 9 17l-5-5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  width="11"
+                  height="11"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <rect x="9" y="9" width="12" height="12" rx="1.5" />
+                  <path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
+                </svg>
+              )}
+            </span>
+            {bank.accountNumber}
+          </button>
+        </dd>
+        <dt className="text-charcoal/50">Account Type</dt>
+        <dd className="text-right font-medium text-onyx">
+          {bank.accountType}
+        </dd>
+        <dt className="text-charcoal/50">Bank</dt>
+        <dd className="text-right font-medium text-onyx">{bank.bankName}</dd>
+        <dt className="text-charcoal/50">Branch Code</dt>
+        <dd className="text-right font-medium text-onyx">
+          {bank.branchCode}
+        </dd>
+      </dl>
+    );
   }
 
   // Shared between the grid card and the popup, so both offer the exact
-  // same buy/contribute actions rather than the popup being a read-only
+  // same "Make a deposit" action rather than the popup being a read-only
   // preview.
   function renderGiftActions(gift: GiftEntry) {
+    if (gift.status !== "available") {
+      return (
+        <div className="mt-auto pt-2">
+          <span className="block border border-charcoal/15 px-4 py-2 text-center text-[11px] uppercase tracking-widest text-charcoal/50">
+            {gift.status === "paid" ? "Received with thanks" : "Already claimed"}
+          </span>
+        </div>
+      );
+    }
+
     return (
       <div className="mt-auto flex flex-col gap-2 pt-2">
-        {gift.status === "available" ? (
+        {depositOpenId === gift.id ? (
+          <>
+            {renderAccountDetails()}
+            <button
+              onClick={() => setDepositOpenId(null)}
+              className="text-left text-[11px] uppercase tracking-widest text-charcoal/40 underline underline-offset-4"
+            >
+              Hide account details
+            </button>
+          </>
+        ) : (
           <button
-            onClick={() => handleBookIt(gift.id)}
+            onClick={() => setDepositOpenId(gift.id)}
             className="btn-gold px-4 py-2 text-[11px] uppercase tracking-widest"
           >
-            I will buy it
-          </button>
-        ) : (
-          <span className="border border-charcoal/15 px-4 py-2 text-center text-[11px] uppercase tracking-widest text-charcoal/50">
-            {gift.status === "paid"
-              ? "Received with thanks"
-              : "Already claimed"}
-          </span>
-        )}
-
-        {contributingId === gift.id ? (
-          <div className="flex flex-col gap-2 bg-cream p-3">
-            <input
-              type="text"
-              placeholder="Your name (optional)"
-              value={contributorName}
-              onChange={(e) => setContributorName(e.target.value)}
-              className="field-underline text-xs"
-            />
-            <input
-              type="number"
-              placeholder="Amount (ZAR)"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="field-underline text-xs"
-            />
-            <button
-              onClick={() => handleContribute(gift.id)}
-              className="btn-primary px-3 py-2 text-[11px] uppercase tracking-widest"
-            >
-              Confirm contribution
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => setContributingId(gift.id)}
-            className="text-left text-[11px] uppercase tracking-widest text-champagne-gold underline underline-offset-4"
-          >
-            Make a deposit toward this
+            Make a deposit
           </button>
         )}
       </div>
@@ -303,14 +302,15 @@ export default function GiftRegistry({
 
         <div className="flex flex-col gap-6">
           <p className="text-sm text-charcoal/60">
-            As a couple, we'd prefer a deposit toward a gift's value or its
-            cash equivalent on the day — though a physical gift is still
-            welcome. Pick one from the list below.
+            As a couple, we'd prefer a deposit toward a gift's value or its cash
+            equivalent on the day. Pick one from the list below.
           </p>
 
-          {status && <p className="text-sm text-royal-blue">{status}</p>}
-
-          <div ref={listRef} className="relative" style={{ scrollMarginTop: 88 }}>
+          <div
+            ref={listRef}
+            className="relative"
+            style={{ scrollMarginTop: 88 }}
+          >
             <motion.div
               animate={{ maxHeight: expanded ? 4000 : 260 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}

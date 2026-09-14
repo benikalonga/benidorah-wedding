@@ -68,7 +68,6 @@ export default async function WeddingPage({ guest }: { guest: (Guest & { rsvp: R
       />
       <AddressSchedule />
       <GiftRegistry
-        guestId={guest?.id ?? null}
         gifts={gifts.map((g) => ({
           id: g.id,
           name: g.name,
