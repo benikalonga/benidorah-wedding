@@ -114,14 +114,10 @@ export default function Hero({
     [0, 0.4, 0.85],
     [0.3, 0.55, 0.4],
   );
-  // Stays fully visible for the entire pinned duration — including while
-  // the placeholder is showing — and only dips right at the very end as
-  // the section releases into History, rather than disappearing early.
-  const scrollHintOpacity = useTransform(
-    scrollYProgress,
-    [0, 0.95, 1],
-    [1, 1, 0],
-  );
+  // Fades out as the placeholder video (and its own "second act" content
+  // block, with its own Scroll button) crossfades in, so the two Scroll
+  // prompts hand off instead of both sitting on screen at once.
+  const scrollHintOpacity = useTransform(scrollYProgress, [0, 0.5, 0.7], [1, 1, 0]);
 
   const handleToggleMute = () => {
     if (mainVideoRef.current) {
@@ -329,6 +325,53 @@ export default function Hero({
             >
               <CountdownTimer targetIso={WEDDING_DATE_ISO} />
             </motion.div>
+          </motion.div>
+
+          {/* Second act: fades in exactly as the placeholder video crossfades
+              in, so the pinned hero doesn't just recede into a bare video —
+              it hands off to a second, quieter beat of copy (same content
+              pattern as the opening one) before releasing into History.
+              pointer-events-none for the same reason as the opening content
+              block above (see its comment) — only the Scroll button inside
+              opts back in with pointer-events-auto. */}
+          <motion.div
+            style={{ opacity: placeholderOpacity }}
+            className="pointer-events-none absolute inset-0 z-10 flex h-full flex-col items-center justify-center gap-6 px-6 text-center"
+          >
+            <p className="eyebrow text-champagne-gold">Save The Date</p>
+            <p className="section-title max-w-xl text-2xl italic text-ivory sm:text-3xl md:text-4xl">
+              Two hearts, one beautiful forever.
+            </p>
+            <div className="flex items-center gap-4 text-ivory/80">
+              <span className="divider-onyx w-10" />
+              <p className="text-xs uppercase tracking-[0.3em]">
+                23 December 2026 · {SITE_COPY.ceremony.time} · {SITE_COPY.venueName}
+              </p>
+              <span className="divider-onyx w-10" />
+            </div>
+            <button
+              type="button"
+              onClick={handleScrollToHistory}
+              className="pointer-events-auto mt-4 flex flex-col items-center gap-2 text-champagne-gold"
+              aria-label="Scroll to our history"
+            >
+              <span className="eyebrow text-[10px] text-ivory/60">Scroll</span>
+              <svg
+                className="animate-chevron"
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <path d="M4 6.5 10 12l6-5.5" />
+                <path d="M4 12.5 10 18l6-5.5" />
+              </svg>
+            </button>
           </motion.div>
 
           <motion.button
