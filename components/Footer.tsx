@@ -1,16 +1,21 @@
-const LINKS = [
-  { href: '#home', label: 'Home' },
-  { href: '#history', label: 'History' },
-  { href: '#gallery', label: 'Gallery' },
-  { href: '#address', label: 'Date & Address' },
-  { href: '#gifts', label: 'Registry' },
-  { href: '#rsvp', label: 'RSVP' },
-  { href: '#theme', label: 'Theme' },
-  { href: '#moments', label: 'Moments' },
-  { href: '#contact', label: 'Contact' },
+'use client';
+
+import { useLocale } from './LocaleProvider';
+
+const LINK_SECTIONS = [
+  { href: '#home', key: 'nav.home' },
+  { href: '#history', key: 'nav.history' },
+  { href: '#gallery', key: 'nav.gallery' },
+  { href: '#address', key: 'nav.dateAddress' },
+  { href: '#gifts', key: 'nav.registry' },
+  { href: '#rsvp', key: 'nav.rsvp' },
+  { href: '#theme', key: 'nav.theme' },
+  { href: '#moments', key: 'nav.moments' },
+  { href: '#contact', key: 'nav.contact' },
 ];
 
 export default function Footer() {
+  const { t } = useLocale();
   return (
     <footer className="bg-onyx text-ivory">
       <div className="checkerboard-strip h-4 w-full" aria-hidden />
@@ -20,17 +25,17 @@ export default function Footer() {
             B<span className="text-champagne-gold">&amp;</span>D
           </p>
           <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2">
-            {LINKS.map((l) => (
+            {LINK_SECTIONS.map((l) => (
               <a key={l.href} href={l.href} className="text-[11px] uppercase tracking-[0.2em] text-ivory/60 hover:text-champagne-gold">
-                {l.label}
+                {t(l.key)}
               </a>
             ))}
           </nav>
           <div className="divider-onyx w-24" />
           <a href="/admin" className="text-[10px] uppercase tracking-[0.2em] text-ivory/30 hover:text-ivory/60">
-            Admin
+            {t('footer.admin')}
           </a>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-ivory/30">23 . 12 . 2026 — Made with love</p>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-ivory/30">{t('footer.madeWithLove')}</p>
         </div>
       </div>
     </footer>

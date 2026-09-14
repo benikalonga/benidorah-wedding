@@ -3,8 +3,11 @@
 import { motion } from 'framer-motion';
 import { SITE_COPY } from '@/lib/content';
 import SectionHeader from './SectionHeader';
+import { useLocale } from './LocaleProvider';
+import { pick } from '@/lib/i18n';
 
 export default function AddressSchedule() {
+  const { locale, t } = useLocale();
   const { venueName, address, mapEmbedUrl, mapsDirectionsUrl, ceremony, party } = SITE_COPY;
 
   return (
@@ -16,7 +19,7 @@ export default function AddressSchedule() {
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
-          <SectionHeader index="03" eyebrow="Save The Date" title="Date & Address" light description={address} />
+          <SectionHeader index="03" eyebrow={t('addressSchedule.eyebrow')} title={t('addressSchedule.title')} light description={address} />
         </motion.div>
 
         <motion.p
@@ -26,7 +29,7 @@ export default function AddressSchedule() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="section-title mt-8 text-2xl text-champagne-gold-light sm:text-3xl"
         >
-          at {venueName}
+          {t('addressSchedule.atVenue').replace('{venue}', venueName)}
         </motion.p>
 
         <div className="mt-8 grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
@@ -38,7 +41,7 @@ export default function AddressSchedule() {
             className="hairline overflow-hidden border-ivory/15 grayscale transition-all duration-700 hover:grayscale-0"
           >
             <iframe
-              title="Venue map"
+              title={t('addressSchedule.venueMapTitle')}
               src={mapEmbedUrl}
               className="h-80 w-full lg:h-full"
               loading="lazy"
@@ -50,7 +53,7 @@ export default function AddressSchedule() {
             <div className="flex flex-col gap-6">
               {[ceremony, party].map((event, i) => (
                 <motion.div
-                  key={event.label}
+                  key={event.label.en}
                   initial={{ opacity: 0, x: 16 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
@@ -58,7 +61,7 @@ export default function AddressSchedule() {
                   className="flex items-center justify-between border-b border-ivory/15 pb-6"
                 >
                   <div>
-                    <p className="eyebrow text-champagne-gold-light">{event.label}</p>
+                    <p className="eyebrow text-champagne-gold-light">{pick(event.label, locale)}</p>
                     <p className="section-title mt-2 text-3xl">{event.time}</p>
                   </div>
                   <span className="eyebrow-num text-4xl text-ivory/15">0{i + 1}</span>
@@ -72,7 +75,7 @@ export default function AddressSchedule() {
               rel="noopener noreferrer"
               className="btn-gold inline-flex items-center justify-center gap-2 px-8 py-4 text-xs uppercase tracking-widest"
             >
-              Get Directions →
+              {t('addressSchedule.getDirections')}
             </a>
           </div>
         </div>

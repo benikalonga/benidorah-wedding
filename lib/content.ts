@@ -21,8 +21,8 @@ export const SITE_COPY = {
   mapsDirectionsUrl:
     "https://www.google.com/maps/dir/?api=1&destination=" +
     encodeURIComponent("236 1st Rd, Walkers Fruit Farms SH, De Deur, 1961"),
-  ceremony: { label: "Matrimonial Ceremony", time: "14:00" },
-  party: { label: "Party", time: "18:00" },
+  ceremony: { label: { en: "Matrimonial Ceremony", fr: "Cérémonie Matrimoniale" }, time: "14:00" },
+  party: { label: { en: "Party", fr: "Réception" }, time: "18:00" },
   bank: {
     accountName: process.env.NEXT_PUBLIC_BANK_ACCOUNT_NAME || "",
     accountNumber: process.env.NEXT_PUBLIC_BANK_ACCOUNT_NUMBER || "",
@@ -42,9 +42,11 @@ export const SITE_COPY = {
   ],
   email: "benidorah@gmail.com",
   dressCode: {
-    title: "Royalties / Royautés",
-    description:
-      "Think regal, not costume. Gentlemen, formal dark attire — think tailored suits in onyx and charcoal. Ladies, gowns in royal hues — sapphire, emerald, amethyst, wine. Gold accents welcome for everyone.",
+    title: { en: "Royalties", fr: "Royautés" },
+    description: {
+      en: "Think regal, not costume. Gentlemen, formal dark attire — think tailored suits in onyx and charcoal. Ladies, gowns in royal hues — sapphire, emerald, amethyst, wine. Gold accents welcome for everyone.",
+      fr: "Pensez royal, pas costume. Messieurs, tenue sombre et formelle — costumes ajustés dans les tons onyx et charbon. Mesdames, des robes aux teintes royales — saphir, émeraude, améthyste, bordeaux. Les touches dorées sont les bienvenues pour tous.",
+    },
   },
 };
 

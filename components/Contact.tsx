@@ -3,8 +3,10 @@
 import { motion } from 'framer-motion';
 import { SITE_COPY } from '@/lib/content';
 import SectionHeader from './SectionHeader';
+import { useLocale } from './LocaleProvider';
 
 export default function Contact() {
+  const { t } = useLocale();
   return (
     <section id="contact" className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <motion.div
@@ -13,7 +15,7 @@ export default function Contact() {
         viewport={{ once: true, margin: '-80px' }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
-        <SectionHeader index="08" eyebrow="Get In Touch" title="Questions?" description="Our organisers are happy to help." />
+        <SectionHeader index="08" eyebrow={t('contact.eyebrow')} title={t('contact.title')} description={t('contact.description')} />
       </motion.div>
 
       <div className="mt-10 grid gap-0 sm:grid-cols-2">

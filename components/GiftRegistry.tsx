@@ -5,11 +5,15 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { SITE_COPY } from "@/lib/content";
 import SectionHeader from "./SectionHeader";
+import { useLocale } from "./LocaleProvider";
+import { pickDb } from "@/lib/i18n";
 
 export interface GiftEntry {
   id: string;
   name: string;
+  nameFr: string | null;
   description: string | null;
+  descriptionFr: string | null;
   imageUrl: string | null;
   priceZar: string;
   priceUsd: string;
@@ -17,6 +21,7 @@ export interface GiftEntry {
 }
 
 export default function GiftRegistry({ gifts }: { gifts: GiftEntry[] }) {
+  const { locale, t } = useLocale();
   const [expanded, setExpanded] = useState(false);
   const [items] = useState(gifts);
   // Which gift's "Make a deposit" reveal (the bank account details) is
@@ -111,17 +116,17 @@ export default function GiftRegistry({ gifts }: { gifts: GiftEntry[] }) {
   function renderAccountDetails() {
     return (
       <dl className="grid grid-cols-2 gap-y-2 bg-cream p-4 text-xs">
-        <dt className="text-charcoal/50">Account Name</dt>
+        <dt className="text-charcoal/50">{t("giftRegistry.accountName")}</dt>
         <dd className="text-right font-medium text-onyx">
           {bank.accountName}
         </dd>
-        <dt className="text-charcoal/50">Account Number</dt>
+        <dt className="text-charcoal/50">{t("giftRegistry.accountNumber")}</dt>
         <dd className="text-right font-medium text-onyx">
           <button
             onClick={handleCopyAccountNumber}
             className="group inline-flex items-center gap-1.5 transition-colors hover:text-champagne-gold"
-            aria-label="Copy account number"
-            title="Click to copy account number"
+            aria-label={t("giftRegistry.copyAria")}
+            title={t("giftRegistry.copyTitle")}
           >
             <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-charcoal/25 transition-colors group-hover:border-champagne-gold">
               {copied ? (
@@ -156,13 +161,13 @@ export default function GiftRegistry({ gifts }: { gifts: GiftEntry[] }) {
             {bank.accountNumber}
           </button>
         </dd>
-        <dt className="text-charcoal/50">Account Type</dt>
+        <dt className="text-charcoal/50">{t("giftRegistry.accountType")}</dt>
         <dd className="text-right font-medium text-onyx">
           {bank.accountType}
         </dd>
-        <dt className="text-charcoal/50">Bank</dt>
+        <dt className="text-charcoal/50">{t("giftRegistry.bank")}</dt>
         <dd className="text-right font-medium text-onyx">{bank.bankName}</dd>
-        <dt className="text-charcoal/50">Branch Code</dt>
+        <dt className="text-charcoal/50">{t("giftRegistry.branchCode")}</dt>
         <dd className="text-right font-medium text-onyx">
           {bank.branchCode}
         </dd>
@@ -178,7 +183,7 @@ export default function GiftRegistry({ gifts }: { gifts: GiftEntry[] }) {
       return (
         <div className="mt-auto pt-2">
           <span className="block border border-charcoal/15 px-4 py-2 text-center text-[11px] uppercase tracking-widest text-charcoal/50">
-            {gift.status === "paid" ? "Received with thanks" : "Already claimed"}
+            {gift.status === "paid" ? t("giftRegistry.receivedThanks") : t("giftRegistry.alreadyClaimed")}
           </span>
         </div>
       );
@@ -193,7 +198,7 @@ export default function GiftRegistry({ gifts }: { gifts: GiftEntry[] }) {
               onClick={() => setDepositOpenId(null)}
               className="text-left text-[11px] uppercase tracking-widest text-charcoal/40 underline underline-offset-4"
             >
-              Hide account details
+              {t("giftRegistry.hideDetails")}
             </button>
           </>
         ) : (
@@ -201,7 +206,7 @@ export default function GiftRegistry({ gifts }: { gifts: GiftEntry[] }) {
             onClick={() => setDepositOpenId(gift.id)}
             className="btn-gold px-4 py-2 text-[11px] uppercase tracking-widest"
           >
-            Make a deposit
+            {t("giftRegistry.makeDeposit")}
           </button>
         )}
       </div>
@@ -219,7 +224,7 @@ export default function GiftRegistry({ gifts }: { gifts: GiftEntry[] }) {
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
-        <SectionHeader index="04" eyebrow="With Love" title="Gift Registry" />
+        <SectionHeader index="04" eyebrow={t("giftRegistry.eyebrow")} title={t("giftRegistry.title")} />
       </motion.div>
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
@@ -232,25 +237,24 @@ export default function GiftRegistry({ gifts }: { gifts: GiftEntry[] }) {
         >
           <div className="bg-onyx p-8 text-ivory sm:p-10">
             <p className="text-lg leading-relaxed text-ivory/85">
-              Your presence will be the best gift of all. If you'd love to spoil
-              us a little too, you are welcome to do so.
+              {t("giftRegistry.intro")}
             </p>
           </div>
 
           <div className="h-px bg-champagne-gold/50" aria-hidden />
 
           <dl className="grid grid-cols-2 gap-y-3 bg-ivory p-8 text-sm sm:p-10">
-            <dt className="text-charcoal/50">Account Name</dt>
+            <dt className="text-charcoal/50">{t("giftRegistry.accountName")}</dt>
             <dd className="text-right font-medium text-onyx">
               {bank.accountName}
             </dd>
-            <dt className="text-charcoal/50">Account Number</dt>
+            <dt className="text-charcoal/50">{t("giftRegistry.accountNumber")}</dt>
             <dd className="text-right font-medium text-onyx">
               <button
                 onClick={handleCopyAccountNumber}
                 className="group inline-flex items-center gap-2 transition-colors hover:text-champagne-gold"
-                aria-label="Copy account number"
-                title="Click to copy account number"
+                aria-label={t("giftRegistry.copyAria")}
+                title={t("giftRegistry.copyTitle")}
               >
                 <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-charcoal/25 transition-colors group-hover:border-champagne-gold">
                   {copied ? (
@@ -285,15 +289,15 @@ export default function GiftRegistry({ gifts }: { gifts: GiftEntry[] }) {
                 {bank.accountNumber}
               </button>
             </dd>
-            <dt className="text-charcoal/50">Account Type</dt>
+            <dt className="text-charcoal/50">{t("giftRegistry.accountType")}</dt>
             <dd className="text-right font-medium text-onyx">
               {bank.accountType}
             </dd>
-            <dt className="text-charcoal/50">Bank</dt>
+            <dt className="text-charcoal/50">{t("giftRegistry.bank")}</dt>
             <dd className="text-right font-medium text-onyx">
               {bank.bankName}
             </dd>
-            <dt className="text-charcoal/50">Branch Code</dt>
+            <dt className="text-charcoal/50">{t("giftRegistry.branchCode")}</dt>
             <dd className="text-right font-medium text-onyx">
               {bank.branchCode}
             </dd>
@@ -302,8 +306,7 @@ export default function GiftRegistry({ gifts }: { gifts: GiftEntry[] }) {
 
         <div className="flex flex-col gap-6">
           <p className="text-sm text-charcoal/60">
-            As a couple, we'd prefer a deposit toward a gift's value or its cash
-            equivalent on the day. Pick one from the list below.
+            {t("giftRegistry.preference")}
           </p>
 
           <div
@@ -316,54 +319,58 @@ export default function GiftRegistry({ gifts }: { gifts: GiftEntry[] }) {
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
               className="grid gap-5 overflow-hidden sm:grid-cols-2"
             >
-              {items.map((gift) => (
-                <div
-                  key={gift.id}
-                  className="hairline flex flex-col overflow-hidden"
-                >
-                  <button
-                    type="button"
-                    onClick={() => setViewingId(gift.id)}
-                    className="block text-left"
-                    aria-label={`View ${gift.name}`}
+              {items.map((gift) => {
+                const name = pickDb(gift.name, gift.nameFr, locale);
+                const description = pickDb(gift.description || "", gift.descriptionFr, locale) || null;
+                return (
+                  <div
+                    key={gift.id}
+                    className="hairline flex flex-col overflow-hidden"
                   >
-                    <div className="relative h-36 w-full bg-cream">
-                      {gift.imageUrl && (
-                        <Image
-                          src={gift.imageUrl}
-                          alt={gift.name}
-                          fill
-                          className="object-cover"
-                        />
-                      )}
-                    </div>
-                  </button>
-                  <div className="flex flex-1 flex-col gap-2 p-4">
                     <button
                       type="button"
                       onClick={() => setViewingId(gift.id)}
-                      className="text-left"
+                      className="block text-left"
+                      aria-label={t("giftRegistry.viewAria").replace("{name}", name)}
                     >
-                      <h3 className="section-title text-base text-onyx">
-                        {gift.name}
-                      </h3>
-                      {gift.description && (
-                        <p className="text-xs text-charcoal/60">
-                          {gift.description}
-                        </p>
-                      )}
-                      <p className="section-title text-lg text-royal-blue">
-                        R{Number(gift.priceZar).toLocaleString("en-ZA")}{" "}
-                        <span className="text-xs font-normal text-charcoal/40">
-                          · ${Number(gift.priceUsd).toLocaleString("en-US")}
-                        </span>
-                      </p>
+                      <div className="relative h-36 w-full bg-cream">
+                        {gift.imageUrl && (
+                          <Image
+                            src={gift.imageUrl}
+                            alt={name}
+                            fill
+                            className="object-cover"
+                          />
+                        )}
+                      </div>
                     </button>
+                    <div className="flex flex-1 flex-col gap-2 p-4">
+                      <button
+                        type="button"
+                        onClick={() => setViewingId(gift.id)}
+                        className="text-left"
+                      >
+                        <h3 className="section-title text-base text-onyx">
+                          {name}
+                        </h3>
+                        {description && (
+                          <p className="text-xs text-charcoal/60">
+                            {description}
+                          </p>
+                        )}
+                        <p className="section-title text-lg text-royal-blue">
+                          R{Number(gift.priceZar).toLocaleString("en-ZA")}{" "}
+                          <span className="text-xs font-normal text-charcoal/40">
+                            · ${Number(gift.priceUsd).toLocaleString("en-US")}
+                          </span>
+                        </p>
+                      </button>
 
-                    {renderGiftActions(gift)}
+                      {renderGiftActions(gift)}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </motion.div>
 
             <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-32 items-end justify-center bg-gradient-to-t from-onyx/70 via-onyx/50 to-transparent pb-6">
@@ -372,80 +379,84 @@ export default function GiftRegistry({ gifts }: { gifts: GiftEntry[] }) {
                 onClick={handleToggleExpanded}
                 className="btn-gold pointer-events-auto px-8 py-3 text-xs uppercase tracking-widest"
               >
-                {expanded ? "Show less" : "Show all gifts →"}
+                {expanded ? t("giftRegistry.showLess") : t("giftRegistry.showAllGifts")}
               </button>
             </div>
           </div>
         </div>
 
         <AnimatePresence>
-          {viewingGift && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-onyx/70 p-4 sm:p-8"
-              onClick={() => setViewingId(null)}
-            >
+          {viewingGift && (() => {
+            const viewingName = pickDb(viewingGift.name, viewingGift.nameFr, locale);
+            const viewingDescription = pickDb(viewingGift.description || "", viewingGift.descriptionFr, locale) || null;
+            return (
               <motion.div
-                initial={{ opacity: 0, y: 16, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 16, scale: 0.98 }}
-                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                className="hairline relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-y-auto bg-ivory"
-                onClick={(e) => e.stopPropagation()}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                className="fixed inset-0 z-50 flex items-center justify-center bg-onyx/70 p-4 sm:p-8"
+                onClick={() => setViewingId(null)}
               >
-                <button
-                  type="button"
-                  onClick={() => setViewingId(null)}
-                  aria-label="Close"
-                  className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-onyx/80 text-ivory transition-colors hover:bg-onyx"
+                <motion.div
+                  initial={{ opacity: 0, y: 16, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 16, scale: 0.98 }}
+                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  className="hairline relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-y-auto bg-ivory"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
+                  <button
+                    type="button"
+                    onClick={() => setViewingId(null)}
+                    aria-label={t("giftRegistry.closeAria")}
+                    className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-onyx/80 text-ivory transition-colors hover:bg-onyx"
                   >
-                    <path d="M18 6 6 18M6 6l12 12" strokeLinecap="round" />
-                  </svg>
-                </button>
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M18 6 6 18M6 6l12 12" strokeLinecap="round" />
+                    </svg>
+                  </button>
 
-                {viewingGift.imageUrl && (
-                  <div className="relative h-64 w-full shrink-0 bg-cream sm:h-80">
-                    <Image
-                      src={viewingGift.imageUrl}
-                      alt={viewingGift.name}
-                      fill
-                      className="object-contain"
-                    />
-                  </div>
-                )}
-
-                <div className="flex flex-col gap-2 p-6 sm:p-8">
-                  <h3 className="section-title text-2xl text-onyx">
-                    {viewingGift.name}
-                  </h3>
-                  {viewingGift.description && (
-                    <p className="text-sm text-charcoal/60">
-                      {viewingGift.description}
-                    </p>
+                  {viewingGift.imageUrl && (
+                    <div className="relative h-64 w-full shrink-0 bg-cream sm:h-80">
+                      <Image
+                        src={viewingGift.imageUrl}
+                        alt={viewingName}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
                   )}
-                  <p className="section-title text-2xl text-royal-blue">
-                    R{Number(viewingGift.priceZar).toLocaleString("en-ZA")}{" "}
-                    <span className="text-sm font-normal text-charcoal/40">
-                      · ${Number(viewingGift.priceUsd).toLocaleString("en-US")}
-                    </span>
-                  </p>
 
-                  {renderGiftActions(viewingGift)}
-                </div>
+                  <div className="flex flex-col gap-2 p-6 sm:p-8">
+                    <h3 className="section-title text-2xl text-onyx">
+                      {viewingName}
+                    </h3>
+                    {viewingDescription && (
+                      <p className="text-sm text-charcoal/60">
+                        {viewingDescription}
+                      </p>
+                    )}
+                    <p className="section-title text-2xl text-royal-blue">
+                      R{Number(viewingGift.priceZar).toLocaleString("en-ZA")}{" "}
+                      <span className="text-sm font-normal text-charcoal/40">
+                        · ${Number(viewingGift.priceUsd).toLocaleString("en-US")}
+                      </span>
+                    </p>
+
+                    {renderGiftActions(viewingGift)}
+                  </div>
+                </motion.div>
               </motion.div>
-            </motion.div>
-          )}
+            );
+          })()}
         </AnimatePresence>
       </div>
     </section>

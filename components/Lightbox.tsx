@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
 import { requestHeroVideoPause } from '@/lib/heroPlayback';
+import { useLocale } from './LocaleProvider';
 
 export interface LightboxItem {
   url: string;
@@ -22,6 +23,7 @@ export default function Lightbox({
   onClose: () => void;
   onNavigate: (nextIndex: number) => void;
 }) {
+  const { t } = useLocale();
   const item = items[index];
 
   useEffect(() => {
@@ -65,14 +67,14 @@ export default function Lightbox({
           <button
             onClick={onClose}
             className="absolute -top-10 right-0 text-xs uppercase tracking-widest text-ivory/70 hover:text-ivory"
-            aria-label="Close"
+            aria-label={t('lightbox.closeAria')}
           >
-            Close ✕
+            {t('lightbox.close')}
           </button>
 
           {item.type === 'image' ? (
             <div className="relative aspect-[4/5] w-full sm:aspect-video">
-              <Image src={item.url} alt={item.caption || 'Gallery photo'} fill className="object-contain" />
+              <Image src={item.url} alt={item.caption || t('lightbox.captionFallback')} fill className="object-contain" />
             </div>
           ) : (
             <video
@@ -91,14 +93,14 @@ export default function Lightbox({
           {item.caption && <p className="mt-3 text-center text-sm text-ivory/70">{item.caption}</p>}
 
           <div className="mt-4 flex items-center justify-between text-ivory/60">
-            <button onClick={() => onNavigate((index - 1 + items.length) % items.length)} className="text-xs uppercase tracking-widest hover:text-champagne-gold" aria-label="Previous">
-              ← Prev
+            <button onClick={() => onNavigate((index - 1 + items.length) % items.length)} className="text-xs uppercase tracking-widest hover:text-champagne-gold" aria-label={t('lightbox.prevAria')}>
+              {t('lightbox.prev')}
             </button>
             <span className="eyebrow text-[10px] text-ivory/40">
               {String(index + 1).padStart(2, '0')} / {String(items.length).padStart(2, '0')}
             </span>
-            <button onClick={() => onNavigate((index + 1) % items.length)} className="text-xs uppercase tracking-widest hover:text-champagne-gold" aria-label="Next">
-              Next →
+            <button onClick={() => onNavigate((index + 1) % items.length)} className="text-xs uppercase tracking-widest hover:text-champagne-gold" aria-label={t('lightbox.nextAria')}>
+              {t('lightbox.next')}
             </button>
           </div>
         </motion.div>

@@ -1,23 +1,29 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useLocale } from './LocaleProvider';
+import LocaleToggle from './LocaleToggle';
 
-const SECTIONS = [
-  { id: 'home', label: 'Home' },
-  { id: 'gallery', label: 'Gallery' },
-  { id: 'history', label: 'History' },
-  { id: 'address', label: 'Date & Address' },
-  { id: 'gifts', label: 'Registry' },
-  { id: 'rsvp', label: 'RSVP' },
-  { id: 'theme', label: 'Theme' },
-  { id: 'moments', label: 'Moments' },
-  { id: 'contact', label: 'Contact' },
-];
+const SECTION_IDS = ['home', 'gallery', 'history', 'address', 'gifts', 'rsvp', 'theme', 'moments', 'contact'] as const;
+const SECTION_LABEL_KEYS: Record<(typeof SECTION_IDS)[number], string> = {
+  home: 'nav.home',
+  gallery: 'nav.gallery',
+  history: 'nav.history',
+  address: 'nav.dateAddress',
+  gifts: 'nav.registry',
+  rsvp: 'nav.rsvp',
+  theme: 'nav.theme',
+  moments: 'nav.moments',
+  contact: 'nav.contact',
+};
 
 export default function Nav() {
+  const { t } = useLocale();
   const [visible, setVisible] = useState(false);
   const [active, setActive] = useState('home');
   const [open, setOpen] = useState(false);
+
+  const sections = SECTION_IDS.map((id) => ({ id, label: t(SECTION_LABEL_KEYS[id]) }));
 
   useEffect(() => {
     const hero = document.getElementById('home');
@@ -35,8 +41,8 @@ export default function Nav() {
       },
       { rootMargin: '-40% 0px -50% 0px', threshold: 0 }
     );
-    SECTIONS.forEach((s) => {
-      const el = document.getElementById(s.id);
+    SECTION_IDS.forEach((id) => {
+      const el = document.getElementById(id);
       if (el) sectionObserver.observe(el);
     });
 
@@ -48,7 +54,7 @@ export default function Nav() {
 
   return (
     <nav
-      aria-label="Section navigation"
+      aria-label={t('nav.sectionNavAria')}
       className={`fixed inset-x-0 top-0 z-40 border-b transition-all duration-500 ${
         visible ? 'translate-y-0 border-charcoal/10 bg-ivory/90 backdrop-blur-md' : '-translate-y-full border-transparent'
       }`}
@@ -59,7 +65,7 @@ export default function Nav() {
         </a>
 
         <div className="hidden items-center gap-7 lg:flex">
-          {SECTIONS.slice(1).map((s) => (
+          {sections.slice(1).map((s) => (
             <a
               key={s.id}
               href={`#${s.id}`}
@@ -75,23 +81,27 @@ export default function Nav() {
               />
             </a>
           ))}
+          <LocaleToggle />
         </div>
 
-        <button
-          onClick={() => setOpen((v) => !v)}
-          className="hairline flex h-9 w-9 items-center justify-center rounded-full lg:hidden"
-          aria-label="Toggle menu"
-        >
-          <div className="flex flex-col gap-1">
-            <span className="block h-px w-4 bg-onyx" />
-            <span className="block h-px w-4 bg-onyx" />
-          </div>
-        </button>
+        <div className="flex items-center gap-2 lg:hidden">
+          <LocaleToggle />
+          <button
+            onClick={() => setOpen((v) => !v)}
+            className="hairline flex h-9 w-9 items-center justify-center rounded-full"
+            aria-label={t('nav.toggleMenuAria')}
+          >
+            <div className="flex flex-col gap-1">
+              <span className="block h-px w-4 bg-onyx" />
+              <span className="block h-px w-4 bg-onyx" />
+            </div>
+          </button>
+        </div>
       </div>
 
       {open && (
         <div className="flex flex-col gap-1 border-t border-charcoal/10 bg-ivory px-5 pb-5 pt-3 lg:hidden">
-          {SECTIONS.slice(1).map((s) => (
+          {sections.slice(1).map((s) => (
             <a
               key={s.id}
               href={`#${s.id}`}

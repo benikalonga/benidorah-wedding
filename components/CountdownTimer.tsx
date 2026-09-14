@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useLocale } from './LocaleProvider';
 
 function getRemaining(targetIso: string) {
   const diff = Math.max(0, new Date(targetIso).getTime() - Date.now());
@@ -18,6 +19,7 @@ export default function CountdownTimer({ targetIso }: { targetIso: string }) {
   // shared render path is what causes a hydration mismatch (server time vs.
   // client time differ by however long the response took to arrive). The
   // real value is only computed once mounted, i.e. strictly client-side.
+  const { t } = useLocale();
   const [remaining, setRemaining] = useState<ReturnType<typeof getRemaining> | null>(null);
 
   useEffect(() => {
@@ -27,10 +29,10 @@ export default function CountdownTimer({ targetIso }: { targetIso: string }) {
   }, [targetIso]);
 
   const units: [string, number | null][] = [
-    ['Days', remaining?.days ?? null],
-    ['Hours', remaining?.hours ?? null],
-    ['Min', remaining?.minutes ?? null],
-    ['Sec', remaining?.seconds ?? null],
+    [t('countdown.days'), remaining?.days ?? null],
+    [t('countdown.hours'), remaining?.hours ?? null],
+    [t('countdown.min'), remaining?.minutes ?? null],
+    [t('countdown.sec'), remaining?.seconds ?? null],
   ];
 
   return (

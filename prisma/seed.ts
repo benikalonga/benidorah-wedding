@@ -37,112 +37,144 @@ const ADMIN_SEEDS = [
 const GIFT_SEEDS = [
   {
     name: "Microwave",
+    nameFr: "Four à micro-ondes",
     description: "30L convection microwave oven.",
+    descriptionFr: "Four à micro-ondes à convection de 30L.",
     priceZar: 2499,
     priceUsd: 139,
     imageUrl: "/gift-registry/microwave.jpg",
   },
   {
     name: "Rice Cooker",
+    nameFr: "Cuiseur à riz",
     description: "Automatic rice cooker with keep-warm function.",
+    descriptionFr: "Cuiseur à riz automatique avec fonction maintien au chaud.",
     priceZar: 1299,
     priceUsd: 72,
     imageUrl: "/gift-registry/rice-cooker.jpg",
   },
   {
     name: "Slow Cooker",
+    nameFr: "Mijoteuse",
     description: "Ceramic-pot slow cooker for stews and casseroles.",
+    descriptionFr: "Mijoteuse en céramique pour ragoûts et plats mijotés.",
     priceZar: 1199,
     priceUsd: 67,
     imageUrl: "/gift-registry/slow-cooker.jpg",
   },
   {
     name: "Kettle",
+    nameFr: "Bouilloire",
     description: "Cordless electric kettle, rapid boil.",
+    descriptionFr: "Bouilloire électrique sans fil, ébullition rapide.",
     priceZar: 1099,
     priceUsd: 61,
     imageUrl: "/gift-registry/kettle.jpg",
   },
   {
     name: "Toaster",
+    nameFr: "Grille-pain",
     description: "2-slice electric toaster with browning control.",
+    descriptionFr: "Grille-pain électrique 2 tranches avec réglage du brunissage.",
     priceZar: 1199,
     priceUsd: 67,
     imageUrl: "/gift-registry/toaster.jpg",
   },
   {
     name: "Griller",
+    nameFr: "Grill électrique",
     description: "Electric contact griller for quick, easy meals.",
+    descriptionFr: "Grill électrique à contact pour des repas rapides et faciles.",
     priceZar: 1499,
     priceUsd: 83,
     imageUrl: "/gift-registry/griller.jpg",
   },
   {
     name: "Air Fryer",
+    nameFr: "Friteuse à air",
     description: "Large-capacity air fryer for healthier everyday cooking.",
+    descriptionFr: "Friteuse à air grande capacité pour une cuisine quotidienne plus saine.",
     priceZar: 2799,
     priceUsd: 155,
     imageUrl: "/gift-registry/air-fryer.jpg",
   },
   {
     name: "Deep Fryer",
+    nameFr: "Friteuse",
     description: "Electric deep fryer with adjustable temperature control.",
+    descriptionFr: "Friteuse électrique avec réglage de température ajustable.",
     priceZar: 1899,
     priceUsd: 105,
     imageUrl: "/gift-registry/deep-fryer.jpg",
   },
   {
     name: "Blender",
+    nameFr: "Mixeur",
     description: "High-powered blender for smoothies and soups.",
+    descriptionFr: "Mixeur puissant pour smoothies et soupes.",
     priceZar: 1699,
     priceUsd: 94,
     imageUrl: "/gift-registry/blender.jpg",
   },
   {
     name: "Steamer",
+    nameFr: "Cuiseur vapeur",
     description: "Multi-tier bamboo steamer set for stovetop cooking.",
+    descriptionFr: "Ensemble de cuiseur vapeur en bambou à plusieurs niveaux pour cuisson sur cuisinière.",
     priceZar: 1399,
     priceUsd: 78,
     imageUrl: "/gift-registry/steamer.jpg",
   },
   {
     name: "Waffle Maker",
+    nameFr: "Gaufrier",
     description: "Non-stick waffle maker for weekend breakfasts.",
+    descriptionFr: "Gaufrier antiadhésif pour les petits-déjeuners du week-end.",
     priceZar: 1299,
     priceUsd: 72,
     imageUrl: "/gift-registry/waffle-maker.jpg",
   },
   {
     name: "Vacuum Cleaner",
+    nameFr: "Aspirateur",
     description: "Cordless stick vacuum with HEPA filter.",
+    descriptionFr: "Aspirateur balai sans fil avec filtre HEPA.",
     priceZar: 3999,
     priceUsd: 222,
     imageUrl: "/gift-registry/vacuum-cleaner.jpg",
   },
   {
     name: "Electric Pan",
+    nameFr: "Poêle électrique",
     description: "Electric frying pan with even, adjustable heat.",
+    descriptionFr: "Poêle électrique à chaleur uniforme et réglable.",
     priceZar: 1599,
     priceUsd: 89,
     imageUrl: "/gift-registry/electric-pan.jpg",
   },
   {
     name: "Coffee Machine",
+    nameFr: "Machine à café",
     description: "Espresso machine with built-in milk frother.",
+    descriptionFr: "Machine à espresso avec mousseur à lait intégré.",
     priceZar: 3499,
     priceUsd: 194,
     imageUrl: "/gift-registry/coffee-machine.jpg",
   },
   {
     name: "Multi Food Processor",
+    nameFr: "Robot multifonction",
     description: "All-in-one food processor — chop, blend, mix, and more.",
+    descriptionFr: "Robot culinaire tout-en-un — hache, mixe, mélange, et plus encore.",
     priceZar: 2999,
     priceUsd: 166,
     imageUrl: "/gift-registry/food-processor.jpg",
   },
   {
     name: "Sandwich Maker",
+    nameFr: "Appareil à croque-monsieur",
     description: "Toastie/sandwich press for a quick hot lunch.",
+    descriptionFr: "Appareil à croque-monsieur pour un déjeuner chaud et rapide.",
     priceZar: 1099,
     priceUsd: 61,
     imageUrl: "/gift-registry/sandwich-maker.jpg",
@@ -152,25 +184,37 @@ const GIFT_SEEDS = [
 const HISTORY_SEEDS = [
   {
     title: "The First Hello",
+    titleFr: "Le Premier Bonjour",
     descriptionShort: "Where it all began.",
+    descriptionShortFr: "Là où tout a commencé.",
     descriptionFull:
       "We met at church, she was part of the choir, and a very welcoming person. That first hello ended up being the start of forever.",
+    descriptionFullFr:
+      "Nous nous sommes rencontrés à l'église, elle faisait partie de la chorale et était une personne très accueillante. Ce premier bonjour a fini par être le début de toute une vie.",
     eventDate: new Date("2023-06-15"),
     imagePath: "/images/couple/history-first-hello.jpg",
   },
   {
     title: "First Date",
+    titleFr: "Premier Rendez-vous",
     descriptionShort: "A birthday date turned into a yes.",
+    descriptionShortFr: "Un rendez-vous d'anniversaire qui s'est transformé en oui.",
     descriptionFull:
       "I took her out to celebrate her birthday, and by the end of the night I asked her to be my girl. She said yes.",
+    descriptionFullFr:
+      "Je l'ai emmenée fêter son anniversaire, et à la fin de la soirée, je lui ai demandé d'être ma copine. Elle a dit oui.",
     eventDate: new Date("2024-06-01"),
     imagePath: "/images/couple/history-first-date.jpg",
   },
   {
     title: "Made It Official",
+    titleFr: "C'est Devenu Officiel",
     descriptionShort: 'She officially said "Yes".',
+    descriptionShortFr: "Elle a officiellement dit « Oui ».",
     descriptionFull:
       "With her family and closest friends secretly gathered around us, I asked her to be my wife. She said yes in front of everyone who loves us most, and the whole rooftop erupted in cheers, tears, and sparklers.",
+    descriptionFullFr:
+      "Avec sa famille et ses amis les plus proches secrètement réunis autour de nous, je lui ai demandé de devenir ma femme. Elle a dit oui devant tous ceux qui nous aiment le plus, et tout le toit a explosé de joie, de larmes et d'étincelles.",
     eventDate: new Date("2025-10-12"),
     imagePaths: [
       "/images/couple/history-made-it-official-1.jpg",
@@ -181,9 +225,13 @@ const HISTORY_SEEDS = [
   },
   {
     title: "Traditionally Married",
+    titleFr: "Mariage Traditionnel",
     descriptionShort: "I paid the Lobola.",
+    descriptionShortFr: "J'ai payé la Lobola.",
     descriptionFull:
       "Following tradition, I paid Lobola to her family, and in that moment she officially became my wife by custom. Both our families gathered together to celebrate — sharing food, laughter, and blessings for the road ahead.",
+    descriptionFullFr:
+      "Selon la tradition, j'ai payé la Lobola à sa famille, et à ce moment-là, elle est officiellement devenue ma femme selon la coutume. Nos deux familles se sont réunies pour célébrer — partageant repas, rires et bénédictions pour la suite.",
     eventDate: new Date("2025-12-22"),
     imagePath: "/images/couple/history-traditionally-married-2.jpg",
     imagePaths: [
@@ -197,9 +245,13 @@ const HISTORY_SEEDS = [
   },
   {
     title: "The Wait For The Big Day",
+    titleFr: "En Attendant Le Grand Jour",
     descriptionShort: "Waiting for the big date.",
+    descriptionShortFr: "En attente de la grande date.",
     descriptionFull:
       "While waiting for the big day, we made the most of every moment together — date nights, spontaneous outings, and quiet days at home, filling the countdown with memories we will always cherish.",
+    descriptionFullFr:
+      "En attendant le grand jour, nous avons profité de chaque instant ensemble — soirées en amoureux, sorties spontanées et journées tranquilles à la maison, remplissant le compte à rebours de souvenirs que nous chérirons toujours.",
     eventDate: new Date("2026-12-23"),
     imagePath: "/images/couple/history-wait-for-big-day-1.jpg",
     imagePaths: Array.from(
@@ -290,7 +342,9 @@ async function main() {
       await prisma.giftItem.create({
         data: {
           name: g.name,
+          nameFr: g.nameFr,
           description: g.description,
+          descriptionFr: g.descriptionFr,
           imageUrl: g.imageUrl,
           priceZar: g.priceZar,
           priceUsd: g.priceUsd,
@@ -307,7 +361,9 @@ async function main() {
       await prisma.giftItem.update({
         where: { id: existing.id },
         data: {
+          nameFr: g.nameFr,
           description: g.description,
+          descriptionFr: g.descriptionFr,
           imageUrl: g.imageUrl,
           priceZar: g.priceZar,
           priceUsd: g.priceUsd,
@@ -342,8 +398,11 @@ async function main() {
       await prisma.historyItem.create({
         data: {
           title: h.title,
+          titleFr: h.titleFr,
           descriptionShort: h.descriptionShort,
+          descriptionShortFr: h.descriptionShortFr,
           descriptionFull: h.descriptionFull,
+          descriptionFullFr: h.descriptionFullFr,
           eventDate: h.eventDate,
           thumbnailUrl: thumbnail,
           sortOrder: i,

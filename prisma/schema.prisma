@@ -116,7 +116,9 @@ model Moment {
 model GiftItem {
   id                String     @id @default(uuid())
   name              String
+  nameFr            String?    @map("name_fr")
   description       String?
+  descriptionFr     String?    @map("description_fr")
   imageUrl          String?    @map("image_url")
   priceZar          Decimal    @map("price_zar") @db.Decimal(10, 2)
   priceUsd          Decimal    @map("price_usd") @db.Decimal(10, 2)
@@ -159,14 +161,17 @@ model AdminUser {
 }
 
 model HistoryItem {
-  id                String   @id @default(uuid())
-  title             String
-  descriptionShort  String   @map("description_short")
-  descriptionFull   String   @map("description_full")
-  eventDate         DateTime @map("event_date") @db.Date
-  thumbnailUrl      String   @map("thumbnail_url")
-  sortOrder         Int      @map("sort_order")
-  images            HistoryItemImage[]
+  id                  String   @id @default(uuid())
+  title               String
+  titleFr             String?  @map("title_fr")
+  descriptionShort    String   @map("description_short")
+  descriptionShortFr  String?  @map("description_short_fr")
+  descriptionFull     String   @map("description_full")
+  descriptionFullFr   String?  @map("description_full_fr")
+  eventDate           DateTime @map("event_date") @db.Date
+  thumbnailUrl        String   @map("thumbnail_url")
+  sortOrder           Int      @map("sort_order")
+  images              HistoryItemImage[]
 
   @@map("history_items")
 }

@@ -22,6 +22,10 @@ uploads/*
 coverage/
 *.tsbuildinfo
 
-# Database dumps — real guest PII (names, phone numbers, RSVPs), never commit these.
+# Database dumps — real guest PII (names, phone numbers, RSVPs), never commit
+# these. Excludes prisma/migrations/ explicitly — those .sql files are
+# versioned schema history (no guest data, ever), not dumps, and production
+# deploys (`prisma migrate deploy`) need them committed.
 *.sql
 *.dump
+!prisma/migrations/**/*.sql

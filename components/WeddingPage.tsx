@@ -1,3 +1,4 @@
+import { LocaleProvider } from './LocaleProvider';
 import Nav from './Nav';
 import Hero from './Hero';
 import History from './History';
@@ -49,15 +50,18 @@ export default async function WeddingPage({ guest }: { guest: (Guest & { rsvp: R
     : null;
 
   return (
-    <>
+    <LocaleProvider>
       <Nav />
       <Hero coupleNames={SITE_COPY.coupleNames} posterSrc="/images/couple/hero-poster.jpg" />
       <History
         items={history.map((h) => ({
           id: h.id,
           title: h.title,
+          titleFr: h.titleFr,
           descriptionShort: h.descriptionShort,
+          descriptionShortFr: h.descriptionShortFr,
           descriptionFull: h.descriptionFull,
+          descriptionFullFr: h.descriptionFullFr,
           eventDate: h.eventDate.toISOString(),
           thumbnailUrl: h.thumbnailUrl,
           images: h.images,
@@ -71,7 +75,9 @@ export default async function WeddingPage({ guest }: { guest: (Guest & { rsvp: R
         gifts={gifts.map((g) => ({
           id: g.id,
           name: g.name,
+          nameFr: g.nameFr,
           description: g.description,
+          descriptionFr: g.descriptionFr,
           imageUrl: g.imageUrl,
           priceZar: g.priceZar.toString(),
           priceUsd: g.priceUsd.toString(),
@@ -95,6 +101,6 @@ export default async function WeddingPage({ guest }: { guest: (Guest & { rsvp: R
       <Contact />
       <Footer />
       <InstallPrompt />
-    </>
+    </LocaleProvider>
   );
 }

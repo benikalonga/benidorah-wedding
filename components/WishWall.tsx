@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { TransformWrapper, TransformComponent, type ReactZoomPanPinchRef } from 'react-zoom-pan-pinch';
 import { motion } from 'framer-motion';
 import { useSocketEvent } from '@/lib/useSocket';
+import { useLocale } from './LocaleProvider';
 
 export interface TicketEntry {
   id: string;
@@ -296,6 +297,7 @@ function useEdgeScrollHandoff(viewportRef: React.RefObject<HTMLDivElement>, acti
 }
 
 export default function WishWall({ initialTickets }: { initialTickets: TicketEntry[] }) {
+  const { t } = useLocale();
   const [tickets, setTickets] = useState(initialTickets);
 
   useSocketEvent<{ ticket: TicketEntry }>('ticket:new', (payload) => {
@@ -351,10 +353,10 @@ export default function WishWall({ initialTickets }: { initialTickets: TicketEnt
         className="flex items-center gap-4"
       >
         <span className="divider w-10" />
-        <h3 className="eyebrow text-charcoal/50">The Wish Wall</h3>
+        <h3 className="eyebrow text-charcoal/50">{t('wishWall.heading')}</h3>
         <span className="divider flex-1" />
       </motion.div>
-      <p className="mt-3 text-sm text-charcoal/50">Pinch or scroll to zoom, drag to explore — updates live as wishes come in.</p>
+      <p className="mt-3 text-sm text-charcoal/50">{t('wishWall.subcopy')}</p>
 
       <div
         ref={viewportRef}
@@ -363,7 +365,7 @@ export default function WishWall({ initialTickets }: { initialTickets: TicketEnt
       >
         {tickets.length === 0 ? (
           <div className="flex h-full items-center justify-center text-sm text-charcoal/40">
-            Be the first to leave a wish above 💌
+            {t('wishWall.empty')}
           </div>
         ) : (
           <TransformWrapper
@@ -377,19 +379,19 @@ export default function WishWall({ initialTickets }: { initialTickets: TicketEnt
           >
             <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
               <div className="relative" style={{ width: wallWidth, height: wallHeight, ...WALL_BACKGROUND }}>
-                {tickets.map((t) => {
-                  const p = placements.get(t.id);
+                {tickets.map((ticket) => {
+                  const p = placements.get(ticket.id);
                   if (!p) return null;
                   return (
                     <div
-                      key={t.id}
+                      key={ticket.id}
                       className="absolute flex flex-col justify-between rounded-sm p-3 shadow-md"
                       style={{
                         left: p.left,
                         top: p.top,
                         width: CELL_W - CELL_PADDING,
                         height: CELL_H - CELL_PADDING,
-                        backgroundColor: t.color,
+                        backgroundColor: ticket.color,
                         transform: `translate(-50%, -50%) rotate(${p.rotation}deg)`,
                       }}
                     >
@@ -401,8 +403,8 @@ export default function WishWall({ initialTickets }: { initialTickets: TicketEnt
                           boxShadow: '0 2px 3px rgba(0,0,0,0.45)',
                         }}
                       />
-                      <p className="line-clamp-4 font-hand text-lg leading-tight text-black">{t.message}</p>
-                      <p className="text-right text-xs font-semibold text-black/80">— {t.displayName || 'Anonymous'}</p>
+                      <p className="line-clamp-4 font-hand text-lg leading-tight text-black">{ticket.message}</p>
+                      <p className="text-right text-xs font-semibold text-black/80">— {ticket.displayName || t('wishWall.anonymous')}</p>
                     </div>
                   );
                 })}

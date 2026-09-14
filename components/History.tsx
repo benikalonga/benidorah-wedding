@@ -4,18 +4,24 @@ import { useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import SectionHeader from "./SectionHeader";
+import { useLocale } from "./LocaleProvider";
+import { pickDb, dateLocaleTag } from "@/lib/i18n";
 
 export interface HistoryEntry {
   id: string;
   title: string;
+  titleFr: string | null;
   descriptionShort: string;
+  descriptionShortFr: string | null;
   descriptionFull: string;
+  descriptionFullFr: string | null;
   eventDate: string;
   thumbnailUrl: string;
   images: { id: string; imageUrl: string }[];
 }
 
 export default function History({ items }: { items: HistoryEntry[] }) {
+  const { locale, t } = useLocale();
   const [expanded, setExpanded] = useState(false);
   const [selected, setSelected] = useState<HistoryEntry | null>(null);
   const visible = expanded ? items : items.slice(0, 5);
@@ -33,9 +39,9 @@ export default function History({ items }: { items: HistoryEntry[] }) {
       >
         <SectionHeader
           index="01"
-          eyebrow="Our Love Story"
-          title="History"
-          description={'From the day we met, to the day we say "I do."'}
+          eyebrow={t("history.eyebrow")}
+          title={t("history.title")}
+          description={t("history.description")}
         />
       </motion.div>
 
@@ -53,6 +59,8 @@ export default function History({ items }: { items: HistoryEntry[] }) {
             // center line on desktop — 0,2,4… on the left (text hugging the
             // line, reading toward it), 1,3,5… on the right.
             const onLeft = idx % 2 === 0;
+            const title = pickDb(item.title, item.titleFr, locale);
+            const descriptionShort = pickDb(item.descriptionShort, item.descriptionShortFr, locale);
 
             const card = (
               <button
@@ -64,26 +72,26 @@ export default function History({ items }: { items: HistoryEntry[] }) {
                 <div className="relative h-16 w-16 shrink-0 overflow-hidden sm:h-20 sm:w-24">
                   <Image
                     src={item.thumbnailUrl}
-                    alt={item.title}
+                    alt={title}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                 </div>
                 <div>
                   <p className="eyebrow text-champagne-gold">
-                    {new Date(item.eventDate).toLocaleDateString("en-ZA", {
+                    {new Date(item.eventDate).toLocaleDateString(dateLocaleTag(locale), {
                       month: "long",
                       year: "numeric",
                     })}
                   </p>
                   <h3 className="section-title mt-1 text-xl text-onyx sm:text-2xl">
-                    {item.title}
+                    {title}
                   </h3>
                   <p className="mt-1 text-sm text-charcoal/60">
-                    {item.descriptionShort}
+                    {descriptionShort}
                   </p>
                   <span className="mt-1 inline-block text-[10px] uppercase tracking-widest text-charcoal/30 transition-colors group-hover:text-champagne-gold">
-                    Read more →
+                    {t("history.readMore")}
                   </span>
                 </div>
               </button>
@@ -127,7 +135,7 @@ export default function History({ items }: { items: HistoryEntry[] }) {
             onClick={() => setExpanded((v) => !v)}
             className="btn-outline rounded-full px-8 py-3 text-xs uppercase"
           >
-            {expanded ? "Show less" : "Read more"}
+            {expanded ? t("history.showLess") : t("history.showMoreButton")}
           </button>
         </div>
       )}
@@ -151,23 +159,23 @@ export default function History({ items }: { items: HistoryEntry[] }) {
             >
               <div className="flex items-start justify-between">
                 <p className="eyebrow text-champagne-gold">
-                  {new Date(selected.eventDate).toLocaleDateString("en-ZA", {
+                  {new Date(selected.eventDate).toLocaleDateString(dateLocaleTag(locale), {
                     dateStyle: "long",
                   })}
                 </p>
                 <button
                   className="text-onyx"
                   onClick={() => setSelected(null)}
-                  aria-label="Close"
+                  aria-label={t("history.closeAria")}
                 >
                   ✕
                 </button>
               </div>
               <h3 className="section-title mt-3 text-3xl text-onyx">
-                {selected.title}
+                {pickDb(selected.title, selected.titleFr, locale)}
               </h3>
               <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-charcoal/80">
-                {selected.descriptionFull}
+                {pickDb(selected.descriptionFull, selected.descriptionFullFr, locale)}
               </p>
               {selected.images.length > 0 && (
                 <div className="mt-6 flex gap-2 overflow-x-auto">
@@ -178,7 +186,7 @@ export default function History({ items }: { items: HistoryEntry[] }) {
                     >
                       <Image
                         src={img.imageUrl}
-                        alt={selected.title}
+                        alt={pickDb(selected.title, selected.titleFr, locale)}
                         fill
                         className="object-cover"
                       />

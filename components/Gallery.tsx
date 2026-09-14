@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import Lightbox, { LightboxItem } from './Lightbox';
 import SectionHeader from './SectionHeader';
+import { useLocale } from './LocaleProvider';
 
 export interface GalleryEntry {
   id: string;
@@ -16,6 +17,7 @@ export interface GalleryEntry {
 const PAGE_SIZE = 10;
 
 export default function Gallery({ items }: { items: GalleryEntry[] }) {
+  const { t } = useLocale();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   // Lightbox navigation (prev/next, swipe) still spans every item, not just
@@ -32,7 +34,7 @@ export default function Gallery({ items }: { items: GalleryEntry[] }) {
         viewport={{ once: true, margin: '-80px' }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
-        <SectionHeader index="02" eyebrow="In Frame" title="Gallery" description="Moments from our story, so far." />
+        <SectionHeader index="02" eyebrow={t('gallery.eyebrow')} title={t('gallery.title')} description={t('gallery.description')} />
       </motion.div>
 
       <div className="mt-10 columns-2 gap-2 [column-fill:_balance] sm:columns-3 sm:gap-3 xl:columns-4">
@@ -49,7 +51,7 @@ export default function Gallery({ items }: { items: GalleryEntry[] }) {
             {item.mediaType === 'image' ? (
               <Image
                 src={item.mediaUrl}
-                alt="Wedding gallery photo"
+                alt={t('gallery.altPhoto')}
                 width={600}
                 height={800}
                 sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"
@@ -62,7 +64,7 @@ export default function Gallery({ items }: { items: GalleryEntry[] }) {
               // like an empty/broken slot in the grid.
               <Image
                 src={item.thumbnailUrl}
-                alt="Video thumbnail"
+                alt={t('gallery.altVideoThumb')}
                 width={600}
                 height={800}
                 sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"
@@ -84,7 +86,7 @@ export default function Gallery({ items }: { items: GalleryEntry[] }) {
             )}
 
             <div className="absolute inset-0 flex items-end bg-gradient-to-t from-onyx/50 via-transparent to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-              <span className="eyebrow text-[9px] text-ivory">{item.mediaType === 'video' ? 'Play' : 'View'}</span>
+              <span className="eyebrow text-[9px] text-ivory">{item.mediaType === 'video' ? t('gallery.play') : t('gallery.view')}</span>
             </div>
           </motion.button>
         ))}
@@ -96,7 +98,7 @@ export default function Gallery({ items }: { items: GalleryEntry[] }) {
             onClick={() => setVisibleCount((c) => Math.min(c + PAGE_SIZE, items.length))}
             className="btn-outline rounded-full px-8 py-3 text-xs uppercase"
           >
-            Show more
+            {t('gallery.showMore')}
           </button>
         </div>
       )}

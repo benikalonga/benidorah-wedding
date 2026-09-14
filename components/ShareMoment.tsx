@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Lightbox, { LightboxItem } from './Lightbox';
 import SectionHeader from './SectionHeader';
 import { useSocketEvent } from '@/lib/useSocket';
+import { useLocale } from './LocaleProvider';
 
 export interface MomentEntry {
   id: string;
@@ -28,6 +29,7 @@ export default function ShareMoment({
   // guest" this app has, so it also doubles as upload permission below.
   guest: GuestSummary | null;
 }) {
+  const { t } = useLocale();
   const [moments, setMoments] = useState(initialMoments);
   const [uploaderName, setUploaderName] = useState(guest?.fullName || '');
   const [uploading, setUploading] = useState(false);
@@ -57,10 +59,10 @@ export default function ShareMoment({
       const res = await fetch('/api/moments', { method: 'POST', body: formData });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error || 'Upload failed');
+        setError(data.error || t('shareMoment.uploadFailed'));
       }
     } catch {
-      setError('Upload failed — check your connection and try again.');
+      setError(t('shareMoment.uploadFailedConn'));
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -77,7 +79,7 @@ export default function ShareMoment({
         viewport={{ once: true, margin: '-80px' }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
-        <SectionHeader index="07" eyebrow="Live From The Day" title="Share a Moment" description="Snap it, upload it — everyone sees it live." />
+        <SectionHeader index="07" eyebrow={t('shareMoment.eyebrow')} title={t('shareMoment.title')} description={t('shareMoment.description')} />
       </motion.div>
 
       <motion.div
@@ -91,7 +93,7 @@ export default function ShareMoment({
           <>
             <input
               type="text"
-              placeholder="Your name"
+              placeholder={t('shareMoment.namePlaceholder')}
               value={uploaderName}
               onChange={(e) => setUploaderName(e.target.value)}
               className="field-underline"
@@ -105,14 +107,11 @@ export default function ShareMoment({
               disabled={uploading}
               className="text-sm text-charcoal/60 file:mr-3 file:border-0 file:bg-onyx file:px-3 file:py-1.5 file:text-xs file:uppercase file:tracking-widest file:text-ivory"
             />
-            {uploading && <p className="text-xs text-charcoal/50">Uploading…</p>}
+            {uploading && <p className="text-xs text-charcoal/50">{t('shareMoment.uploading')}</p>}
             {error && <p className="text-xs text-red-700">{error}</p>}
           </>
         ) : (
-          <p className="text-sm text-charcoal/60">
-            Only invited guests can share a moment — open the personal invite link sent to you on
-            WhatsApp to upload your photos and videos here.
-          </p>
+          <p className="text-sm text-charcoal/60">{t('shareMoment.lockedMessage')}</p>
         )}
       </motion.div>
 
@@ -121,7 +120,7 @@ export default function ShareMoment({
           <button key={m.id} onClick={() => setOpenIndex(idx)} className="overflow-hidden">
             {m.mediaType === 'image' ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={m.mediaUrl} alt={`Uploaded by ${m.uploaderName}`} className="aspect-square w-full object-cover transition-transform duration-500 hover:scale-105" loading="lazy" />
+              <img src={m.mediaUrl} alt={t('shareMoment.uploadedByAlt').replace('{name}', m.uploaderName)} className="aspect-square w-full object-cover transition-transform duration-500 hover:scale-105" loading="lazy" />
             ) : (
               <video src={m.mediaUrl} className="aspect-square w-full object-cover" muted />
             )}

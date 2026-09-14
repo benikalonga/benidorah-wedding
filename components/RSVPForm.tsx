@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import SectionHeader from './SectionHeader';
+import { useLocale } from './LocaleProvider';
 
 export interface RsvpGuestContext {
   id: string;
@@ -19,6 +20,7 @@ export interface RsvpGuestContext {
 }
 
 export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) {
+  const { t } = useLocale();
   const [attending, setAttending] = useState(guest?.existingRsvp?.attending ?? '');
   const [email, setEmail] = useState(guest?.email ?? '');
   const [allergyComment, setAllergyComment] = useState(guest?.existingRsvp?.allergyComment ?? '');
@@ -30,13 +32,10 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
   if (!guest) {
     return (
       <section id="rsvp" className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-        <SectionHeader index="05" eyebrow="Kindly Reply" title="RSVP" />
+        <SectionHeader index="05" eyebrow={t('rsvp.eyebrow')} title={t('rsvp.title')} />
         <div className="hairline-gold mx-auto mt-10 max-w-lg bg-onyx p-10 text-center text-ivory">
           <RingIcon className="mx-auto mb-4 text-champagne-gold" />
-          <p className="text-ivory/75">
-            RSVP is only available through your personal invitation link. If you've received an invite, open the
-            link shared with you on WhatsApp to respond.
-          </p>
+          <p className="text-ivory/75">{t('rsvp.lockedMessage')}</p>
         </div>
       </section>
     );
@@ -71,13 +70,13 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
   const attendanceOptions =
     guest.type === 'single'
       ? [
-          { value: 'yes', label: "Yes, I'll be there" },
-          { value: 'no', label: "No, I can't make it" },
+          { value: 'yes', label: t('rsvp.yesSingle') },
+          { value: 'no', label: t('rsvp.noSingle') },
         ]
       : [
-          { value: 'yes', label: 'Yes, both of us' },
-          { value: 'one_only', label: 'Only one of us will make it' },
-          { value: 'none', label: 'None of us, unfortunately' },
+          { value: 'yes', label: t('rsvp.yesBoth') },
+          { value: 'one_only', label: t('rsvp.oneOnly') },
+          { value: 'none', label: t('rsvp.none') },
         ];
 
   return (
@@ -88,7 +87,7 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
         viewport={{ once: true, margin: '-80px' }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
-        <SectionHeader index="05" eyebrow="Kindly Reply" title="RSVP" description="Please respond by 15 November 2026." />
+        <SectionHeader index="05" eyebrow={t('rsvp.eyebrow')} title={t('rsvp.title')} description={t('rsvp.deadline')} />
       </motion.div>
 
       <motion.form
@@ -102,7 +101,7 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
         <RingIcon className="mx-auto text-champagne-gold" />
 
         <div>
-          <label className="text-[11px] uppercase tracking-widest text-ivory/50">Full name</label>
+          <label className="text-[11px] uppercase tracking-widest text-ivory/50">{t('rsvp.fullName')}</label>
           <input
             readOnly
             value={guest.type === 'couple' ? `${guest.fullName} & ${guest.partnerName ?? ''}` : guest.fullName}
@@ -112,12 +111,12 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
 
         {guest.type === 'couple' && (
           <p className="-mt-4 text-xs uppercase tracking-widest text-champagne-gold">
-            Couple — {guest.fullName} &amp; {guest.partnerName}
+            {t('rsvp.coupleLabel').replace('{a}', guest.fullName).replace('{b}', guest.partnerName ?? '')}
           </p>
         )}
 
         <div>
-          <label className="text-[11px] uppercase tracking-widest text-ivory/50">Email (optional)</label>
+          <label className="text-[11px] uppercase tracking-widest text-ivory/50">{t('rsvp.email')}</label>
           <input
             type="email"
             value={email ?? ''}
@@ -127,7 +126,7 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
         </div>
 
         <fieldset>
-          <legend className="text-[11px] uppercase tracking-widest text-ivory/50">Will you attend?</legend>
+          <legend className="text-[11px] uppercase tracking-widest text-ivory/50">{t('rsvp.willAttend')}</legend>
           <div className="mt-3 flex flex-col gap-3">
             {attendanceOptions.map((opt) => (
               <label
@@ -154,7 +153,7 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
         </fieldset>
 
         <div>
-          <label className="text-[11px] uppercase tracking-widest text-ivory/50">Allergies or comments (optional)</label>
+          <label className="text-[11px] uppercase tracking-widest text-ivory/50">{t('rsvp.allergies')}</label>
           <textarea
             value={allergyComment ?? ''}
             onChange={(e) => setAllergyComment(e.target.value)}
@@ -164,7 +163,7 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
         </div>
 
         <div>
-          <label className="text-[11px] uppercase tracking-widest text-ivory/50">Leave a wish for the couple (optional)</label>
+          <label className="text-[11px] uppercase tracking-widest text-ivory/50">{t('rsvp.wish')}</label>
           <textarea
             value={wishText ?? ''}
             onChange={(e) => setWishText(e.target.value)}
@@ -176,15 +175,15 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
 
         <label className="flex items-center gap-3 text-sm text-ivory/75">
           <input type="checkbox" checked={displayName} onChange={(e) => setDisplayName(e.target.checked)} className="h-4 w-4 accent-champagne-gold" />
-          Display my name on the wish wall
+          {t('rsvp.displayNameCheckbox')}
         </label>
 
         <button type="submit" disabled={submitting} className="btn-gold mt-2 px-6 py-4 text-xs uppercase tracking-widest disabled:opacity-50">
-          {submitting ? 'Sending…' : 'Submit RSVP'}
+          {submitting ? t('rsvp.sending') : t('rsvp.submit')}
         </button>
 
-        {result === 'success' && <p className="text-center text-sm text-champagne-gold-light">Thank you — your RSVP has been recorded!</p>}
-        {result === 'error' && <p className="text-center text-sm text-red-400">Something went wrong. Please try again.</p>}
+        {result === 'success' && <p className="text-center text-sm text-champagne-gold-light">{t('rsvp.success')}</p>}
+        {result === 'error' && <p className="text-center text-sm text-red-400">{t('rsvp.error')}</p>}
       </motion.form>
     </section>
   );

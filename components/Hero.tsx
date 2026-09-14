@@ -12,6 +12,7 @@ import CountdownTimer from "./CountdownTimer";
 import HeroLoader from "./HeroLoader";
 import { WEDDING_DATE_ISO, SITE_COPY } from "@/lib/content";
 import { onHeroVideoPauseRequest } from "@/lib/heroPlayback";
+import { useLocale } from "./LocaleProvider";
 
 const MIN_LOADER_MS = 1100;
 const LOADER_TIMEOUT_MS = 6000;
@@ -23,6 +24,7 @@ export default function Hero({
   coupleNames: string;
   posterSrc: string;
 }) {
+  const { t } = useLocale();
   const wrapperRef = useRef<HTMLElement>(null);
   const mainVideoRef = useRef<HTMLVideoElement>(null);
 
@@ -144,7 +146,7 @@ export default function Hero({
           {reducedMotion ? (
             <Image
               src={posterSrc}
-              alt={`${coupleNames} on their engagement shoot`}
+              alt={t("hero.reducedMotionAlt").replace("{names}", coupleNames)}
               fill
               priority
               className="object-cover"
@@ -201,7 +203,7 @@ export default function Hero({
             style={{ opacity: contentOpacity }}
             className="absolute inset-x-0 top-0 z-10 flex items-center justify-between p-5 sm:p-8"
           >
-            <span className="eyebrow text-ivory/70">Beni &amp; Dorah</span>
+            <span className="eyebrow text-ivory/70">{t("hero.eyebrowNames")}</span>
             <div className="flex items-center gap-2">
               {!reducedMotion && (
                 <button
@@ -226,7 +228,7 @@ export default function Hero({
                         />
                         <path d="M22 9l-6 6M16 9l6 6" strokeLinecap="round" />
                       </svg>
-                      Sound On
+                      {t("hero.soundOn")}
                     </>
                   ) : (
                     <>
@@ -248,7 +250,7 @@ export default function Hero({
                           strokeLinecap="round"
                         />
                       </svg>
-                      Sound Off
+                      {t("hero.soundOff")}
                     </>
                   )}
                 </button>
@@ -257,8 +259,8 @@ export default function Hero({
                 href="/api/media/highlight?download=1"
                 download
                 className="hairline flex h-10 w-10 items-center justify-center rounded-full border-ivory/25 bg-onyx/30 text-ivory backdrop-blur-sm"
-                aria-label="Download the highlight video"
-                title="Download highlight video"
+                aria-label={t("hero.downloadHighlight")}
+                title={t("hero.downloadHighlight")}
               >
                 <svg
                   width="16"
@@ -294,7 +296,7 @@ export default function Hero({
               transition={{ duration: 0.7, delay: 0.15 }}
               className="eyebrow text-champagne-gold"
             >
-              We're Getting Married
+              {t("hero.gettingMarried")}
             </motion.p>
             <motion.h1
               initial={{ opacity: 0, y: 18 }}
@@ -314,7 +316,7 @@ export default function Hero({
             >
               <span className="divider-onyx w-10" />
               <p className="text-xs uppercase tracking-[0.3em]">
-                23 December 2026 · {SITE_COPY.venueName}
+                {t("hero.dateVenueLine").replace("{venue}", SITE_COPY.venueName)}
               </p>
               <span className="divider-onyx w-10" />
             </motion.div>
@@ -338,14 +340,16 @@ export default function Hero({
             style={{ opacity: placeholderOpacity }}
             className="pointer-events-none absolute inset-0 z-10 flex h-full flex-col items-center justify-center gap-6 px-6 text-center"
           >
-            <p className="eyebrow text-champagne-gold">Save The Date</p>
+            <p className="eyebrow text-champagne-gold">{t("hero.saveTheDate")}</p>
             <p className="section-title max-w-xl text-2xl italic text-ivory sm:text-3xl md:text-4xl">
-              Two hearts, one beautiful forever.
+              {t("hero.tagline")}
             </p>
             <div className="flex items-center gap-4 text-ivory/80">
               <span className="divider-onyx w-10" />
               <p className="text-xs uppercase tracking-[0.3em]">
-                23 December 2026 · {SITE_COPY.ceremony.time} · {SITE_COPY.venueName}
+                {t("hero.dateTimeVenueLine")
+                  .replace("{time}", SITE_COPY.ceremony.time)
+                  .replace("{venue}", SITE_COPY.venueName)}
               </p>
               <span className="divider-onyx w-10" />
             </div>
@@ -353,9 +357,9 @@ export default function Hero({
               type="button"
               onClick={handleScrollToHistory}
               className="pointer-events-auto mt-4 flex flex-col items-center gap-2 text-champagne-gold"
-              aria-label="Scroll to our history"
+              aria-label={t("hero.scrollToHistoryAria")}
             >
-              <span className="eyebrow text-[10px] text-ivory/60">Scroll</span>
+              <span className="eyebrow text-[10px] text-ivory/60">{t("hero.scroll")}</span>
               <svg
                 className="animate-chevron"
                 width="20"
@@ -379,9 +383,9 @@ export default function Hero({
             onClick={handleScrollToHistory}
             style={{ opacity: scrollHintOpacity }}
             className="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-champagne-gold"
-            aria-label="Scroll to our history"
+            aria-label={t("hero.scrollToHistoryAria")}
           >
-            <span className="eyebrow text-[10px] text-ivory/60">Scroll</span>
+            <span className="eyebrow text-[10px] text-ivory/60">{t("hero.scroll")}</span>
             <svg
               className="animate-chevron"
               width="20"
