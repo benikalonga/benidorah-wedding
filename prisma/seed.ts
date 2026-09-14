@@ -170,7 +170,7 @@ const HISTORY_SEEDS = [
     title: "Made It Official",
     descriptionShort: 'She officially said "Yes".',
     descriptionFull:
-      "With her family and closest friends secretly gathered around us, I got down on one knee and asked her to be my wife. She said yes in front of everyone who loves us most, and the whole rooftop erupted in cheers, tears, and sparklers.",
+      "With her family and closest friends secretly gathered around us, I asked her to be my wife. She said yes in front of everyone who loves us most, and the whole rooftop erupted in cheers, tears, and sparklers.",
     eventDate: new Date("2025-10-12"),
     imagePaths: [
       "/images/couple/history-made-it-official-1.jpg",
