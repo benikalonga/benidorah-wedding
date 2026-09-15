@@ -244,12 +244,18 @@ export default function GiftRegistry({
       <div className="mt-auto flex flex-col gap-2 pt-2">
         {depositOpenId === gift.id ? (
           <>
+            <p className="text-[11px] font-medium uppercase tracking-widest text-charcoal/60">
+              {t("giftRegistry.depositHeader")}
+            </p>
             {renderAccountDetails()}
             {claimErrorId === gift.id && (
               <p className="text-[11px] text-red-700">
                 {t("giftRegistry.claimError")}
               </p>
             )}
+            <p className="text-center text-[11px] uppercase tracking-widest text-charcoal/40">
+              {t("giftRegistry.or")}
+            </p>
             <button
               onClick={() => handleBringCash(gift.id)}
               disabled={claimingId === gift.id}
