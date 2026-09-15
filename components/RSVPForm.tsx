@@ -33,9 +33,9 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
     return (
       <section id="rsvp" className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
         <SectionHeader index="05" eyebrow={t('rsvp.eyebrow')} title={t('rsvp.title')} />
-        <div className="hairline-gold mx-auto mt-10 max-w-lg bg-onyx p-10 text-center text-ivory">
+        <div className="hairline-gold mx-auto mt-10 max-w-lg bg-cream p-10 text-center">
           <RingIcon className="mx-auto mb-4 text-champagne-gold" />
-          <p className="text-ivory/75">{t('rsvp.lockedMessage')}</p>
+          <p className="text-charcoal/70">{t('rsvp.lockedMessage')}</p>
         </div>
       </section>
     );
@@ -96,16 +96,16 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
         viewport={{ once: true }}
         transition={{ duration: 0.7 }}
         onSubmit={handleSubmit}
-        className="hairline-gold mx-auto mt-10 flex max-w-xl flex-col gap-7 bg-onyx p-8 text-ivory sm:p-10"
+        className="hairline-gold mx-auto mt-10 flex max-w-xl flex-col gap-7 bg-cream p-8 sm:p-10"
       >
         <RingIcon className="mx-auto text-champagne-gold" />
 
         <div>
-          <label className="text-[11px] uppercase tracking-widest text-ivory/50">{t('rsvp.fullName')}</label>
+          <label className="text-[11px] uppercase tracking-widest text-charcoal/50">{t('rsvp.fullName')}</label>
           <input
             readOnly
             value={guest.type === 'couple' ? `${guest.fullName} & ${guest.partnerName ?? ''}` : guest.fullName}
-            className="field-underline field-underline-dark mt-1 text-ivory/70"
+            className="field-underline mt-1 text-charcoal/70"
           />
         </div>
 
@@ -116,17 +116,17 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
         )}
 
         <div>
-          <label className="text-[11px] uppercase tracking-widest text-ivory/50">{t('rsvp.email')}</label>
+          <label className="text-[11px] uppercase tracking-widest text-charcoal/50">{t('rsvp.email')}</label>
           <input
             type="email"
             value={email ?? ''}
             onChange={(e) => setEmail(e.target.value)}
-            className="field-underline field-underline-dark mt-1"
+            className="field-underline mt-1"
           />
         </div>
 
         <fieldset>
-          <legend className="text-[11px] uppercase tracking-widest text-ivory/50">{t('rsvp.willAttend')}</legend>
+          <legend className="text-[11px] uppercase tracking-widest text-charcoal/50">{t('rsvp.willAttend')}</legend>
           <div className="mt-3 flex flex-col gap-3">
             {attendanceOptions.map((opt) => (
               <label
@@ -134,7 +134,7 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
                 className={`flex cursor-pointer items-center justify-between border px-4 py-3 text-sm transition-colors ${
                   attending === opt.value
                     ? 'border-champagne-gold bg-champagne-gold text-onyx'
-                    : 'border-ivory/20 text-ivory/85 hover:border-champagne-gold'
+                    : 'border-charcoal/15 text-charcoal/70 hover:border-champagne-gold'
                 }`}
               >
                 {opt.label}
@@ -153,27 +153,27 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
         </fieldset>
 
         <div>
-          <label className="text-[11px] uppercase tracking-widest text-ivory/50">{t('rsvp.allergies')}</label>
+          <label className="text-[11px] uppercase tracking-widest text-charcoal/50">{t('rsvp.allergies')}</label>
           <textarea
             value={allergyComment ?? ''}
             onChange={(e) => setAllergyComment(e.target.value)}
             rows={2}
-            className="field-underline field-underline-dark mt-1 resize-none"
+            className="field-underline mt-1 resize-none"
           />
         </div>
 
         <div>
-          <label className="text-[11px] uppercase tracking-widest text-ivory/50">{t('rsvp.wish')}</label>
+          <label className="text-[11px] uppercase tracking-widest text-charcoal/50">{t('rsvp.wish')}</label>
           <textarea
             value={wishText ?? ''}
             onChange={(e) => setWishText(e.target.value)}
             rows={3}
             maxLength={280}
-            className="field-underline field-underline-dark mt-1 resize-none"
+            className="field-underline mt-1 resize-none"
           />
         </div>
 
-        <label className="flex items-center gap-3 text-sm text-ivory/75">
+        <label className="flex items-center gap-3 text-sm text-charcoal/70">
           <input type="checkbox" checked={displayName} onChange={(e) => setDisplayName(e.target.checked)} className="h-4 w-4 accent-champagne-gold" />
           {t('rsvp.displayNameCheckbox')}
         </label>
@@ -182,8 +182,8 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
           {submitting ? t('rsvp.sending') : t('rsvp.submit')}
         </button>
 
-        {result === 'success' && <p className="text-center text-sm text-champagne-gold-light">{t('rsvp.success')}</p>}
-        {result === 'error' && <p className="text-center text-sm text-red-400">{t('rsvp.error')}</p>}
+        {result === 'success' && <p className="text-center text-sm text-champagne-gold">{t('rsvp.success')}</p>}
+        {result === 'error' && <p className="text-center text-sm text-red-600">{t('rsvp.error')}</p>}
       </motion.form>
     </section>
   );
