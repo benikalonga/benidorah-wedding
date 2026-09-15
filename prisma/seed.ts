@@ -411,6 +411,21 @@ async function main() {
           },
         },
       });
+    } else {
+      // Same reasoning as the gift branch above: an already-seeded
+      // environment (production) needs its French columns backfilled by
+      // re-running this seed, not just fresh installs. Deliberately NOT
+      // touching eventDate/thumbnailUrl/images/sortOrder here — those are
+      // either unlikely to change post-launch or (images) managed via
+      // their own create-only relation, so leave them alone on a re-run.
+      await prisma.historyItem.update({
+        where: { id: existing.id },
+        data: {
+          titleFr: h.titleFr,
+          descriptionShortFr: h.descriptionShortFr,
+          descriptionFullFr: h.descriptionFullFr,
+        },
+      });
     }
   }
 
