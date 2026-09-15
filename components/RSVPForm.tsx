@@ -28,6 +28,12 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
   const [displayName, setDisplayName] = useState(guest?.existingRsvp?.displayNameOnWall ?? false);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<'idle' | 'success' | 'error'>('idle');
+  // Tracks "has this guest ever submitted" independently of `result` (which
+  // only reflects the outcome of the most recent submit attempt this
+  // session) — starts from their existing RSVP row, then flips true the
+  // moment a first-time submit succeeds, so the title/button switch to the
+  // "already submitted" wording without needing a page reload.
+  const [hasSubmitted, setHasSubmitted] = useState(!!guest?.existingRsvp);
 
   if (!guest) {
     return (
@@ -60,6 +66,7 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
         }),
       });
       setResult(res.ok ? 'success' : 'error');
+      if (res.ok) setHasSubmitted(true);
     } catch {
       setResult('error');
     } finally {
@@ -99,6 +106,14 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
         className="hairline-gold mx-auto mt-10 flex max-w-xl flex-col gap-7 bg-cream p-8 sm:p-10"
       >
         <RingIcon className="mx-auto text-champagne-gold" />
+
+        <p
+          className={`text-center text-sm font-medium ${
+            hasSubmitted ? 'text-green-700' : 'text-charcoal/70'
+          }`}
+        >
+          {hasSubmitted ? t('rsvp.alreadySubmitted') : t('rsvp.formTitle')}
+        </p>
 
         <div>
           <label className="text-[11px] uppercase tracking-widest text-charcoal/50">{t('rsvp.fullName')}</label>
@@ -179,7 +194,7 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
         </label>
 
         <button type="submit" disabled={submitting} className="btn-gold mt-2 px-6 py-4 text-xs uppercase tracking-widest disabled:opacity-50">
-          {submitting ? t('rsvp.sending') : t('rsvp.submit')}
+          {submitting ? t('rsvp.sending') : hasSubmitted ? t('rsvp.update') : t('rsvp.submit')}
         </button>
 
         {result === 'success' && <p className="text-center text-sm text-champagne-gold">{t('rsvp.success')}</p>}

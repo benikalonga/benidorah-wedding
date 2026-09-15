@@ -130,6 +130,8 @@ const en = {
     lockedMessage:
       "RSVP is only available through your personal invitation link. If you've received an invite, open the link shared with you on WhatsApp to respond.",
     deadline: "Please respond by 15 November 2026.",
+    formTitle: "Fill in the form to confirm your attendance",
+    alreadySubmitted: "You have already submitted",
     fullName: "Full name",
     coupleLabel: "Couple — {a} & {b}",
     email: "Email (optional)",
@@ -144,6 +146,7 @@ const en = {
     displayNameCheckbox: "Display my name on the wish wall",
     sending: "Sending…",
     submit: "Submit RSVP",
+    update: "Update RSVP",
     success: "Thank you — your RSVP has been recorded!",
     error: "Something went wrong. Please try again.",
   },
@@ -297,6 +300,8 @@ const fr: typeof en = {
     lockedMessage:
       "Le RSVP n'est disponible qu'à partir de votre lien d'invitation personnel. Si vous avez reçu une invitation, ouvrez le lien partagé sur WhatsApp pour répondre.",
     deadline: "Merci de répondre avant le 15 novembre 2026.",
+    formTitle: "Remplissez le formulaire pour confirmer votre présence",
+    alreadySubmitted: "Vous avez déjà répondu",
     fullName: "Nom complet",
     coupleLabel: "Couple — {a} et {b}",
     email: "E-mail (facultatif)",
@@ -311,6 +316,7 @@ const fr: typeof en = {
     displayNameCheckbox: "Afficher mon nom sur le mur des vœux",
     sending: "Envoi en cours…",
     submit: "Envoyer le RSVP",
+    update: "Mettre à jour le RSVP",
     success: "Merci — votre RSVP a bien été enregistré !",
     error: "Une erreur est survenue. Veuillez réessayer.",
   },
