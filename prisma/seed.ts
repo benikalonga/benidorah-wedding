@@ -429,6 +429,15 @@ async function main() {
     }
   }
 
+  // #3 (3.mp4 + 3-poster.jpg) was removed from the gallery batch below back
+  // in 4fd490a, but that only stopped it being *re-created* — an
+  // environment that already had the row from an earlier seed run (i.e.
+  // production) kept serving it forever, now broken since the files are
+  // gone. Explicit one-off cleanup so a re-seed actually removes it there.
+  await prisma.galleryItem.deleteMany({
+    where: { mediaUrl: "/images/gallery/3.mp4" },
+  });
+
   console.log("Seeding gallery…");
   const galleryCount = await prisma.galleryItem.count();
   if (galleryCount === 0) {
