@@ -227,11 +227,11 @@ const HISTORY_SEEDS = [
     title: "Traditionally Married",
     titleFr: "Mariage Traditionnel",
     descriptionShort: "I paid the Lobola.",
-    descriptionShortFr: "J'ai payé la Lobola.",
+    descriptionShortFr: "J'ai payé la dot.",
     descriptionFull:
       "Following tradition, I paid Lobola to her family, and in that moment she officially became my wife by custom. Both our families gathered together to celebrate — sharing food, laughter, and blessings for the road ahead.",
     descriptionFullFr:
-      "Selon la tradition, j'ai payé la Lobola à sa famille, et à ce moment-là, elle est officiellement devenue ma femme selon la coutume. Nos deux familles se sont réunies pour célébrer — partageant repas, rires et bénédictions pour la suite.",
+      "Selon la tradition, j'ai payé la dot à sa famille, et à ce moment-là, elle est officiellement devenue ma femme selon la coutume. Nos deux familles se sont réunies pour célébrer — partageant repas, rires et bénédictions pour la suite.",
     eventDate: new Date("2025-12-22"),
     imagePath: "/images/couple/history-traditionally-married-2.jpg",
     imagePaths: [
