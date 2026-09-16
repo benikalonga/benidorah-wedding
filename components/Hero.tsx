@@ -14,6 +14,7 @@ import { WEDDING_DATE_ISO, SITE_COPY } from "@/lib/content";
 import { onHeroVideoPauseRequest } from "@/lib/heroPlayback";
 import { useLocale } from "./LocaleProvider";
 import LocaleToggle from "./LocaleToggle";
+import { useRsvpStatus } from "./RsvpStatusProvider";
 
 const MIN_LOADER_MS = 1100;
 const LOADER_TIMEOUT_MS = 6000;
@@ -21,13 +22,15 @@ const LOADER_TIMEOUT_MS = 6000;
 export default function Hero({
   coupleNames,
   posterSrc,
-  needsRsvp = false,
 }: {
   coupleNames: string;
   posterSrc: string;
-  needsRsvp?: boolean;
 }) {
   const { t } = useLocale();
+  // Shared with RSVPForm — flips to false the instant a guest submits
+  // (from anywhere on the page), so this button disappears immediately
+  // without needing a reload, not just on a fresh page load.
+  const { needsRsvp } = useRsvpStatus();
   const wrapperRef = useRef<HTMLElement>(null);
   const mainVideoRef = useRef<HTMLVideoElement>(null);
 

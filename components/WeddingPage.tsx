@@ -1,4 +1,5 @@
 import { LocaleProvider } from './LocaleProvider';
+import { RsvpStatusProvider } from './RsvpStatusProvider';
 import Nav from './Nav';
 import Hero from './Hero';
 import History from './History';
@@ -51,61 +52,62 @@ export default async function WeddingPage({ guest }: { guest: (Guest & { rsvp: R
 
   return (
     <LocaleProvider>
-      <Nav />
-      <Hero
-        coupleNames={SITE_COPY.coupleNames}
-        posterSrc="/images/couple/hero-poster.jpg"
-        needsRsvp={!!guest && !guest.rsvp}
-      />
-      <History
-        items={history.map((h) => ({
-          id: h.id,
-          title: h.title,
-          titleFr: h.titleFr,
-          descriptionShort: h.descriptionShort,
-          descriptionShortFr: h.descriptionShortFr,
-          descriptionFull: h.descriptionFull,
-          descriptionFullFr: h.descriptionFullFr,
-          eventDate: h.eventDate.toISOString(),
-          thumbnailUrl: h.thumbnailUrl,
-          images: h.images,
-        }))}
-      />
-      <Gallery
-        items={gallery.map((g) => ({ id: g.id, mediaUrl: g.mediaUrl, mediaType: g.mediaType, thumbnailUrl: g.thumbnailUrl }))}
-      />
-      <AddressSchedule />
-      <GiftRegistry
-        guestId={guest?.id ?? null}
-        gifts={gifts.map((g) => ({
-          id: g.id,
-          name: g.name,
-          nameFr: g.nameFr,
-          description: g.description,
-          descriptionFr: g.descriptionFr,
-          imageUrl: g.imageUrl,
-          priceZar: g.priceZar.toString(),
-          priceUsd: g.priceUsd.toString(),
-          status: g.status,
-        }))}
-      />
-      <RSVPForm guest={rsvpGuest as any} />
-      <WishWall
-        initialTickets={tickets.map((t) => ({ id: t.id, displayName: t.displayName, message: t.message, color: t.color }))}
-      />
-      <DressCode />
-      <ShareMoment
-        guest={guest ? { userHashCode: guest.userHashCode, fullName: guest.fullName } : null}
-        initialMoments={moments.map((m) => ({
-          id: m.id,
-          uploaderName: m.uploaderName,
-          mediaUrl: m.mediaUrl,
-          mediaType: m.mediaType,
-        }))}
-      />
-      <Contact />
-      <Footer />
-      <InstallPrompt />
+      <RsvpStatusProvider initialNeedsRsvp={!!guest && !guest.rsvp}>
+        <Nav />
+        <Hero
+          coupleNames={SITE_COPY.coupleNames}
+          posterSrc="/images/couple/hero-poster.jpg"
+        />
+        <History
+          items={history.map((h) => ({
+            id: h.id,
+            title: h.title,
+            titleFr: h.titleFr,
+            descriptionShort: h.descriptionShort,
+            descriptionShortFr: h.descriptionShortFr,
+            descriptionFull: h.descriptionFull,
+            descriptionFullFr: h.descriptionFullFr,
+            eventDate: h.eventDate.toISOString(),
+            thumbnailUrl: h.thumbnailUrl,
+            images: h.images,
+          }))}
+        />
+        <Gallery
+          items={gallery.map((g) => ({ id: g.id, mediaUrl: g.mediaUrl, mediaType: g.mediaType, thumbnailUrl: g.thumbnailUrl }))}
+        />
+        <AddressSchedule />
+        <GiftRegistry
+          guestId={guest?.id ?? null}
+          gifts={gifts.map((g) => ({
+            id: g.id,
+            name: g.name,
+            nameFr: g.nameFr,
+            description: g.description,
+            descriptionFr: g.descriptionFr,
+            imageUrl: g.imageUrl,
+            priceZar: g.priceZar.toString(),
+            priceUsd: g.priceUsd.toString(),
+            status: g.status,
+          }))}
+        />
+        <RSVPForm guest={rsvpGuest as any} />
+        <WishWall
+          initialTickets={tickets.map((t) => ({ id: t.id, displayName: t.displayName, message: t.message, color: t.color }))}
+        />
+        <DressCode />
+        <ShareMoment
+          guest={guest ? { userHashCode: guest.userHashCode, fullName: guest.fullName } : null}
+          initialMoments={moments.map((m) => ({
+            id: m.id,
+            uploaderName: m.uploaderName,
+            mediaUrl: m.mediaUrl,
+            mediaType: m.mediaType,
+          }))}
+        />
+        <Contact />
+        <Footer />
+        <InstallPrompt />
+      </RsvpStatusProvider>
     </LocaleProvider>
   );
 }

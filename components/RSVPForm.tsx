@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import SectionHeader from './SectionHeader';
 import { useLocale } from './LocaleProvider';
+import { useRsvpStatus } from './RsvpStatusProvider';
 
 export interface RsvpGuestContext {
   id: string;
@@ -28,12 +29,13 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
   const [displayName, setDisplayName] = useState(guest?.existingRsvp?.displayNameOnWall ?? false);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<'idle' | 'success' | 'error'>('idle');
-  // Tracks "has this guest ever submitted" independently of `result` (which
-  // only reflects the outcome of the most recent submit attempt this
-  // session) — starts from their existing RSVP row, then flips true the
-  // moment a first-time submit succeeds, so the title/button switch to the
-  // "already submitted" wording without needing a page reload.
-  const [hasSubmitted, setHasSubmitted] = useState(!!guest?.existingRsvp);
+  // Shared with Hero's "Go to the Invitation" button — hasSubmitted here is
+  // just the inverse of needsRsvp (this component only renders its form
+  // past the !guest check above, so a guest is guaranteed at this point).
+  // markSubmitted() flips both this form's title/button AND hides Hero's
+  // CTA the instant a submit succeeds, without needing a page reload.
+  const { needsRsvp, markSubmitted } = useRsvpStatus();
+  const hasSubmitted = !needsRsvp;
 
   if (!guest) {
     return (
@@ -66,7 +68,7 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
         }),
       });
       setResult(res.ok ? 'success' : 'error');
-      if (res.ok) setHasSubmitted(true);
+      if (res.ok) markSubmitted();
     } catch {
       setResult('error');
     } finally {
