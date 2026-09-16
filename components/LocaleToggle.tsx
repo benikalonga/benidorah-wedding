@@ -3,8 +3,12 @@
 import { useLocale } from "./LocaleProvider";
 
 /**
- * Small EN/FR segmented toggle. Rendered in a few places with different
- * visual contexts:
+ * Small EN/FR segmented toggle. Both buttons call toggleLocale rather than
+ * setLocale("en")/setLocale("fr") directly — with only two locales, clicking
+ * either side always flips to the other language, even if you click the
+ * side that's already active, instead of that click being a no-op.
+ *
+ * Rendered in a few places with different visual contexts:
  * - Nav bar (light ivory background) — variant="light" (default), twice
  *   there ("lg:hidden" just before the mobile hamburger, "hidden lg:flex"
  *   inside the desktop link group).
@@ -19,7 +23,7 @@ export default function LocaleToggle({
   className?: string;
   variant?: "light" | "dark";
 }) {
-  const { locale, setLocale, t } = useLocale();
+  const { locale, toggleLocale, t } = useLocale();
   const isDark = variant === "dark";
 
   return (
@@ -30,7 +34,7 @@ export default function LocaleToggle({
     >
       <button
         type="button"
-        onClick={() => setLocale("en")}
+        onClick={toggleLocale}
         aria-pressed={locale === "en"}
         aria-label={t("nav.switchToEnglish")}
         className={`rounded-full px-2.5 py-1 transition-colors ${
@@ -47,7 +51,7 @@ export default function LocaleToggle({
       </button>
       <button
         type="button"
-        onClick={() => setLocale("fr")}
+        onClick={toggleLocale}
         aria-pressed={locale === "fr"}
         aria-label={t("nav.switchToFrench")}
         className={`rounded-full px-2.5 py-1 transition-colors ${

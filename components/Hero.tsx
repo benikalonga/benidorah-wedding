@@ -250,7 +250,8 @@ export default function Hero({
                         />
                         <path d="M22 9l-6 6M16 9l6 6" strokeLinecap="round" />
                       </svg>
-                      {t("hero.soundOn")}
+                      <span className="hidden sm:inline">{t("hero.soundOn")}</span>
+                      <span className="sm:hidden">{t("hero.soundOnShort")}</span>
                     </>
                   ) : (
                     <>
@@ -272,7 +273,8 @@ export default function Hero({
                           strokeLinecap="round"
                         />
                       </svg>
-                      {t("hero.soundOff")}
+                      <span className="hidden sm:inline">{t("hero.soundOff")}</span>
+                      <span className="sm:hidden">{t("hero.soundOffShort")}</span>
                     </>
                   )}
                 </button>
