@@ -322,6 +322,23 @@ async function main() {
       },
     })
     .catch(() => null);
+  // Deliberately left with no Rsvp row (unlike the two above) — a stable
+  // link for testing the "not yet submitted" first-time flow, since the
+  // other two always already have a submitted response.
+  await prisma.guest
+    .upsert({
+      where: { userHashCode: "devDemoNoRsvp03" },
+      update: {},
+      create: {
+        userHashCode: "devDemoNoRsvp03",
+        type: "single",
+        fullName: "Palesa Mokoena",
+        phoneNumber: "+27820000003",
+        guestSide: "bride",
+        tableId: tables[2].id,
+      },
+    })
+    .catch(() => null);
 
   console.log("Seeding gift registry…");
   // Clear out any gift items from an older registry list (e.g. the
