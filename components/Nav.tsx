@@ -5,11 +5,11 @@ import { useLocale } from './LocaleProvider';
 import LocaleToggle from './LocaleToggle';
 import { useActivityLog } from './ActivityLogProvider';
 
-const SECTION_IDS = ['home', 'gallery', 'history', 'address', 'gifts', 'rsvp', 'theme', 'moments', 'contact'] as const;
+const SECTION_IDS = ['home','history',  'gallery', 'address', 'gifts', 'rsvp', 'theme', 'moments', 'contact'] as const;
 const SECTION_LABEL_KEYS: Record<(typeof SECTION_IDS)[number], string> = {
   home: 'nav.home',
-  gallery: 'nav.gallery',
   history: 'nav.history',
+  gallery: 'nav.gallery',
   address: 'nav.dateAddress',
   gifts: 'nav.registry',
   rsvp: 'nav.rsvp',
