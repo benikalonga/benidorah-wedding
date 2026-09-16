@@ -39,7 +39,7 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
     return (
       <section id="rsvp" className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
         <SectionHeader index="05" eyebrow={t('rsvp.eyebrow')} title={t('rsvp.title')} />
-        <div className="hairline-gold mx-auto mt-10 max-w-lg bg-cream p-10 text-center">
+        <div className="hairline-gold mx-auto mt-10 max-w-lg bg-ivory p-10 text-center">
           <RingIcon className="mx-auto mb-4 text-champagne-gold" />
           <p className="text-charcoal/70">{t('rsvp.lockedMessage')}</p>
         </div>
@@ -103,7 +103,7 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
         viewport={{ once: true }}
         transition={{ duration: 0.7 }}
         onSubmit={handleSubmit}
-        className="hairline-gold mx-auto mt-10 flex max-w-xl flex-col gap-7 bg-cream p-8 sm:p-10"
+        className="hairline-gold mx-auto mt-10 flex max-w-xl flex-col gap-7 bg-ivory p-8 sm:p-10"
       >
         <RingIcon className="mx-auto text-champagne-gold" />
 
