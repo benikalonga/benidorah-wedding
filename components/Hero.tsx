@@ -21,9 +21,11 @@ const LOADER_TIMEOUT_MS = 6000;
 export default function Hero({
   coupleNames,
   posterSrc,
+  needsRsvp = false,
 }: {
   coupleNames: string;
   posterSrc: string;
+  needsRsvp?: boolean;
 }) {
   const { t } = useLocale();
   const wrapperRef = useRef<HTMLElement>(null);
@@ -144,6 +146,10 @@ export default function Hero({
 
   const handleScrollToHistory = () => {
     document.getElementById("history")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleScrollToRsvp = () => {
+    document.getElementById("rsvp")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -296,12 +302,13 @@ export default function Hero({
 
           <motion.div
             style={{ opacity: contentOpacity, y: contentY }}
-            // This card has no interactive children — it's centered text
-            // over a `h-full` box, so without pointer-events-none its
-            // empty flex padding (same z-10 as the top bar, but later in
-            // DOM) would win every click in that overlapping region,
-            // silently swallowing clicks on the Sound On / Download
-            // buttons above it.
+            // Mostly non-interactive centered text over a `h-full` box, so
+            // without pointer-events-none its empty flex padding (same
+            // z-10 as the top bar, but later in DOM) would win every click
+            // in that overlapping region, silently swallowing clicks on
+            // the Sound On / Download buttons above it. The one real
+            // button here (Go to RSVP) opts back in with its own
+            // pointer-events-auto, same pattern as the Scroll button below.
             className="relative z-10 flex h-full flex-col items-center justify-center gap-7 px-6 text-center pointer-events-none"
           >
             <motion.p
@@ -341,6 +348,19 @@ export default function Hero({
             >
               <CountdownTimer targetIso={WEDDING_DATE_ISO} />
             </motion.div>
+
+            {needsRsvp && (
+              <motion.button
+                type="button"
+                onClick={handleScrollToRsvp}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.7 }}
+                className="btn-gold pointer-events-auto mt-1 px-6 py-3 text-xs uppercase tracking-widest"
+              >
+                {t("hero.goToRsvp")}
+              </motion.button>
+            )}
           </motion.div>
 
           {/* Second act: fades in exactly as the placeholder video crossfades

@@ -52,7 +52,11 @@ export default async function WeddingPage({ guest }: { guest: (Guest & { rsvp: R
   return (
     <LocaleProvider>
       <Nav />
-      <Hero coupleNames={SITE_COPY.coupleNames} posterSrc="/images/couple/hero-poster.jpg" />
+      <Hero
+        coupleNames={SITE_COPY.coupleNames}
+        posterSrc="/images/couple/hero-poster.jpg"
+        needsRsvp={!!guest && !guest.rsvp}
+      />
       <History
         items={history.map((h) => ({
           id: h.id,
