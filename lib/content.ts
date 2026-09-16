@@ -21,6 +21,7 @@ export const SITE_COPY = {
   mapsDirectionsUrl:
     "https://www.google.com/maps/dir/?api=1&destination=" +
     encodeURIComponent("236 1st Rd, Walkers Fruit Farms SH, De Deur, 1961"),
+  venueWebsiteUrl: "https://suitabilitygardens.co.za/weddings/",
   ceremony: { label: { en: "Matrimonial Ceremony", fr: "Cérémonie Matrimoniale" }, time: "14:00" },
   party: { label: { en: "Party", fr: "Réception" }, time: "18:00" },
   bank: {

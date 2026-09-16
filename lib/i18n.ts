@@ -98,6 +98,10 @@ const en = {
     atVenue: "at {venue}",
     getDirections: "Get Directions →",
     venueMapTitle: "Venue map",
+    previewVenueAria: "Preview the venue's website",
+    venuePreviewTitle: "Venue website preview",
+    openInNewTab: "Open in a new tab",
+    closeAria: "Close",
   },
   giftRegistry: {
     eyebrow: "With Love",
@@ -270,6 +274,10 @@ const fr: typeof en = {
     atVenue: "à {venue}",
     getDirections: "Obtenir l'itinéraire →",
     venueMapTitle: "Carte du lieu",
+    previewVenueAria: "Aperçu du site du lieu",
+    venuePreviewTitle: "Aperçu du site du lieu",
+    openInNewTab: "Ouvrir dans un nouvel onglet",
+    closeAria: "Fermer",
   },
   giftRegistry: {
     eyebrow: "Avec Amour",
