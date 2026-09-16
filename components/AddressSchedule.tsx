@@ -5,14 +5,27 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { SITE_COPY } from '@/lib/content';
 import SectionHeader from './SectionHeader';
 import { useLocale } from './LocaleProvider';
+import { useActivityLog } from './ActivityLogProvider';
 import { pick } from '@/lib/i18n';
 
 export default function AddressSchedule() {
   const { locale, t } = useLocale();
+  const { logAction } = useActivityLog();
   const { venueName, address, mapEmbedUrl, mapsDirectionsUrl, venueWebsiteUrl, ceremony, party } = SITE_COPY;
   const [showVenueSite, setShowVenueSite] = useState(false);
 
+  function handleOpenVenueSite() {
+    setShowVenueSite(true);
+    logAction('venue_preview_open');
+  }
+
+  function handleCloseVenueSite() {
+    setShowVenueSite(false);
+    logAction('venue_preview_close');
+  }
+
   function handleOpenInNewTab() {
+    logAction('venue_preview_open_external');
     window.open(venueWebsiteUrl, '_blank', 'noopener,noreferrer');
     setShowVenueSite(false);
   }
@@ -24,7 +37,7 @@ export default function AddressSchedule() {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') setShowVenueSite(false);
+      if (e.key === 'Escape') handleCloseVenueSite();
     }
     window.addEventListener('keydown', onKeyDown);
     return () => {
@@ -57,7 +70,7 @@ export default function AddressSchedule() {
           </p>
           <button
             type="button"
-            onClick={() => setShowVenueSite(true)}
+            onClick={handleOpenVenueSite}
             aria-label={t('addressSchedule.previewVenueAria')}
             title={t('addressSchedule.previewVenueAria')}
             className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-champagne-gold-light/40 text-champagne-gold-light transition-colors hover:bg-champagne-gold-light/10"
@@ -110,6 +123,7 @@ export default function AddressSchedule() {
               href={mapsDirectionsUrl}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => logAction('get_directions_click')}
               className="btn-gold inline-flex items-center justify-center gap-2 px-8 py-4 text-xs uppercase tracking-widest"
             >
               {t('addressSchedule.getDirections')}
@@ -126,7 +140,7 @@ export default function AddressSchedule() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-onyx/80 p-4 sm:p-8"
-            onClick={() => setShowVenueSite(false)}
+            onClick={handleCloseVenueSite}
           >
             <motion.div
               initial={{ opacity: 0, y: 16, scale: 0.98 }}
@@ -154,7 +168,7 @@ export default function AddressSchedule() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setShowVenueSite(false)}
+                    onClick={handleCloseVenueSite}
                     aria-label={t('addressSchedule.closeAria')}
                     className="flex h-9 w-9 items-center justify-center rounded-full text-charcoal/60 transition-colors hover:bg-charcoal/10 hover:text-onyx"
                   >

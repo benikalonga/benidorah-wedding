@@ -1,5 +1,6 @@
 import { LocaleProvider } from './LocaleProvider';
 import { RsvpStatusProvider } from './RsvpStatusProvider';
+import { ActivityLogProvider } from './ActivityLogProvider';
 import Nav from './Nav';
 import Hero from './Hero';
 import History from './History';
@@ -53,6 +54,7 @@ export default async function WeddingPage({ guest }: { guest: (Guest & { rsvp: R
   return (
     <LocaleProvider>
       <RsvpStatusProvider initialNeedsRsvp={!!guest && !guest.rsvp}>
+        <ActivityLogProvider guestId={guest?.id ?? null}>
         <Nav />
         <Hero
           coupleNames={SITE_COPY.coupleNames}
@@ -107,6 +109,7 @@ export default async function WeddingPage({ guest }: { guest: (Guest & { rsvp: R
         <Contact />
         <Footer />
         <InstallPrompt />
+      </ActivityLogProvider>
       </RsvpStatusProvider>
     </LocaleProvider>
   );

@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useLocale } from './LocaleProvider';
+import { useActivityLog } from './ActivityLogProvider';
 
 export default function InstallPrompt() {
   const { t } = useLocale();
+  const { logAction } = useActivityLog();
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [dismissed, setDismissed] = useState(false);
 
@@ -26,6 +28,7 @@ export default function InstallPrompt() {
         <button
           className="btn-gold px-4 py-2 text-[11px] uppercase tracking-widest"
           onClick={async () => {
+            logAction('install_prompt_install');
             deferredPrompt.prompt();
             await deferredPrompt.userChoice;
             setDeferredPrompt(null);
@@ -33,7 +36,13 @@ export default function InstallPrompt() {
         >
           {t('installPrompt.install')}
         </button>
-        <button className="text-[11px] uppercase tracking-widest text-ivory/50" onClick={() => setDismissed(true)}>
+        <button
+          className="text-[11px] uppercase tracking-widest text-ivory/50"
+          onClick={() => {
+            setDismissed(true);
+            logAction('install_prompt_dismiss');
+          }}
+        >
           {t('installPrompt.later')}
         </button>
       </div>

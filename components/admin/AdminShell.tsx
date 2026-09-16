@@ -17,6 +17,7 @@ import {
   IconMenu,
   IconChevronLeft,
   IconLogout,
+  IconLogs,
 } from "./ui/icons";
 
 const NAV = [
@@ -26,6 +27,7 @@ const NAV = [
   { href: "/admin/invited", label: "Invited / RSVPs", icon: IconMail },
   { href: "/admin/moments", label: "Moments", icon: IconImage },
   { href: "/admin/tickets", label: "Wish Wall Tickets", icon: IconTicket },
+  { href: "/admin/logs", label: "Logs", icon: IconLogs },
   { href: "/admin/settings", label: "Settings", icon: IconSettings },
 ];
 

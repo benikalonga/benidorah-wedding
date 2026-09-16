@@ -15,6 +15,7 @@ import { onHeroVideoPauseRequest } from "@/lib/heroPlayback";
 import { useLocale } from "./LocaleProvider";
 import LocaleToggle from "./LocaleToggle";
 import { useRsvpStatus } from "./RsvpStatusProvider";
+import { useActivityLog } from "./ActivityLogProvider";
 
 const MIN_LOADER_MS = 1100;
 const LOADER_TIMEOUT_MS = 6000;
@@ -31,6 +32,7 @@ export default function Hero({
   // (from anywhere on the page), so this button disappears immediately
   // without needing a reload, not just on a fresh page load.
   const { needsRsvp } = useRsvpStatus();
+  const { logAction } = useActivityLog();
   const wrapperRef = useRef<HTMLElement>(null);
   const mainVideoRef = useRef<HTMLVideoElement>(null);
 
@@ -144,14 +146,17 @@ export default function Hero({
       const next = !mainVideoRef.current.muted;
       mainVideoRef.current.muted = next;
       setMuted(next);
+      logAction("sound_toggle", { muted: next });
     }
   };
 
   const handleScrollToHistory = () => {
+    logAction("scroll_to_history");
     document.getElementById("history")?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleScrollToRsvp = () => {
+    logAction("go_to_invitation_click");
     document.getElementById("rsvp")?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -282,6 +287,7 @@ export default function Hero({
               <a
                 href="/api/media/highlight?download=1"
                 download
+                onClick={() => logAction("download_highlight")}
                 className="hairline flex h-10 w-10 items-center justify-center rounded-full border-ivory/25 bg-onyx/30 text-ivory backdrop-blur-sm"
                 aria-label={t("hero.downloadHighlight")}
                 title={t("hero.downloadHighlight")}

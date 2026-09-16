@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocale } from './LocaleProvider';
+import { useActivityLog } from './ActivityLogProvider';
 
 const LINK_SECTIONS = [
   { href: '#home', key: 'nav.home' },
@@ -16,6 +17,7 @@ const LINK_SECTIONS = [
 
 export default function Footer() {
   const { t } = useLocale();
+  const { logAction } = useActivityLog();
   return (
     <footer className="bg-onyx text-ivory">
       <div className="checkerboard-strip h-4 w-full" aria-hidden />
@@ -32,7 +34,11 @@ export default function Footer() {
             ))}
           </nav>
           <div className="divider-onyx w-24" />
-          <a href="/admin" className="text-[10px] uppercase tracking-[0.2em] text-ivory/30 hover:text-ivory/60">
+          <a
+            href="/admin"
+            onClick={() => logAction('footer_admin_click')}
+            className="text-[10px] uppercase tracking-[0.2em] text-ivory/30 hover:text-ivory/60"
+          >
             {t('footer.admin')}
           </a>
           <p className="text-[10px] uppercase tracking-[0.2em] text-ivory/30">{t('footer.madeWithLove')}</p>

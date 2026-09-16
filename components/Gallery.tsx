@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import Lightbox, { LightboxItem } from './Lightbox';
 import SectionHeader from './SectionHeader';
 import { useLocale } from './LocaleProvider';
+import { useActivityLog } from './ActivityLogProvider';
 
 export interface GalleryEntry {
   id: string;
@@ -18,6 +19,7 @@ const PAGE_SIZE = 10;
 
 export default function Gallery({ items }: { items: GalleryEntry[] }) {
   const { t } = useLocale();
+  const { logAction } = useActivityLog();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   // Lightbox navigation (prev/next, swipe) still spans every item, not just
@@ -45,7 +47,10 @@ export default function Gallery({ items }: { items: GalleryEntry[] }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-40px' }}
             transition={{ duration: 0.6, delay: (idx % 4) * 0.06 }}
-            onClick={() => setOpenIndex(idx)}
+            onClick={() => {
+              setOpenIndex(idx);
+              logAction('gallery_view', { id: item.id, mediaType: item.mediaType });
+            }}
             className="group relative mb-2 block w-full break-inside-avoid overflow-hidden sm:mb-3"
           >
             {item.mediaType === 'image' ? (
@@ -95,7 +100,10 @@ export default function Gallery({ items }: { items: GalleryEntry[] }) {
       {hasMore && (
         <div className="mt-10 flex justify-center">
           <button
-            onClick={() => setVisibleCount((c) => Math.min(c + PAGE_SIZE, items.length))}
+            onClick={() => {
+              setVisibleCount((c) => Math.min(c + PAGE_SIZE, items.length));
+              logAction('gallery_show_more');
+            }}
             className="btn-outline rounded-full px-8 py-3 text-xs uppercase"
           >
             {t('gallery.showMore')}

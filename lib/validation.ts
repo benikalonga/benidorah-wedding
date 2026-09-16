@@ -29,6 +29,13 @@ export const giftContributionSchema = z.object({
   note: z.string().max(500).optional().or(z.literal('')),
 });
 
+export const activityLogSchema = z.object({
+  guestId: z.string().uuid().nullable().optional(),
+  action: z.string().min(1).max(100),
+  path: z.string().max(500).optional(),
+  metadata: z.record(z.any()).optional(),
+});
+
 export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),

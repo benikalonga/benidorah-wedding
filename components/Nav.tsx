@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useLocale } from './LocaleProvider';
 import LocaleToggle from './LocaleToggle';
+import { useActivityLog } from './ActivityLogProvider';
 
 const SECTION_IDS = ['home', 'gallery', 'history', 'address', 'gifts', 'rsvp', 'theme', 'moments', 'contact'] as const;
 const SECTION_LABEL_KEYS: Record<(typeof SECTION_IDS)[number], string> = {
@@ -19,6 +20,7 @@ const SECTION_LABEL_KEYS: Record<(typeof SECTION_IDS)[number], string> = {
 
 export default function Nav() {
   const { t } = useLocale();
+  const { logAction } = useActivityLog();
   const [visible, setVisible] = useState(false);
   const [active, setActive] = useState('home');
   const [open, setOpen] = useState(false);
@@ -60,7 +62,11 @@ export default function Nav() {
       }`}
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8">
-        <a href="#home" className="display-huge text-lg text-onyx">
+        <a
+          href="#home"
+          onClick={() => logAction('nav_click', { section: 'home' })}
+          className="display-huge text-lg text-onyx"
+        >
           B<span className="text-champagne-gold">&amp;</span>D
         </a>
 
@@ -69,6 +75,7 @@ export default function Nav() {
             <a
               key={s.id}
               href={`#${s.id}`}
+              onClick={() => logAction('nav_click', { section: s.id })}
               className={`group relative text-xs uppercase tracking-[0.18em] transition-colors ${
                 active === s.id ? 'text-onyx' : 'text-charcoal/50 hover:text-onyx'
               }`}
@@ -87,7 +94,10 @@ export default function Nav() {
         <div className="flex items-center gap-2 lg:hidden">
           <LocaleToggle />
           <button
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => {
+              setOpen((v) => !v);
+              logAction('toggle_menu', { open: !open });
+            }}
             className="hairline flex h-9 w-9 items-center justify-center rounded-full"
             aria-label={t('nav.toggleMenuAria')}
           >
@@ -105,7 +115,10 @@ export default function Nav() {
             <a
               key={s.id}
               href={`#${s.id}`}
-              onClick={() => setOpen(false)}
+              onClick={() => {
+                setOpen(false);
+                logAction('nav_click', { section: s.id, from: 'mobile_menu' });
+              }}
               className="py-2 text-sm uppercase tracking-[0.18em] text-charcoal/70"
             >
               {s.label}

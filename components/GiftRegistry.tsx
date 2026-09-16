@@ -8,6 +8,7 @@ import SectionHeader from "./SectionHeader";
 import { useLocale } from "./LocaleProvider";
 import { pickDb } from "@/lib/i18n";
 import { useSocketEvent } from "@/lib/useSocket";
+import { useActivityLog } from "./ActivityLogProvider";
 
 export interface GiftEntry {
   id: string;
@@ -29,6 +30,7 @@ export default function GiftRegistry({
   guestId?: string | null;
 }) {
   const { locale, t } = useLocale();
+  const { logAction } = useActivityLog();
   const [expanded, setExpanded] = useState(false);
   const [items, setItems] = useState(gifts);
   // Which gift's "I will gift it" reveal (the bank account details) is
@@ -52,6 +54,7 @@ export default function GiftRegistry({
   function handleToggleExpanded() {
     const collapsing = expanded;
     setExpanded(!expanded);
+    logAction(collapsing ? "gift_show_less" : "gift_show_all");
     if (collapsing) {
       listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
@@ -59,6 +62,11 @@ export default function GiftRegistry({
   const viewingGift = viewingId
     ? (items.find((g) => g.id === viewingId) ?? null)
     : null;
+
+  function handleViewGift(gift: GiftEntry) {
+    setViewingId(gift.id);
+    logAction("gift_view", { giftId: gift.id, name: gift.name });
+  }
 
   // The only thing ever broadcast for a gift is a successful claim (the
   // reserve endpoint is the sole emitter), so any other guest's "I will
@@ -129,6 +137,7 @@ export default function GiftRegistry({
 
     if (success) {
       setCopied(true);
+      logAction("copy_account_number");
       setTimeout(() => setCopied(false), 2000);
     }
   }
@@ -137,9 +146,10 @@ export default function GiftRegistry({
   // an available→booked conditional update, so two guests clicking at once
   // can't both win the same gift. Here it's reached via "I will bring cash
   // on the day" rather than a deposit, but the claim itself is identical.
-  async function handleBringCash(id: string) {
+  async function handleBringCash(id: string, name: string) {
     setClaimErrorId(null);
     setClaimingId(id);
+    logAction("gift_claim_attempt", { giftId: id, name });
     try {
       const res = await fetch(`/api/gifts/${id}/reserve`, {
         method: "POST",
@@ -151,11 +161,14 @@ export default function GiftRegistry({
           prev.map((g) => (g.id === id ? { ...g, status: "booked" } : g)),
         );
         setDepositOpenId(null);
+        logAction("gift_claim_success", { giftId: id, name });
       } else {
         setClaimErrorId(id);
+        logAction("gift_claim_error", { giftId: id, name });
       }
     } catch {
       setClaimErrorId(id);
+      logAction("gift_claim_error", { giftId: id, name });
     } finally {
       setClaimingId(null);
     }
@@ -257,7 +270,7 @@ export default function GiftRegistry({
               {t("giftRegistry.or")}
             </p>
             <button
-              onClick={() => handleBringCash(gift.id)}
+              onClick={() => handleBringCash(gift.id, gift.name)}
               disabled={claimingId === gift.id}
               className="btn-gold px-4 py-2 text-[11px] uppercase tracking-widest disabled:opacity-60"
             >
@@ -266,7 +279,10 @@ export default function GiftRegistry({
                 : t("giftRegistry.bringCash")}
             </button>
             <button
-              onClick={() => setDepositOpenId(null)}
+              onClick={() => {
+                setDepositOpenId(null);
+                logAction("gift_hide_details", { giftId: gift.id, name: gift.name });
+              }}
               className="text-left text-[11px] uppercase tracking-widest text-charcoal/40 underline underline-offset-4"
             >
               {t("giftRegistry.hideDetails")}
@@ -274,7 +290,10 @@ export default function GiftRegistry({
           </>
         ) : (
           <button
-            onClick={() => setDepositOpenId(gift.id)}
+            onClick={() => {
+              setDepositOpenId(gift.id);
+              logAction("gift_deposit_view", { giftId: gift.id, name: gift.name });
+            }}
             className="btn-gold px-4 py-2 text-[11px] uppercase tracking-widest"
           >
             {t("giftRegistry.iWillGiftIt")}
@@ -400,7 +419,7 @@ export default function GiftRegistry({
                   >
                     <button
                       type="button"
-                      onClick={() => setViewingId(gift.id)}
+                      onClick={() => handleViewGift(gift)}
                       className="block text-left"
                       aria-label={t("giftRegistry.viewAria").replace("{name}", name)}
                     >
@@ -418,7 +437,7 @@ export default function GiftRegistry({
                     <div className="flex flex-1 flex-col gap-2 p-4">
                       <button
                         type="button"
-                        onClick={() => setViewingId(gift.id)}
+                        onClick={() => handleViewGift(gift)}
                         className="text-left"
                       >
                         <h3 className="section-title text-base text-onyx">

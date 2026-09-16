@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import SectionHeader from './SectionHeader';
 import { useLocale } from './LocaleProvider';
 import { useRsvpStatus } from './RsvpStatusProvider';
+import { useActivityLog } from './ActivityLogProvider';
 
 export interface RsvpGuestContext {
   id: string;
@@ -36,6 +37,7 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
   // CTA the instant a submit succeeds, without needing a page reload.
   const { needsRsvp, markSubmitted } = useRsvpStatus();
   const hasSubmitted = !needsRsvp;
+  const { logAction } = useActivityLog();
 
   if (!guest) {
     return (
@@ -68,9 +70,15 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
         }),
       });
       setResult(res.ok ? 'success' : 'error');
-      if (res.ok) markSubmitted();
+      if (res.ok) {
+        markSubmitted();
+        logAction('rsvp_submit_success', { attending });
+      } else {
+        logAction('rsvp_submit_error', { attending });
+      }
     } catch {
       setResult('error');
+      logAction('rsvp_submit_error', { attending });
     } finally {
       setSubmitting(false);
     }

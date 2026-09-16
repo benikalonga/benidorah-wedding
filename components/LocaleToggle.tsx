@@ -1,6 +1,7 @@
 "use client";
 
 import { useLocale } from "./LocaleProvider";
+import { useActivityLog } from "./ActivityLogProvider";
 
 /**
  * Small EN/FR segmented toggle. Both buttons call toggleLocale rather than
@@ -24,7 +25,13 @@ export default function LocaleToggle({
   variant?: "light" | "dark";
 }) {
   const { locale, toggleLocale, t } = useLocale();
+  const { logAction } = useActivityLog();
   const isDark = variant === "dark";
+
+  function handleToggle() {
+    logAction("locale_toggle", { to: locale === "en" ? "fr" : "en" });
+    toggleLocale();
+  }
 
   return (
     <div
@@ -34,7 +41,7 @@ export default function LocaleToggle({
     >
       <button
         type="button"
-        onClick={toggleLocale}
+        onClick={handleToggle}
         aria-pressed={locale === "en"}
         aria-label={t("nav.switchToEnglish")}
         className={`rounded-full px-2.5 py-1 transition-colors ${
@@ -51,7 +58,7 @@ export default function LocaleToggle({
       </button>
       <button
         type="button"
-        onClick={toggleLocale}
+        onClick={handleToggle}
         aria-pressed={locale === "fr"}
         aria-label={t("nav.switchToFrench")}
         className={`rounded-full px-2.5 py-1 transition-colors ${

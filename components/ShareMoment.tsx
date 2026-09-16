@@ -6,6 +6,7 @@ import Lightbox, { LightboxItem } from './Lightbox';
 import SectionHeader from './SectionHeader';
 import { useSocketEvent } from '@/lib/useSocket';
 import { useLocale } from './LocaleProvider';
+import { useActivityLog } from './ActivityLogProvider';
 
 export interface MomentEntry {
   id: string;
@@ -30,6 +31,7 @@ export default function ShareMoment({
   guest: GuestSummary | null;
 }) {
   const { t } = useLocale();
+  const { logAction } = useActivityLog();
   const [moments, setMoments] = useState(initialMoments);
   const [uploaderName, setUploaderName] = useState(guest?.fullName || '');
   const [uploading, setUploading] = useState(false);
@@ -60,9 +62,13 @@ export default function ShareMoment({
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         setError(data.error || t('shareMoment.uploadFailed'));
+        logAction('moment_upload_error');
+      } else {
+        logAction('moment_upload_success', { mediaType: file.type.startsWith('video') ? 'video' : 'image' });
       }
     } catch {
       setError(t('shareMoment.uploadFailedConn'));
+      logAction('moment_upload_error');
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -117,7 +123,14 @@ export default function ShareMoment({
 
       <div className="mt-10 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4">
         {moments.map((m, idx) => (
-          <button key={m.id} onClick={() => setOpenIndex(idx)} className="overflow-hidden">
+          <button
+            key={m.id}
+            onClick={() => {
+              setOpenIndex(idx);
+              logAction('moment_view', { id: m.id, mediaType: m.mediaType });
+            }}
+            className="overflow-hidden"
+          >
             {m.mediaType === 'image' ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={m.mediaUrl} alt={t('shareMoment.uploadedByAlt').replace('{name}', m.uploaderName)} className="aspect-square w-full object-cover transition-transform duration-500 hover:scale-105" loading="lazy" />

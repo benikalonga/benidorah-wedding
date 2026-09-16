@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import SectionHeader from "./SectionHeader";
 import { useLocale } from "./LocaleProvider";
 import { pickDb, dateLocaleTag } from "@/lib/i18n";
+import { useActivityLog } from "./ActivityLogProvider";
 
 export interface HistoryEntry {
   id: string;
@@ -22,6 +23,7 @@ export interface HistoryEntry {
 
 export default function History({ items }: { items: HistoryEntry[] }) {
   const { locale, t } = useLocale();
+  const { logAction } = useActivityLog();
   const [expanded, setExpanded] = useState(false);
   const [selected, setSelected] = useState<HistoryEntry | null>(null);
   const visible = expanded ? items : items.slice(0, 5);
@@ -64,7 +66,10 @@ export default function History({ items }: { items: HistoryEntry[] }) {
 
             const card = (
               <button
-                onClick={() => setSelected(item)}
+                onClick={() => {
+                  setSelected(item);
+                  logAction("history_read_more", { id: item.id, title: item.title });
+                }}
                 className={`group inline-flex w-full max-w-md items-center gap-4 pb-2 text-left ${
                   onLeft ? "md:flex-row-reverse md:text-right" : ""
                 }`}
@@ -132,7 +137,10 @@ export default function History({ items }: { items: HistoryEntry[] }) {
       {items.length > 5 && (
         <div className="mt-10 flex justify-center">
           <button
-            onClick={() => setExpanded((v) => !v)}
+            onClick={() => {
+              setExpanded((v) => !v);
+              logAction(expanded ? "history_show_less" : "history_show_more");
+            }}
             className="btn-outline rounded-full px-8 py-3 text-xs uppercase"
           >
             {expanded ? t("history.showLess") : t("history.showMoreButton")}

@@ -4,9 +4,11 @@ import { motion } from 'framer-motion';
 import { SITE_COPY } from '@/lib/content';
 import SectionHeader from './SectionHeader';
 import { useLocale } from './LocaleProvider';
+import { useActivityLog } from './ActivityLogProvider';
 
 export default function Contact() {
   const { t } = useLocale();
+  const { logAction } = useActivityLog();
   return (
     <section id="contact" className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
       <motion.div
@@ -27,6 +29,7 @@ export default function Contact() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: i * 0.08 }}
             href={`tel:${c.phone.replace(/\s+/g, '')}`}
+            onClick={() => logAction('contact_click', { contact: c.name })}
             className="group flex items-center justify-between border-b border-t border-charcoal/10 py-8 transition-colors hover:bg-onyx sm:border-l sm:first:border-l-0"
           >
             <div className="px-2">
@@ -39,7 +42,11 @@ export default function Contact() {
       </div>
 
       <div className="mt-10 text-center">
-        <a href={`mailto:${SITE_COPY.email}`} className="eyebrow border-b border-champagne-gold pb-1 text-champagne-gold">
+        <a
+          href={`mailto:${SITE_COPY.email}`}
+          onClick={() => logAction('contact_email_click')}
+          className="eyebrow border-b border-champagne-gold pb-1 text-champagne-gold"
+        >
           {SITE_COPY.email}
         </a>
       </div>

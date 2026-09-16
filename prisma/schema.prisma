@@ -66,6 +66,7 @@ model Guest {
   moments       Moment[]
   bookedGifts   GiftItem[] @relation("BookedBy")
   contributions GiftContribution[]
+  activityLogs  ActivityLog[]
 
   @@map("guests")
 }
@@ -193,6 +194,30 @@ model GalleryItem {
   sortOrder    Int       @map("sort_order")
 
   @@map("gallery_items")
+}
+
+// Every tracked visitor action on the public site — page views, clicks,
+// external-link opens, form submissions. guestId/guestName are set when the
+// visitor arrived via their personal invite link (guestName is a snapshot
+// taken at write time, so a log entry still reads sensibly even if the
+// guest is later renamed or removed — same pattern as Ticket.displayName);
+// otherwise only ipAddress identifies them. Never a source of truth for
+// anything — purely an admin-facing activity feed, safe to lose/truncate.
+model ActivityLog {
+  id         String   @id @default(uuid())
+  guestId    String?  @map("guest_id")
+  guest      Guest?   @relation(fields: [guestId], references: [id], onDelete: SetNull)
+  guestName  String?  @map("guest_name")
+  ipAddress  String?  @map("ip_address")
+  userAgent  String?  @map("user_agent")
+  action     String
+  path       String?
+  metadata   Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@index([guestId])
+  @@map("activity_logs")
 }
 
 model SiteSetting {

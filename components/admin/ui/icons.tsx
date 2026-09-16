@@ -152,6 +152,13 @@ export const IconEye = (p: SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+export const IconLogs = (p: SVGProps<SVGSVGElement>) => (
+  <svg {...base(p)}>
+    <path d="M4 5h16M4 12h16M4 19h10" />
+    <circle cx="20" cy="19" r="1.5" fill="currentColor" stroke="none" />
+  </svg>
+);
+
 export const IconEyeOff = (p: SVGProps<SVGSVGElement>) => (
   <svg {...base(p)}>
     <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.4 10.4 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24" />
