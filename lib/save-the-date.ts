@@ -30,7 +30,7 @@ function greetingName(guest: SaveTheDateGuest): string {
 // Deliberately just the month + year, not the exact day — this message
 // goes out before the formal invitation, which is where the precise date
 // (and the personal RSVP link) belongs.
-const WEDDING_DATE_LABEL = { en: "December 2026", fr: "décembre 2026" };
+const WEDDING_DATE_LABEL = { en: "December 2026", fr: "Décembre 2026" };
 
 // No emojis here — some come through as unreadable/mojibake once run
 // through wa.me's URL-encoded text parameter (varies by device/OS font
