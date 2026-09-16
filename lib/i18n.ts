@@ -69,7 +69,7 @@ const en = {
     saveTheDate: "Save The Date",
     tagline: "Two hearts, one beautiful forever.",
     reducedMotionAlt: "{names} on their engagement shoot",
-    goToRsvp: "Go to RSVP",
+    goToRsvp: "Go to the Invitation",
   },
   history: {
     eyebrow: "Our Love Story",
@@ -238,7 +238,7 @@ const fr: typeof en = {
     saveTheDate: "Réservez La Date",
     tagline: "Deux cœurs, un bel avenir.",
     reducedMotionAlt: "{names} lors de leur séance photo de fiançailles",
-    goToRsvp: "Accéder au RSVP",
+    goToRsvp: "Accéder à l'invitation",
   },
   history: {
     eyebrow: "Notre Histoire d'Amour",
