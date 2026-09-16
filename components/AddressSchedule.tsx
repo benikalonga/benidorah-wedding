@@ -144,8 +144,12 @@ export default function AddressSchedule() {
                   <button
                     type="button"
                     onClick={handleOpenInNewTab}
-                    className="btn-gold px-4 py-2 text-[11px] uppercase tracking-widest"
+                    className="btn-gold inline-flex items-center gap-2 px-4 py-2 text-[11px] uppercase tracking-widest"
                   >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M15 3h6v6M10 14 21 3" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                     {t('addressSchedule.openInNewTab')}
                   </button>
                   <button

@@ -100,7 +100,7 @@ const en = {
     venueMapTitle: "Venue map",
     previewVenueAria: "Preview the venue's website",
     venuePreviewTitle: "Venue website preview",
-    openInNewTab: "Open in a new tab",
+    openInNewTab: "Open",
     closeAria: "Close",
   },
   giftRegistry: {
@@ -276,7 +276,7 @@ const fr: typeof en = {
     venueMapTitle: "Carte du lieu",
     previewVenueAria: "Aperçu du site du lieu",
     venuePreviewTitle: "Aperçu du site du lieu",
-    openInNewTab: "Ouvrir dans un nouvel onglet",
+    openInNewTab: "Ouvrir",
     closeAria: "Fermer",
   },
   giftRegistry: {
