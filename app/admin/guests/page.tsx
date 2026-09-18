@@ -40,6 +40,7 @@ interface GuestRow {
   tableId: string;
   table: { tableNumber: number };
   userHashCode: string;
+  inviteCode: string;
   inviteSentAt: string | null;
 }
 
@@ -403,6 +404,7 @@ function GuestsPageInner() {
                   <Th className="w-12">No</Th>
                   <Th className="min-w-[12rem]">Name</Th>
                   <Th>Phone</Th>
+                  <Th>Code</Th>
                   <Th>Side</Th>
                   <Th>Table</Th>
                   <Th>Invitation sent</Th>
@@ -425,6 +427,9 @@ function GuestsPageInner() {
                       </div>
                     </Td>
                     <Td className="text-charcoal/70">{g.phoneNumber}</Td>
+                    <Td className="font-mono text-charcoal/60" title="For a guest calling in without their link — the code they can enter under 'Enter the code you received' on the RSVP section">
+                      {g.inviteCode}
+                    </Td>
                     <Td>
                       <Badge tone={g.guestSide === "groom" ? "blue" : "gold"}>
                         {g.guestSide}
@@ -465,7 +470,7 @@ function GuestsPageInner() {
                     </p>
                   </div>
                   <p className="mt-0.5 text-xs text-charcoal/60">
-                    {g.phoneNumber}
+                    {g.phoneNumber} · <span className="font-mono">{g.inviteCode}</span>
                   </p>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-1.5">

@@ -7,6 +7,7 @@ const guest = {
   type: 'single' as const,
   phoneNumber: '+27821234567',
   userHashCode: 'AbC12xyz',
+  inviteCode: '12345678',
 };
 
 describe('Invitation link', () => {
@@ -20,6 +21,11 @@ describe('Invitation link', () => {
     expect(message).toContain('http://localhost:3000/AbC12xyz/en');
     const messageFr = buildInvitationMessage(guest, 'fr');
     expect(messageFr).toContain('http://localhost:3000/AbC12xyz/fr');
+  });
+
+  it('includes the fallback invite code', () => {
+    const message = buildInvitationMessage(guest, 'en');
+    expect(message).toContain('12345678');
   });
 
   it('greets a couple with both names', () => {

@@ -24,6 +24,7 @@ interface GuestRow {
   partnerName: string | null;
   phoneNumber: string;
   userHashCode: string;
+  inviteCode: string;
   linkOpenedAt: string | null;
   inviteSentAt: string | null;
   presentAt: string | null;

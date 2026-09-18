@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import SectionHeader from './SectionHeader';
 import { useLocale } from './LocaleProvider';
@@ -22,7 +22,10 @@ export interface RsvpGuestContext {
 }
 
 export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
+  const [code, setCode] = useState('');
+  const [codeSubmitting, setCodeSubmitting] = useState(false);
+  const [codeError, setCodeError] = useState<string | null>(null);
   const [attending, setAttending] = useState(guest?.existingRsvp?.attending ?? '');
   const [email, setEmail] = useState(guest?.email ?? '');
   const [allergyComment, setAllergyComment] = useState(guest?.existingRsvp?.allergyComment ?? '');
@@ -39,6 +42,49 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
   const hasSubmitted = !needsRsvp;
   const { logAction } = useActivityLog();
 
+  // Lands the code-retrieval redirect (see handleCodeSubmit below) — and
+  // any other #rsvp deep link — actually on the form. The browser's own
+  // scroll-to-fragment fires once, before gallery/history images finish
+  // loading and push this section further down the page, so it lands
+  // short; re-running it after `load` corrects for that.
+  useEffect(() => {
+    if (window.location.hash !== '#rsvp') return;
+    const scrollToForm = () => document.getElementById('rsvp')?.scrollIntoView();
+    scrollToForm();
+    window.addEventListener('load', scrollToForm);
+    return () => window.removeEventListener('load', scrollToForm);
+  }, []);
+
+  async function handleCodeSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (code.length !== 8) return;
+    setCodeSubmitting(true);
+    setCodeError(null);
+    try {
+      const res = await fetch('/api/rsvp-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.hash) {
+        // The API's error text is English-only (rate limit, bad shape,
+        // no match) — always show our own localized copy instead so a
+        // French visitor doesn't suddenly see an English sentence here.
+        setCodeError(t('rsvp.codeInvalid'));
+        setCodeSubmitting(false);
+        return;
+      }
+      // A real reload (not a client-side route push) so the page re-fetches
+      // as this guest — same as opening their actual invite link — and
+      // lands scrolled straight to the RSVP form via the #rsvp anchor.
+      window.location.href = `/${data.hash}/${locale}#rsvp`;
+    } catch {
+      setCodeError(t('rsvp.codeInvalid'));
+      setCodeSubmitting(false);
+    }
+  }
+
   if (!guest) {
     return (
       <section id="rsvp" className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
@@ -46,6 +92,36 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
         <div className="hairline-gold mx-auto mt-10 max-w-lg bg-ivory p-10 text-center">
           <RingIcon className="mx-auto mb-4 text-champagne-gold" />
           <p className="text-charcoal/70">{t('rsvp.lockedMessage')}</p>
+
+          <div className="my-6 flex items-center gap-3 text-[11px] uppercase tracking-widest text-charcoal/40">
+            <span className="h-px flex-1 bg-charcoal/15" />
+            {t('rsvp.codeDivider')}
+            <span className="h-px flex-1 bg-charcoal/15" />
+          </div>
+
+          <form onSubmit={handleCodeSubmit} className="flex flex-col gap-3">
+            <label className="text-[11px] uppercase tracking-widest text-charcoal/50">{t('rsvp.codeLabel')}</label>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={8}
+              value={code}
+              onChange={(e) => {
+                setCode(e.target.value.replace(/\D/g, '').slice(0, 8));
+                setCodeError(null);
+              }}
+              className="field-underline text-center tracking-[0.3em]"
+            />
+            <button
+              type="submit"
+              disabled={code.length !== 8 || codeSubmitting}
+              className="btn-gold px-6 py-3 text-xs uppercase tracking-widest disabled:opacity-50"
+            >
+              {codeSubmitting ? t('rsvp.codeSending') : t('rsvp.codeSubmit')}
+            </button>
+            {codeError && <p className="text-sm text-red-600">{codeError}</p>}
+          </form>
         </div>
       </section>
     );

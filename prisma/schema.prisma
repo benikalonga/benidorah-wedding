@@ -48,6 +48,7 @@ model Table {
 model Guest {
   id            String   @id @default(uuid())
   userHashCode  String   @unique @map("user_hash_code")
+  inviteCode    String   @unique @map("invite_code")
   type          GuestType
   fullName      String   @map("full_name")
   partnerName   String?  @map("partner_name")

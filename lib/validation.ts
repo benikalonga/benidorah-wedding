@@ -8,6 +8,10 @@ export const rsvpSchema = z.object({
   displayNameOnWall: z.boolean().default(false),
 });
 
+export const rsvpCodeSchema = z.object({
+  code: z.string().regex(/^\d{8}$/, 'Code must be 8 digits'),
+});
+
 export const guestInputSchema = z.object({
   type: z.enum(['single', 'couple']),
   fullName: z.string().min(1).max(200),

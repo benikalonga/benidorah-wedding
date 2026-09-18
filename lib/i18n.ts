@@ -136,6 +136,11 @@ const en = {
     title: "RSVP",
     lockedMessage:
       "RSVP is only available through your personal invitation link. If you've received an invite, open the link shared with you on WhatsApp to respond.",
+    codeDivider: "or",
+    codeLabel: "Enter the code you received",
+    codeSubmit: "Find my invitation",
+    codeSending: "Checking…",
+    codeInvalid: "That code doesn't match any invitation — please check and try again.",
     deadline: "Please respond by 15 November 2026.",
     formTitle: "Fill in the form to confirm your attendance",
     alreadySubmitted: "You have already submitted",
@@ -313,6 +318,11 @@ const fr: typeof en = {
     title: "RSVP",
     lockedMessage:
       "Le RSVP n'est disponible qu'à partir de votre lien d'invitation personnel. Si vous avez reçu une invitation, ouvrez le lien partagé sur WhatsApp pour répondre.",
+    codeDivider: "ou",
+    codeLabel: "Entrez le code que vous avez reçu",
+    codeSubmit: "Retrouver mon invitation",
+    codeSending: "Vérification…",
+    codeInvalid: "Ce code ne correspond à aucune invitation — veuillez vérifier et réessayer.",
     deadline: "Merci de répondre avant le 15 novembre 2026.",
     formTitle: "Remplissez le formulaire pour confirmer votre présence",
     alreadySubmitted: "Vous avez déjà répondu",

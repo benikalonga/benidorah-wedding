@@ -22,6 +22,7 @@ export interface InvitationGuest {
   type: "single" | "couple";
   phoneNumber: string;
   userHashCode: string;
+  inviteCode: string;
 }
 
 function greetingName(guest: InvitationGuest): string {
@@ -45,21 +46,23 @@ const RSVP_DEADLINE_LABEL: Record<Locale, string> = {
 
 const MESSAGE_BUILDERS: Record<
   Locale,
-  (name: string, link: string, type: "single" | "couple") => string
+  (name: string, link: string, type: "single" | "couple", code: string) => string
 > = {
-  en: (name, link, type) =>
+  en: (name, link, type, code) =>
     `Dear ${name}!\n\n` +
     `We are delighted to formally invite you to celebrate the wedding of Beni & Dorah.\n\n` +
     `Join us on ${WEDDING_DATE_LABEL.en} at ${SITE_COPY.ceremony.time}, at ${SITE_COPY.venueName}.\n\n` +
     `Please RSVP and find all the details here: ${link}\n\n` +
+    `If that link doesn't open, go to ${SITE_URL} and enter your code: ${code}\n\n` +
     `We'd be grateful for your response before ${RSVP_DEADLINE_LABEL.en}. We can't wait to celebrate with you!`,
-  fr: (name, link, type) =>
+  fr: (name, link, type, code) =>
     `Cher` +
     (type === "single" ? "(e) " : " ") +
     `${name} !\n\n` +
     `Nous avons le plaisir de vous inviter officiellement à célébrer le mariage de Beni & Dorah.\n\n` +
     `Rejoignez-nous le ${WEDDING_DATE_LABEL.fr} à ${SITE_COPY.ceremony.time}, à ${SITE_COPY.venueName}.\n\n` +
     `Merci de confirmer votre présence et de retrouver tous les détails ici : ${link}\n\n` +
+    `Si ce lien ne s'ouvre pas, rendez-vous sur ${SITE_URL} et entrez votre code : ${code}\n\n` +
     `Nous vous serions reconnaissants de répondre avant le ${RSVP_DEADLINE_LABEL.fr}. Nous avons hâte de célébrer avec vous !`,
 };
 
@@ -79,7 +82,7 @@ export function buildInvitationMessage(
   locale: Locale,
 ): string {
   const link = buildInvitationUrl(guest.userHashCode, locale);
-  return MESSAGE_BUILDERS[locale](greetingName(guest), link, guest.type);
+  return MESSAGE_BUILDERS[locale](greetingName(guest), link, guest.type, guest.inviteCode);
 }
 
 // wa.me expects digits only — country code first, no "+", spaces, or dashes.

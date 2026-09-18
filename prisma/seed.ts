@@ -299,6 +299,7 @@ async function main() {
       update: {},
       create: {
         userHashCode: "devDemoThandi01",
+        inviteCode: "10000001",
         type: "single",
         fullName: "Thandiwe Nkosi",
         phoneNumber: "+27820000001",
@@ -313,6 +314,7 @@ async function main() {
       update: {},
       create: {
         userHashCode: "devDemoSipho02",
+        inviteCode: "10000002",
         type: "couple",
         fullName: "Sipho Dlamini",
         partnerName: "Lindiwe Dlamini",
@@ -331,6 +333,7 @@ async function main() {
       update: {},
       create: {
         userHashCode: "devDemoNoRsvp03",
+        inviteCode: "10000003",
         type: "single",
         fullName: "Palesa Mokoena",
         phoneNumber: "+27820000003",

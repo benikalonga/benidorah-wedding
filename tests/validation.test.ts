@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { rsvpSchema, guestInputSchema, sanitizeText, randomWishColor } from '@/lib/validation';
+import { rsvpSchema, guestInputSchema, rsvpCodeSchema, sanitizeText, randomWishColor } from '@/lib/validation';
 
 describe('RSVP submission validation', () => {
   it('accepts a valid single-guest RSVP', () => {
@@ -28,6 +28,20 @@ describe('guest input validation', () => {
       tableId: 'not-a-uuid',
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe('RSVP code lookup validation', () => {
+  it('accepts an 8-digit code', () => {
+    expect(rsvpCodeSchema.safeParse({ code: '12345678' }).success).toBe(true);
+  });
+
+  it('rejects a code that is too short', () => {
+    expect(rsvpCodeSchema.safeParse({ code: '1234' }).success).toBe(false);
+  });
+
+  it('rejects a non-numeric code', () => {
+    expect(rsvpCodeSchema.safeParse({ code: 'abcdefgh' }).success).toBe(false);
   });
 });
 
