@@ -9,7 +9,7 @@ export const rsvpSchema = z.object({
 });
 
 export const rsvpCodeSchema = z.object({
-  code: z.string().regex(/^\d{8}$/, 'Code must be 8 digits'),
+  code: z.string().regex(/^\d{6}$/, 'Code must be 6 digits'),
 });
 
 export const guestInputSchema = z.object({

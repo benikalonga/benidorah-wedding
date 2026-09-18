@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
   // 8 chars of a URL-safe alphabet — a capability token, never derived
   // from the guest's name (see §8 of the brief).
   const userHashCode = nanoid(8);
-  // A separate, human-typable 8-digit fallback for the "Enter the code you
+  // A separate, human-typable 6-digit fallback for the "Enter the code you
   // received" box on the public RSVP section (see app/api/rsvp-code) — not
   // a capability token like userHashCode, just a lookup key.
   const inviteCode = await generateUniqueInviteCode();

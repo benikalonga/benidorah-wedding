@@ -32,16 +32,20 @@ describe('guest input validation', () => {
 });
 
 describe('RSVP code lookup validation', () => {
-  it('accepts an 8-digit code', () => {
-    expect(rsvpCodeSchema.safeParse({ code: '12345678' }).success).toBe(true);
+  it('accepts a 6-digit code', () => {
+    expect(rsvpCodeSchema.safeParse({ code: '123456' }).success).toBe(true);
   });
 
   it('rejects a code that is too short', () => {
     expect(rsvpCodeSchema.safeParse({ code: '1234' }).success).toBe(false);
   });
 
+  it('rejects a code that is too long', () => {
+    expect(rsvpCodeSchema.safeParse({ code: '1234567' }).success).toBe(false);
+  });
+
   it('rejects a non-numeric code', () => {
-    expect(rsvpCodeSchema.safeParse({ code: 'abcdefgh' }).success).toBe(false);
+    expect(rsvpCodeSchema.safeParse({ code: 'abcdef' }).success).toBe(false);
   });
 });
 

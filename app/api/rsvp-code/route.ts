@@ -6,7 +6,7 @@ import { rateLimit, clientIp } from '@/lib/rateLimit';
 // Public lookup for the "Enter the code you received" fallback on the
 // RSVP section (components/RSVPForm.tsx), for a guest who landed on the
 // generic site instead of their personal /<hash> link. Only ever returns
-// the hash for an exact code match — an 8-digit space is brute-forceable
+// the hash for an exact code match — a 6-digit space is brute-forceable
 // given enough attempts, so this is rate-limited fairly tightly per IP.
 export async function POST(req: NextRequest) {
   const ip = clientIp(req);
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   const json = await req.json().catch(() => null);
   const parsed = rsvpCodeSchema.safeParse(json);
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Enter the 8-digit code.' }, { status: 400 });
+    return NextResponse.json({ error: 'Enter the 6-digit code.' }, { status: 400 });
   }
 
   const guest = await prisma.guest.findUnique({

@@ -46,14 +46,19 @@ const RSVP_DEADLINE_LABEL: Record<Locale, string> = {
 
 const MESSAGE_BUILDERS: Record<
   Locale,
-  (name: string, link: string, type: "single" | "couple", code: string) => string
+  (
+    name: string,
+    link: string,
+    type: "single" | "couple",
+    code: string,
+  ) => string
 > = {
   en: (name, link, type, code) =>
     `Dear ${name}!\n\n` +
     `We are delighted to formally invite you to celebrate the wedding of Beni & Dorah.\n\n` +
     `Join us on ${WEDDING_DATE_LABEL.en} at ${SITE_COPY.ceremony.time}, at ${SITE_COPY.venueName}.\n\n` +
     `Please RSVP and find all the details here: ${link}\n\n` +
-    `If that link doesn't open, go to ${SITE_URL} and enter your code: ${code}\n\n` +
+    `Or enter your unique code: ${code}\n\n` +
     `We'd be grateful for your response before ${RSVP_DEADLINE_LABEL.en}. We can't wait to celebrate with you!`,
   fr: (name, link, type, code) =>
     `Cher` +
@@ -82,7 +87,12 @@ export function buildInvitationMessage(
   locale: Locale,
 ): string {
   const link = buildInvitationUrl(guest.userHashCode, locale);
-  return MESSAGE_BUILDERS[locale](greetingName(guest), link, guest.type, guest.inviteCode);
+  return MESSAGE_BUILDERS[locale](
+    greetingName(guest),
+    link,
+    guest.type,
+    guest.inviteCode,
+  );
 }
 
 // wa.me expects digits only — country code first, no "+", spaces, or dashes.

@@ -44,20 +44,32 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
 
   // Lands the code-retrieval redirect (see handleCodeSubmit below) — and
   // any other #rsvp deep link — actually on the form. The browser's own
-  // scroll-to-fragment fires once, before gallery/history images finish
-  // loading and push this section further down the page, so it lands
-  // short; re-running it after `load` corrects for that.
+  // scroll-to-fragment only fires once, but images above this section
+  // (gallery, history) keep reflowing the page well past `load` as they
+  // decode, each time throwing the target further down — so re-scroll
+  // every time the page's height changes, for a few seconds, instead of
+  // trying to guess the one right moment.
   useEffect(() => {
     if (window.location.hash !== '#rsvp') return;
-    const scrollToForm = () => document.getElementById('rsvp')?.scrollIntoView();
+    const target = document.getElementById('rsvp');
+    if (!target) return;
+
+    const scrollToForm = () => target.scrollIntoView();
     scrollToForm();
-    window.addEventListener('load', scrollToForm);
-    return () => window.removeEventListener('load', scrollToForm);
+
+    const observer = new ResizeObserver(scrollToForm);
+    observer.observe(document.body);
+    const stop = setTimeout(() => observer.disconnect(), 3000);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(stop);
+    };
   }, []);
 
   async function handleCodeSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (code.length !== 8) return;
+    if (code.length !== 6) return;
     setCodeSubmitting(true);
     setCodeError(null);
     try {
@@ -105,17 +117,17 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
-              maxLength={8}
+              maxLength={6}
               value={code}
               onChange={(e) => {
-                setCode(e.target.value.replace(/\D/g, '').slice(0, 8));
+                setCode(e.target.value.replace(/\D/g, '').slice(0, 6));
                 setCodeError(null);
               }}
               className="field-underline text-center tracking-[0.3em]"
             />
             <button
               type="submit"
-              disabled={code.length !== 8 || codeSubmitting}
+              disabled={code.length !== 6 || codeSubmitting}
               className="btn-gold px-6 py-3 text-xs uppercase tracking-widest disabled:opacity-50"
             >
               {codeSubmitting ? t('rsvp.codeSending') : t('rsvp.codeSubmit')}
