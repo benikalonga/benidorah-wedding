@@ -3,7 +3,8 @@
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
-import { buildSaveTheDateWaLink, type SaveTheDateLocale } from '@/lib/save-the-date';
+import { buildInvitationWaLink } from '@/lib/invitation';
+import type { Locale } from '@/lib/i18n';
 import PageHeader from '@/components/admin/ui/PageHeader';
 import Button from '@/components/admin/ui/Button';
 import WhatsAppSendButton from '@/components/admin/ui/WhatsAppSendButton';
@@ -144,13 +145,14 @@ function InvitedPageInner() {
     router.replace(pathname);
   }
 
-  async function handleResend(g: GuestRow, locale: SaveTheDateLocale) {
-    // Same as the Guests page's "Save the date" button — a plain wa.me
-    // "click to chat" link, pre-filled and opened for the admin to review
-    // and send personally. We still record the click below as "save the
-    // date sent" — there's no delivery receipt from wa.me, so this marks
-    // that the admin sent it, not that WhatsApp delivered it.
-    window.open(buildSaveTheDateWaLink(g, locale), '_blank', 'noopener,noreferrer');
+  async function handleResend(g: GuestRow, locale: Locale) {
+    // Same as the Guests page's "Send Invitation" button — a plain wa.me
+    // "click to chat" link (with the guest's personal /<hash>/<locale> RSVP
+    // link pre-filled), opened for the admin to review and send personally.
+    // We still record the click below as "invite sent" — there's no
+    // delivery receipt from wa.me, so this marks that the admin sent it,
+    // not that WhatsApp delivered it.
+    window.open(buildInvitationWaLink(g, locale), '_blank', 'noopener,noreferrer');
     const res = await fetch(`/api/admin/guests/${g.id}/save-the-date`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -298,7 +300,7 @@ function InvitedPageInner() {
               <Thead>
                 <Tr>
                   <Th className="min-w-[12rem]">Guest</Th>
-                  <Th>Save the date sent</Th>
+                  <Th>Invitation sent</Th>
                   <Th>Link opened</Th>
                   <Th>RSVP status</Th>
                   <Th>Allergy / comment</Th>
@@ -355,7 +357,7 @@ function InvitedPageInner() {
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {g.inviteSentAt && (
-                    <Badge tone="green">Save the date sent {new Date(g.inviteSentAt).toLocaleDateString()}</Badge>
+                    <Badge tone="green">Invitation sent {new Date(g.inviteSentAt).toLocaleDateString()}</Badge>
                   )}
                   {g.linkOpenedAt ? <Badge tone="green">Link opened</Badge> : <Badge tone="neutral">Link not opened</Badge>}
                 </div>

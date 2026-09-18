@@ -6,7 +6,7 @@ import { requireAdmin, isSession } from '@/lib/adminGuard';
 const saveTheDateSchema = z.object({ sent: z.boolean() });
 
 /**
- * Records (or clears) when the save-the-date / resend wa.me message was
+ * Records (or clears) when the invitation / resend wa.me message was
  * triggered for a guest — set from the Guests and Invited/RSVPs pages right
  * after the wa.me link opens. There's no delivery receipt from wa.me itself,
  * so this is "the admin clicked send", not confirmation WhatsApp delivered

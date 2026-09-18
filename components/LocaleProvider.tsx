@@ -25,14 +25,38 @@ function lookup(path: string, locale: Locale): string | undefined {
   return typeof node === "string" ? node : undefined;
 }
 
-export function LocaleProvider({ children }: { children: ReactNode }) {
-  // Always starts "en" on both server and first client render (no
-  // hydration mismatch), then swaps to a saved preference — if any —
-  // right after mount. A guest with no saved preference simply keeps
-  // seeing English, matching the site's actual default language.
-  const [locale, setLocaleState] = useState<Locale>("en");
+export function LocaleProvider({
+  children,
+  initialLocale,
+}: {
+  children: ReactNode;
+  /**
+   * Set by a guest's personal `/<hash>/<locale>` link (see
+   * lib/invitation.ts) — known synchronously from the URL on both server
+   * and first client render, so it can seed state directly with no
+   * hydration mismatch and no flash of the wrong language.
+   */
+  initialLocale?: Locale;
+}) {
+  // With no initialLocale (the generic `/` and hash-only `/<hash>` routes),
+  // always start "en" on both server and first client render (no hydration
+  // mismatch), then swap to a saved preference — if any — right after
+  // mount. A guest with no saved preference simply keeps seeing English,
+  // matching the site's actual default language.
+  const [locale, setLocaleState] = useState<Locale>(initialLocale ?? "en");
 
   useEffect(() => {
+    if (initialLocale) {
+      // The link's language is a deliberate signal from whoever sent it —
+      // let it win over any stale saved preference for this visit, and
+      // persist it so toggling/navigating elsewhere on the site keeps it.
+      try {
+        localStorage.setItem(STORAGE_KEY, initialLocale);
+      } catch {
+        // Non-fatal — see the other localStorage try/catch below.
+      }
+      return;
+    }
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved === "en" || saved === "fr") setLocaleState(saved);
@@ -40,7 +64,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       // localStorage can throw in a private/locked-down browser context —
       // just stay on the default "en" rather than crash the page over it.
     }
-  }, []);
+  }, [initialLocale]);
 
   useEffect(() => {
     document.documentElement.lang = locale;

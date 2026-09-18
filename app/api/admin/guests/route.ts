@@ -25,9 +25,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid guest data', details: parsed.error.flatten() }, { status: 400 });
   }
 
-  // 10 chars of a URL-safe alphabet — a capability token, never derived
+  // 8 chars of a URL-safe alphabet — a capability token, never derived
   // from the guest's name (see §8 of the brief).
-  const userHashCode = nanoid(10);
+  const userHashCode = nanoid(8);
 
   const guest = await prisma.guest.create({
     data: { ...parsed.data, partnerName: parsed.data.partnerName || null, email: parsed.data.email || null, userHashCode },

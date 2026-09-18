@@ -3,7 +3,8 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { buildSaveTheDateWaLink, type SaveTheDateLocale } from "@/lib/save-the-date";
+import { buildInvitationWaLink } from "@/lib/invitation";
+import type { Locale } from "@/lib/i18n";
 import WhatsAppSendButton from "@/components/admin/ui/WhatsAppSendButton";
 import PageHeader from "@/components/admin/ui/PageHeader";
 import Button from "@/components/admin/ui/Button";
@@ -220,13 +221,14 @@ function GuestsPageInner() {
     load();
   }
 
-  async function handleSaveTheDate(g: GuestRow, locale: SaveTheDateLocale) {
+  async function handleSendInvitation(g: GuestRow, locale: Locale) {
     // A plain wa.me "click to chat" link, not the WhatsApp Cloud API — it
-    // just opens the admin's own WhatsApp with the message pre-filled, for
-    // them to review and send personally. We still record the click as
-    // "save the date sent" below — there's no delivery receipt from wa.me,
-    // so this marks that the admin sent it, not that WhatsApp delivered it.
-    window.open(buildSaveTheDateWaLink(g, locale), "_blank", "noopener,noreferrer");
+    // just opens the admin's own WhatsApp with the message (and the
+    // guest's personal /<hash>/<locale> RSVP link) pre-filled, for them to
+    // review and send personally. We still record the click as "invite
+    // sent" below — there's no delivery receipt from wa.me, so this marks
+    // that the admin sent it, not that WhatsApp delivered it.
+    window.open(buildInvitationWaLink(g, locale), "_blank", "noopener,noreferrer");
     const res = await fetch(`/api/admin/guests/${g.id}/save-the-date`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -242,7 +244,7 @@ function GuestsPageInner() {
   function GuestActions({ g }: { g: GuestRow }) {
     return (
       <div className="flex flex-nowrap items-center gap-1.5">
-        <WhatsAppSendButton label="Save the date" onSend={(locale) => handleSaveTheDate(g, locale)} />
+        <WhatsAppSendButton label="Send Invitation" onSend={(locale) => handleSendInvitation(g, locale)} />
         <Button
           variant="outline"
           size="icon"
@@ -403,7 +405,7 @@ function GuestsPageInner() {
                   <Th>Phone</Th>
                   <Th>Side</Th>
                   <Th>Table</Th>
-                  <Th>Save the date sent</Th>
+                  <Th>Invitation sent</Th>
                   <Th>Actions</Th>
                 </Tr>
               </Thead>
@@ -473,7 +475,7 @@ function GuestsPageInner() {
                   <Badge tone="neutral">Table {g.table?.tableNumber}</Badge>
                   {g.inviteSentAt && (
                     <Badge tone="green">
-                      Save the date sent {new Date(g.inviteSentAt).toLocaleDateString()}
+                      Invitation sent {new Date(g.inviteSentAt).toLocaleDateString()}
                     </Badge>
                   )}
                 </div>

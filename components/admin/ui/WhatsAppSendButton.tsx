@@ -3,20 +3,20 @@
 import * as RadixMenu from '@radix-ui/react-dropdown-menu';
 import Button from './Button';
 import { IconWhatsApp } from './icons';
-import type { SaveTheDateLocale } from '@/lib/save-the-date';
+import type { Locale } from '@/lib/i18n';
 
 /**
- * The "Save the date" (Guests page) / "Resend" (Invited/RSVPs page)
+ * The "Send Invitation" (Guests page) / "Resend" (Invited/RSVPs page)
  * button — a single WhatsApp-icon button that, on click, offers a choice
- * of language before opening the wa.me link, instead of always sending
- * English.
+ * of language before opening the wa.me link. The chosen language is also
+ * what the guest's personal link opens the site in (see lib/invitation.ts).
  */
 export default function WhatsAppSendButton({
   label,
   onSend,
 }: {
   label: string;
-  onSend: (locale: SaveTheDateLocale) => void;
+  onSend: (locale: Locale) => void;
 }) {
   return (
     <RadixMenu.Root>

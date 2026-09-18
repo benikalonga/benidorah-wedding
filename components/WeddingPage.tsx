@@ -22,9 +22,16 @@ import {
   getVisibleTickets,
   getVisibleMoments,
 } from '@/lib/content';
+import type { Locale } from '@/lib/i18n';
 import type { Guest, Rsvp } from '@prisma/client';
 
-export default async function WeddingPage({ guest }: { guest: (Guest & { rsvp: Rsvp | null }) | null }) {
+export default async function WeddingPage({
+  guest,
+  initialLocale,
+}: {
+  guest: (Guest & { rsvp: Rsvp | null }) | null;
+  initialLocale?: Locale;
+}) {
   const [history, gallery, gifts, tickets, moments] = await Promise.all([
     getHistoryItems(),
     getGalleryItems(),
@@ -52,7 +59,7 @@ export default async function WeddingPage({ guest }: { guest: (Guest & { rsvp: R
     : null;
 
   return (
-    <LocaleProvider>
+    <LocaleProvider initialLocale={initialLocale}>
       <RsvpStatusProvider initialNeedsRsvp={!!guest && !guest.rsvp}>
         <ActivityLogProvider guestId={guest?.id ?? null}>
         <Nav />

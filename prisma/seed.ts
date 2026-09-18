@@ -291,7 +291,7 @@ async function main() {
 
   // Fixed hash codes here are for local/dev convenience only (so re-running
   // the seed is idempotent) — real guests created via the admin UI always
-  // get a fresh nanoid(10), never a predictable value (see §8 of the brief).
+  // get a fresh nanoid(8), never a predictable value (see §8 of the brief).
   console.log("Seeding a couple of example guests…");
   await prisma.guest
     .upsert({
