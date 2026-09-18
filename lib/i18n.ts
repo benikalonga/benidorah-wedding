@@ -184,6 +184,10 @@ const en = {
     lockedMessage:
       "Only invited guests can share a moment — open the personal invite link sent to you on WhatsApp to upload your photos and videos here.",
     namePlaceholder: "Your name",
+    browseFiles: "Browse files",
+    orDragDrop: "or drag and drop",
+    dropHere: "Drop it here",
+    fileHint: "Photos or videos",
     uploading: "Uploading…",
     uploadFailed: "Upload failed",
     uploadFailedConn: "Upload failed — check your connection and try again.",
@@ -367,6 +371,10 @@ const fr: typeof en = {
     lockedMessage:
       "Seuls les invités peuvent partager un instant — ouvrez le lien d'invitation personnel envoyé sur WhatsApp pour y publier vos photos et vidéos.",
     namePlaceholder: "Votre nom",
+    browseFiles: "Parcourir les fichiers",
+    orDragDrop: "ou glissez-déposez",
+    dropHere: "Déposez ici",
+    fileHint: "Photos ou vidéos",
     uploading: "Envoi en cours…",
     uploadFailed: "Échec de l'envoi",
     uploadFailedConn:

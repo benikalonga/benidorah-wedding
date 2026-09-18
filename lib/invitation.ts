@@ -67,7 +67,7 @@ const MESSAGE_BUILDERS: Record<
     `Nous avons le plaisir de vous inviter officiellement à célébrer le mariage de Beni & Dorah.\n\n` +
     `Rejoignez-nous le ${WEDDING_DATE_LABEL.fr} à ${SITE_COPY.ceremony.time}, à ${SITE_COPY.venueName}.\n\n` +
     `Merci de confirmer votre présence et de retrouver tous les détails ici : ${link}\n\n` +
-    `Si ce lien ne s'ouvre pas, rendez-vous sur ${SITE_URL} et entrez votre code : ${code}\n\n` +
+    `Ou entrez votre code unique : ${code}\n\n` +
     `Nous vous serions reconnaissants de répondre avant le ${RSVP_DEADLINE_LABEL.fr}. Nous avons hâte de célébrer avec vous !`,
 };
 
