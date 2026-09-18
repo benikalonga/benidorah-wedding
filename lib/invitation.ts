@@ -11,39 +11,52 @@
 // only pre-fill text, not attach media, so the hero video (if wanted) has
 // to be attached by hand in the chat before hitting send.
 
-import { SITE_COPY } from './content';
-import type { Locale } from './i18n';
+import { SITE_COPY } from "./content";
+import type { Locale } from "./i18n";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://benidorah.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://benidorah.com";
 
 export interface InvitationGuest {
   fullName: string;
   partnerName?: string | null;
-  type: 'single' | 'couple';
+  type: "single" | "couple";
   phoneNumber: string;
   userHashCode: string;
 }
 
 function greetingName(guest: InvitationGuest): string {
-  if (guest.type !== 'couple') return guest.fullName;
-  return guest.partnerName ? `Couple ${guest.fullName} & ${guest.partnerName}` : `Couple ${guest.fullName}`;
+  if (guest.type !== "couple") return guest.fullName;
+  return guest.partnerName
+    ? `Couple ${guest.fullName} & ${guest.partnerName}`
+    : `Couple ${guest.fullName}`;
 }
 
 // No emojis here — some come through as unreadable/mojibake once run
 // through wa.me's URL-encoded text parameter (varies by device/OS font
 // support), so plain text is the safe choice for this specific channel.
-const WEDDING_DATE_LABEL: Record<Locale, string> = { en: '23 December 2026', fr: '23 décembre 2026' };
-const RSVP_DEADLINE_LABEL: Record<Locale, string> = { en: '15 November 2026', fr: '15 novembre 2026' };
+const WEDDING_DATE_LABEL: Record<Locale, string> = {
+  en: "23 December 2026",
+  fr: "23 décembre 2026",
+};
+const RSVP_DEADLINE_LABEL: Record<Locale, string> = {
+  en: "15 November 2026",
+  fr: "15 novembre 2026",
+};
 
-const MESSAGE_BUILDERS: Record<Locale, (name: string, link: string) => string> = {
-  en: (name, link) =>
+const MESSAGE_BUILDERS: Record<
+  Locale,
+  (name: string, link: string, type: "single" | "couple") => string
+> = {
+  en: (name, link, type) =>
     `Dear ${name}!\n\n` +
     `We are delighted to formally invite you to celebrate the wedding of Beni & Dorah.\n\n` +
     `Join us on ${WEDDING_DATE_LABEL.en} at ${SITE_COPY.ceremony.time}, at ${SITE_COPY.venueName}.\n\n` +
     `Please RSVP and find all the details here: ${link}\n\n` +
     `We'd be grateful for your response before ${RSVP_DEADLINE_LABEL.en}. We can't wait to celebrate with you!`,
-  fr: (name, link) =>
-    `Cher(e) ${name} !\n\n` +
+  fr: (name, link, type) =>
+    `Cher` +
+    (type === "single" ? "(e) " : " ") +
+    `${name} !\n\n` +
     `Nous avons le plaisir de vous inviter officiellement à célébrer le mariage de Beni & Dorah.\n\n` +
     `Rejoignez-nous le ${WEDDING_DATE_LABEL.fr} à ${SITE_COPY.ceremony.time}, à ${SITE_COPY.venueName}.\n\n` +
     `Merci de confirmer votre présence et de retrouver tous les détails ici : ${link}\n\n` +
@@ -54,18 +67,27 @@ const MESSAGE_BUILDERS: Record<Locale, (name: string, link: string) => string> =
  * The guest's personal link, carrying the language the invite was sent in
  * so the site opens in that language by default — `/<hash>/<locale>`.
  */
-export function buildInvitationUrl(userHashCode: string, locale: Locale): string {
+export function buildInvitationUrl(
+  userHashCode: string,
+  locale: Locale,
+): string {
   return `${SITE_URL}/${userHashCode}/${locale}`;
 }
 
-export function buildInvitationMessage(guest: InvitationGuest, locale: Locale): string {
+export function buildInvitationMessage(
+  guest: InvitationGuest,
+  locale: Locale,
+): string {
   const link = buildInvitationUrl(guest.userHashCode, locale);
-  return MESSAGE_BUILDERS[locale](greetingName(guest), link);
+  return MESSAGE_BUILDERS[locale](greetingName(guest), link, guest.type);
 }
 
 // wa.me expects digits only — country code first, no "+", spaces, or dashes.
-export function buildInvitationWaLink(guest: InvitationGuest, locale: Locale): string {
-  const digits = guest.phoneNumber.replace(/\D/g, '');
+export function buildInvitationWaLink(
+  guest: InvitationGuest,
+  locale: Locale,
+): string {
+  const digits = guest.phoneNumber.replace(/\D/g, "");
   const message = buildInvitationMessage(guest, locale);
   return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
 }
