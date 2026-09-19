@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import { SITE_COPY } from "@/lib/content";
 import SectionHeader from "./SectionHeader";
 import { useLocale } from "./LocaleProvider";
@@ -41,7 +42,6 @@ export default function GiftRegistry({
   // Which gift is mid-flight claiming itself as "bringing cash on the
   // day" — disables that button so a double-click can't fire two requests.
   const [claimingId, setClaimingId] = useState<string | null>(null);
-  const [claimErrorId, setClaimErrorId] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
   const { bank } = SITE_COPY;
@@ -147,7 +147,6 @@ export default function GiftRegistry({
   // can't both win the same gift. Here it's reached via "I will bring cash
   // on the day" rather than a deposit, but the claim itself is identical.
   async function handleBringCash(id: string, name: string) {
-    setClaimErrorId(null);
     setClaimingId(id);
     logAction("gift_claim_attempt", { giftId: id, name });
     try {
@@ -163,11 +162,11 @@ export default function GiftRegistry({
         setDepositOpenId(null);
         logAction("gift_claim_success", { giftId: id, name });
       } else {
-        setClaimErrorId(id);
+        toast.error(t("giftRegistry.claimError"));
         logAction("gift_claim_error", { giftId: id, name });
       }
     } catch {
-      setClaimErrorId(id);
+      toast.error(t("giftRegistry.claimError"));
       logAction("gift_claim_error", { giftId: id, name });
     } finally {
       setClaimingId(null);
@@ -261,11 +260,6 @@ export default function GiftRegistry({
               {t("giftRegistry.depositHeader")}
             </p>
             {renderAccountDetails()}
-            {claimErrorId === gift.id && (
-              <p className="text-[11px] text-red-700">
-                {t("giftRegistry.claimError")}
-              </p>
-            )}
             <p className="text-center text-[11px] uppercase tracking-widest text-charcoal/40">
               {t("giftRegistry.or")}
             </p>

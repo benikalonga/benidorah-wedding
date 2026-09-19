@@ -1,3 +1,4 @@
+import { Toaster } from 'sonner';
 import { LocaleProvider } from './LocaleProvider';
 import { RsvpStatusProvider } from './RsvpStatusProvider';
 import { ActivityLogProvider } from './ActivityLogProvider';
@@ -62,6 +63,7 @@ export default async function WeddingPage({
     <LocaleProvider initialLocale={initialLocale}>
       <RsvpStatusProvider initialNeedsRsvp={!!guest && !guest.rsvp}>
         <ActivityLogProvider guestId={guest?.id ?? null}>
+        <Toaster position="top-center" richColors closeButton />
         <Nav />
         <Hero
           coupleNames={SITE_COPY.coupleNames}

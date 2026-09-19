@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import SectionHeader from './SectionHeader';
 import { useLocale } from './LocaleProvider';
 import { useRsvpStatus } from './RsvpStatusProvider';
@@ -25,14 +26,12 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
   const { t, locale } = useLocale();
   const [code, setCode] = useState('');
   const [codeSubmitting, setCodeSubmitting] = useState(false);
-  const [codeError, setCodeError] = useState<string | null>(null);
   const [attending, setAttending] = useState(guest?.existingRsvp?.attending ?? '');
   const [email, setEmail] = useState(guest?.email ?? '');
   const [allergyComment, setAllergyComment] = useState(guest?.existingRsvp?.allergyComment ?? '');
   const [wishText, setWishText] = useState(guest?.existingRsvp?.wishText ?? '');
   const [displayName, setDisplayName] = useState(guest?.existingRsvp?.displayNameOnWall ?? false);
   const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState<'idle' | 'success' | 'error'>('idle');
   // Shared with Hero's "Go to the Invitation" button — hasSubmitted here is
   // just the inverse of needsRsvp (this component only renders its form
   // past the !guest check above, so a guest is guaranteed at this point).
@@ -71,7 +70,6 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
     e.preventDefault();
     if (code.length !== 6) return;
     setCodeSubmitting(true);
-    setCodeError(null);
     try {
       const res = await fetch('/api/rsvp-code', {
         method: 'POST',
@@ -83,7 +81,7 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
         // The API's error text is English-only (rate limit, bad shape,
         // no match) — always show our own localized copy instead so a
         // French visitor doesn't suddenly see an English sentence here.
-        setCodeError(t('rsvp.codeInvalid'));
+        toast.error(t('rsvp.codeInvalid'));
         setCodeSubmitting(false);
         return;
       }
@@ -92,7 +90,7 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
       // lands scrolled straight to the RSVP form via the #rsvp anchor.
       window.location.href = `/${data.hash}/${locale}#rsvp`;
     } catch {
-      setCodeError(t('rsvp.codeInvalid'));
+      toast.error(t('rsvp.codeInvalid'));
       setCodeSubmitting(false);
     }
   }
@@ -119,10 +117,7 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
               pattern="[0-9]*"
               maxLength={6}
               value={code}
-              onChange={(e) => {
-                setCode(e.target.value.replace(/\D/g, '').slice(0, 6));
-                setCodeError(null);
-              }}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
               className="field-underline text-center tracking-[0.3em]"
             />
             <button
@@ -132,7 +127,6 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
             >
               {codeSubmitting ? t('rsvp.codeSending') : t('rsvp.codeSubmit')}
             </button>
-            {codeError && <p className="text-sm text-red-600">{codeError}</p>}
           </form>
         </div>
       </section>
@@ -143,7 +137,6 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
     e.preventDefault();
     if (!attending) return;
     setSubmitting(true);
-    setResult('idle');
     try {
       const res = await fetch('/api/rsvp', {
         method: 'POST',
@@ -157,15 +150,16 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
           displayNameOnWall: displayName,
         }),
       });
-      setResult(res.ok ? 'success' : 'error');
       if (res.ok) {
+        toast.success(t('rsvp.success'));
         markSubmitted();
         logAction('rsvp_submit_success', { attending });
       } else {
+        toast.error(t('rsvp.error'));
         logAction('rsvp_submit_error', { attending });
       }
     } catch {
-      setResult('error');
+      toast.error(t('rsvp.error'));
       logAction('rsvp_submit_error', { attending });
     } finally {
       setSubmitting(false);
@@ -294,9 +288,6 @@ export default function RSVPForm({ guest }: { guest: RsvpGuestContext | null }) 
         <button type="submit" disabled={submitting} className="btn-gold mt-2 px-6 py-4 text-xs uppercase tracking-widest disabled:opacity-50">
           {submitting ? t('rsvp.sending') : hasSubmitted ? t('rsvp.update') : t('rsvp.submit')}
         </button>
-
-        {result === 'success' && <p className="text-center text-sm text-champagne-gold">{t('rsvp.success')}</p>}
-        {result === 'error' && <p className="text-center text-sm text-red-600">{t('rsvp.error')}</p>}
       </motion.form>
     </section>
   );

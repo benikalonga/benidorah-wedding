@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import Lightbox, { LightboxItem } from './Lightbox';
 import SectionHeader from './SectionHeader';
 import { useSocketEvent } from '@/lib/useSocket';
@@ -35,7 +36,6 @@ export default function ShareMoment({
   const [moments, setMoments] = useState(initialMoments);
   const [uploaderName, setUploaderName] = useState(guest?.fullName || '');
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -60,7 +60,6 @@ export default function ShareMoment({
   async function processFile(file: File) {
     if (!guest) return;
     setUploading(true);
-    setError(null);
     setPreviewUrl(file.type.startsWith('image/') ? URL.createObjectURL(file) : null);
 
     const formData = new FormData();
@@ -72,13 +71,13 @@ export default function ShareMoment({
       const res = await fetch('/api/moments', { method: 'POST', body: formData });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error || t('shareMoment.uploadFailed'));
+        toast.error(data.error || t('shareMoment.uploadFailed'));
         logAction('moment_upload_error');
       } else {
         logAction('moment_upload_success', { mediaType: file.type.startsWith('video') ? 'video' : 'image' });
       }
     } catch {
-      setError(t('shareMoment.uploadFailedConn'));
+      toast.error(t('shareMoment.uploadFailedConn'));
       logAction('moment_upload_error');
     } finally {
       setUploading(false);
@@ -198,8 +197,6 @@ export default function ShareMoment({
                 </>
               )}
             </div>
-
-            {error && <p className="text-xs text-red-700">{error}</p>}
           </>
         ) : (
           <p className="text-sm text-charcoal/60">{t('shareMoment.lockedMessage')}</p>
