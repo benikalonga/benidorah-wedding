@@ -58,7 +58,7 @@ const MESSAGE_BUILDERS: Record<
     `We are delighted to formally invite you to celebrate the wedding of Beni & Dorah.\n\n` +
     `Join us on ${WEDDING_DATE_LABEL.en} at ${SITE_COPY.ceremony.time}, at ${SITE_COPY.venueName}.\n\n` +
     `Please RSVP and find all the details here: ${link}\n\n` +
-    `Or enter your unique code: ${code}\n\n` +
+    `Or enter your unique code: ${code} on the website ${SITE_URL}\n\n` +
     `We'd be grateful for your response before ${RSVP_DEADLINE_LABEL.en}. We can't wait to celebrate with you!`,
   fr: (name, link, type, code) =>
     `Cher` +
@@ -67,7 +67,8 @@ const MESSAGE_BUILDERS: Record<
     `Nous avons le plaisir de vous inviter officiellement à célébrer le mariage de Beni & Dorah.\n\n` +
     `Rejoignez-nous le ${WEDDING_DATE_LABEL.fr} à ${SITE_COPY.ceremony.time}, à ${SITE_COPY.venueName}.\n\n` +
     `Merci de confirmer votre présence et de retrouver tous les détails ici : ${link}\n\n` +
-    `Ou entrez votre code unique : ${code}\n\n` +
+    `Ou entrez votre code unique : ${code} en allant sur le site ${SITE_URL}\n\n` +
+    `Vous trouverez ci-joint la lettre de confirmation, utile pour votre demande de visa.\n\n` +
     `Nous vous serions reconnaissants de répondre avant le ${RSVP_DEADLINE_LABEL.fr}. Nous avons hâte de célébrer avec vous !`,
 };
 
