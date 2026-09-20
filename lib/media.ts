@@ -3,6 +3,8 @@ import path from 'path';
 import { randomUUID } from 'crypto';
 import sharp from 'sharp';
 import { fileTypeFromBuffer } from 'file-type';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const heicConvert = require('heic-convert');
 
 export const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
 export const PRIVATE_MEDIA_DIR =
@@ -32,7 +34,8 @@ export async function storeGuestUpload(buffer: Buffer, originalName: string): Pr
   const detected = await fileTypeFromBuffer(buffer);
   if (!detected) throw new Error('Could not verify file type');
 
-  const isImage = ALLOWED_IMAGE_MIME.has(detected.mime);
+  const isHeic = detected.mime === 'image/heic' || detected.mime === 'image/heif';
+  const isImage = isHeic || ALLOWED_IMAGE_MIME.has(detected.mime);
   const isVideo = ALLOWED_VIDEO_MIME.has(detected.mime);
   if (!isImage && !isVideo) {
     throw new Error(`Unsupported file type: ${detected.mime}`);
@@ -42,12 +45,19 @@ export async function storeGuestUpload(buffer: Buffer, originalName: string): Pr
   const dir = path.join(UPLOAD_DIR, 'moments', datePart);
   await mkdir(dir, { recursive: true });
 
-  const filename = `${randomUUID()}.${detected.ext}`;
+  // iPhones default to HEIC, which the sharp/libvips build here can't
+  // decode (its bundled libheif has no HEVC decoding plugin — only
+  // AVIF's). heic-convert bundles a pure-JS/WASM HEIF decoder instead,
+  // so we hand it off to that first and feed sharp a plain JPEG buffer.
+  const sourceBuffer = isHeic
+    ? Buffer.from(await heicConvert({ buffer, format: 'JPEG', quality: 0.9 }))
+    : buffer;
+  const filename = `${randomUUID()}.${isHeic ? 'jpg' : detected.ext}`;
   const destPath = path.join(dir, filename);
 
   if (isImage) {
     // Re-encoding through sharp strips EXIF (including GPS) by default.
-    const processed = await sharp(buffer).rotate().resize({ width: 2400, withoutEnlargement: true }).toBuffer();
+    const processed = await sharp(sourceBuffer).rotate().resize({ width: 2400, withoutEnlargement: true }).toBuffer();
     await writeFile(destPath, processed);
   } else {
     // Video thumbnailing/transcoding via ffmpeg is out of scope for this
