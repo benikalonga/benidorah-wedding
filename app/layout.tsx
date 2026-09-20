@@ -26,10 +26,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: OG_TITLE,
     description: OG_DESCRIPTION,
-    // 1200x630 (the standard 1.91:1 og:image ratio) — WhatsApp's crawler
-    // silently drops the preview for portrait/oversized images like the
-    // raw gallery photo this used to point to, so this is a purpose-built
-    // card instead (see public/images/og/save-the-date.jpg).
+    // The real save-the-date photo (public/images/gallery/27.jpeg) is a
+    // 3123x4160 portrait — WhatsApp's crawler silently drops the preview
+    // for anything that far outside the standard 1.91:1 og:image ratio.
+    // public/images/og/save-the-date.jpg is a landscape crop of that same
+    // photo (framed to keep the "Save the Date" text and both faces),
+    // not a different image — see the crop coordinates in git history if
+    // this ever needs re-cutting from the source photo.
     images: [{ url: '/images/og/save-the-date.jpg', width: 1200, height: 630 }],
     videos: [
       {
