@@ -59,7 +59,7 @@ const MESSAGE_BUILDERS: Record<
     `Join us on the ${WEDDING_DATE_LABEL.en} at ${SITE_COPY.ceremony.time}, at ${SITE_COPY.venueName}.\n\n` +
     `Please RSVP and find all the details here: ${link}\n\n` +
     `Or enter your unique code: ${code} on the website ${SITE_URL}\n\n` +
-    `We'd be grateful for your response before ${RSVP_DEADLINE_LABEL.en}. We can't wait to celebrate with you!`,
+    `We'd be grateful for your response before the ${RSVP_DEADLINE_LABEL.en}. We can't wait to celebrate with you!`,
   fr: (name, link, type, code) =>
     `Cher` +
     (type === "single" ? "(e) " : " ") +
