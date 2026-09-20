@@ -26,7 +26,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: OG_TITLE,
     description: OG_DESCRIPTION,
-    images: [{ url: '/images/gallery/27.jpeg', width: 3123, height: 4160 }],
+    // 1200x630 (the standard 1.91:1 og:image ratio) — WhatsApp's crawler
+    // silently drops the preview for portrait/oversized images like the
+    // raw gallery photo this used to point to, so this is a purpose-built
+    // card instead (see public/images/og/save-the-date.jpg).
+    images: [{ url: '/images/og/save-the-date.jpg', width: 1200, height: 630 }],
     videos: [
       {
         url: OG_VIDEO_URL,
@@ -42,7 +46,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: OG_TITLE,
     description: OG_DESCRIPTION,
-    images: ['/images/gallery/27.jpeg'],
+    images: ['/images/og/save-the-date.jpg'],
   },
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'Beni & Dorah' },
 };
