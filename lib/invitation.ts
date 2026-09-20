@@ -56,7 +56,7 @@ const MESSAGE_BUILDERS: Record<
   en: (name, link, type, code) =>
     `Dear ${name}!\n\n` +
     `We are delighted to formally invite you to celebrate the wedding of Beni & Dorah.\n\n` +
-    `Join us on ${WEDDING_DATE_LABEL.en} at ${SITE_COPY.ceremony.time}, at ${SITE_COPY.venueName}.\n\n` +
+    `Join us on the ${WEDDING_DATE_LABEL.en} at ${SITE_COPY.ceremony.time}, at ${SITE_COPY.venueName}.\n\n` +
     `Please RSVP and find all the details here: ${link}\n\n` +
     `Or enter your unique code: ${code} on the website ${SITE_URL}\n\n` +
     `We'd be grateful for your response before ${RSVP_DEADLINE_LABEL.en}. We can't wait to celebrate with you!`,
