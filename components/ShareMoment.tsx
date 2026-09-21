@@ -139,6 +139,8 @@ export default function ShareMoment({
       >
         {guest ? (
           <>
+            <p className="text-sm italic text-charcoal/60">{t('shareMoment.hint')}</p>
+
             <input
               type="text"
               placeholder={t('shareMoment.namePlaceholder')}

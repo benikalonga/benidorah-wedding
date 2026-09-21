@@ -181,6 +181,7 @@ const en = {
     eyebrow: "Live From The Day",
     title: "Share a Moment",
     description: "Snap it, upload it — everyone sees it live.",
+    hint: "Grab a photo with Beni or Dorah — or just the fun around you! Share it here and it'll show up live for everyone. Great memories start with you.",
     lockedMessage:
       "Only invited guests can share a moment — open the personal invite link sent to you on WhatsApp to upload your photos and videos here.",
     namePlaceholder: "Your name",
@@ -368,6 +369,7 @@ const fr: typeof en = {
     title: "Partagez un Instant",
     description:
       "Prenez la photo, envoyez-la — tout le monde la voit en direct.",
+    hint: "Prenez une photo avec Beni ou Dorah — ou simplement l'ambiance autour de vous ! Partagez-la ici, elle apparaîtra en direct pour tout le monde. Les plus beaux souvenirs commencent avec vous.",
     lockedMessage:
       "Seuls les invités peuvent partager un instant — ouvrez le lien d'invitation personnel envoyé sur WhatsApp pour y publier vos photos et vidéos.",
     namePlaceholder: "Votre nom",

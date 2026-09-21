@@ -25,7 +25,7 @@ export default function AdminMomentsPage() {
   const [moments, setMoments] = useState<MomentRow[] | null>(null);
 
   async function load() {
-    const data = await fetch('/api/moments?page=1').then((r) => r.json());
+    const data = await fetch('/api/admin/moments/list').then((r) => r.json());
     setMoments(data.moments || []);
   }
 
