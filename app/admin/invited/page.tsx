@@ -77,6 +77,7 @@ function InvitedPageInner() {
   const [guests, setGuests] = useState<GuestRow[] | null>(null);
   const [query, setQuery] = useState('');
   const [attendingFilter, setAttendingFilter] = useState<AttendingFilter>('all');
+  const [sentFilter, setSentFilter] = useState<YesNoFilter>('all');
   const [openedFilter, setOpenedFilter] = useState<YesNoFilter>('all');
   const [presentFilter, setPresentFilter] = useState<YesNoFilter>('all');
 
@@ -97,6 +98,8 @@ function InvitedPageInner() {
     if (attending && ['responded', 'yes', 'one_only', 'declined', 'pending'].includes(attending)) {
       setAttendingFilter(attending as AttendingFilter);
     }
+    const sent = searchParams.get('sent');
+    if (sent === 'yes' || sent === 'no') setSentFilter(sent);
     const opened = searchParams.get('opened');
     if (opened === 'yes' || opened === 'no') setOpenedFilter(opened);
     const present = searchParams.get('present');
@@ -112,6 +115,8 @@ function InvitedPageInner() {
       if (attendingFilter === 'yes' && g.rsvp?.attending !== 'yes') return false;
       if (attendingFilter === 'one_only' && g.rsvp?.attending !== 'one_only') return false;
       if (attendingFilter === 'declined' && !isDeclined(g.rsvp?.attending)) return false;
+      if (sentFilter === 'yes' && !g.inviteSentAt) return false;
+      if (sentFilter === 'no' && g.inviteSentAt) return false;
       if (openedFilter === 'yes' && !g.linkOpenedAt) return false;
       if (openedFilter === 'no' && g.linkOpenedAt) return false;
       if (presentFilter === 'yes' && !g.presentAt) return false;
@@ -119,9 +124,10 @@ function InvitedPageInner() {
       if (!q) return true;
       return g.fullName.toLowerCase().includes(q) || g.partnerName?.toLowerCase().includes(q);
     });
-  }, [guests, query, attendingFilter, openedFilter, presentFilter]);
+  }, [guests, query, attendingFilter, sentFilter, openedFilter, presentFilter]);
 
-  const hasActiveFilter = !!query || attendingFilter !== 'all' || openedFilter !== 'all' || presentFilter !== 'all';
+  const hasActiveFilter =
+    !!query || attendingFilter !== 'all' || sentFilter !== 'all' || openedFilter !== 'all' || presentFilter !== 'all';
 
   // Headcount stats for the whole list (unaffected by the filters above) —
   // a couple is one guest row but two people, so it counts as 2 here, same
@@ -141,6 +147,7 @@ function InvitedPageInner() {
   function resetFilters() {
     setQuery('');
     setAttendingFilter('all');
+    setSentFilter('all');
     setOpenedFilter('all');
     setPresentFilter('all');
     router.replace(pathname);
@@ -257,6 +264,15 @@ function InvitedPageInner() {
             <option value="one_only">One only</option>
             <option value="declined">Declined</option>
             <option value="pending">Pending</option>
+          </Select>
+          <Select
+            value={sentFilter}
+            onChange={(e) => setSentFilter(e.target.value as YesNoFilter)}
+            className="w-auto min-w-[9.5rem]"
+          >
+            <option value="all">Invitation sent or not</option>
+            <option value="yes">Invitation sent</option>
+            <option value="no">Not sent yet</option>
           </Select>
           <Select
             value={openedFilter}
