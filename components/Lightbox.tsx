@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import Image from 'next/image';
 import { requestHeroVideoPause } from '@/lib/heroPlayback';
 import { useLocale } from './LocaleProvider';
 
@@ -74,7 +73,21 @@ export default function Lightbox({
 
           {item.type === 'image' ? (
             <div className="relative aspect-[4/5] w-full sm:aspect-video">
-              <Image src={item.url} alt={item.caption || t('lightbox.captionFallback')} fill className="object-contain" />
+              {/*
+                Plain <img>, not next/image: items here can be a gallery
+                photo (public/, next/image works) or a guest-uploaded
+                moment (served by nginx straight off a separate uploads
+                volume, outside public/) — next/image's built-in optimizer
+                only knows how to read local sources from public/, so it
+                threw "isn't a valid image ... received null" for every
+                moment opened here.
+              */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={item.url}
+                alt={item.caption || t('lightbox.captionFallback')}
+                className="absolute inset-0 h-full w-full object-contain"
+              />
             </div>
           ) : (
             <video
