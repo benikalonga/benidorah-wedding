@@ -46,7 +46,7 @@ const en = {
     history: "History",
     gallery: "Gallery",
     dateAddress: "Date & Address",
-    registry: "Registry",
+    registry: "Gift",
     rsvp: "RSVP",
     theme: "Theme",
     moments: "Moments",
@@ -105,7 +105,7 @@ const en = {
   },
   giftRegistry: {
     eyebrow: "With Love",
-    title: "Gift Registry",
+    title: "Wedding Gift",
     intro:
       "Your presence will be the best gift of all. If you'd love to spoil us a little too, you are welcome to do so.",
     accountName: "Account Name",
@@ -218,7 +218,7 @@ const fr: typeof en = {
     history: "Histoire",
     gallery: "Galerie",
     dateAddress: "Date et lieu",
-    registry: "Cadeaux",
+    registry: "Cadeau",
     rsvp: "RSVP",
     theme: "Thème",
     moments: "Moments",
@@ -278,7 +278,7 @@ const fr: typeof en = {
   },
   giftRegistry: {
     eyebrow: "Avec Amour",
-    title: "Liste de Cadeaux",
+    title: "Cadeau de Mariage",
     intro:
       "Votre présence sera le plus beau des cadeaux. Si vous souhaitez tout de même nous gâter un peu, vous êtes les bienvenus.",
     accountName: "Nom du compte",
