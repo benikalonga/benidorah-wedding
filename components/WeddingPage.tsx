@@ -19,7 +19,6 @@ import {
   SITE_COPY,
   getHistoryItems,
   getGalleryItems,
-  getGiftItems,
   getVisibleTickets,
   getVisibleMoments,
 } from '@/lib/content';
@@ -33,10 +32,9 @@ export default async function WeddingPage({
   guest: (Guest & { rsvp: Rsvp | null }) | null;
   initialLocale?: Locale;
 }) {
-  const [history, gallery, gifts, tickets, moments] = await Promise.all([
+  const [history, gallery, tickets, moments] = await Promise.all([
     getHistoryItems(),
     getGalleryItems(),
-    getGiftItems(),
     getVisibleTickets(),
     getVisibleMoments(),
   ]);
@@ -87,20 +85,7 @@ export default async function WeddingPage({
           items={gallery.map((g) => ({ id: g.id, mediaUrl: g.mediaUrl, mediaType: g.mediaType, thumbnailUrl: g.thumbnailUrl }))}
         />
         <AddressSchedule />
-        <GiftRegistry
-          guestId={guest?.id ?? null}
-          gifts={gifts.map((g) => ({
-            id: g.id,
-            name: g.name,
-            nameFr: g.nameFr,
-            description: g.description,
-            descriptionFr: g.descriptionFr,
-            imageUrl: g.imageUrl,
-            priceZar: g.priceZar.toString(),
-            priceUsd: g.priceUsd.toString(),
-            status: g.status,
-          }))}
-        />
+        <GiftRegistry />
         <RSVPForm guest={rsvpGuest as any} />
         <WishWall
           initialTickets={tickets.map((t) => ({ id: t.id, displayName: t.displayName, message: t.message, color: t.color }))}
