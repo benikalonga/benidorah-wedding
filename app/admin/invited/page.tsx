@@ -47,30 +47,18 @@ function isPending(g: GuestRow) {
   return !g.rsvp || g.rsvp.attending === 'pending';
 }
 
+function attendingTone(status?: string): 'green' | 'gold' | 'red' | 'neutral' {
+  if (status === 'yes') return 'green';
+  if (status === 'one_only') return 'gold';
+  if (isDeclined(status)) return 'red';
+  return 'neutral';
+}
+
 function attendingLabel(status?: string) {
   if (status === 'yes') return 'Attending';
   if (status === 'one_only') return 'One only';
   if (isDeclined(status)) return 'Declined';
   return 'Pending';
-}
-
-// 'no' (single guest declining) vs 'none' (neither of a couple attending)
-// are the same concept shown as one "Declined" filter/badge elsewhere, but
-// the RSVP enum keeps them distinct per guest type — offer only the option
-// that's valid for this guest's type, same split as the public RSVPForm.
-function attendingOptionsFor(type: 'single' | 'couple') {
-  return type === 'couple'
-    ? [
-        { value: 'pending', label: 'Pending' },
-        { value: 'yes', label: 'Attending (full)' },
-        { value: 'one_only', label: 'One only' },
-        { value: 'none', label: 'Declined' },
-      ]
-    : [
-        { value: 'pending', label: 'Pending' },
-        { value: 'yes', label: 'Attending' },
-        { value: 'no', label: 'Declined' },
-      ];
 }
 
 export default function InvitedPage() {
@@ -92,7 +80,6 @@ function InvitedPageInner() {
   const [sentFilter, setSentFilter] = useState<YesNoFilter>('all');
   const [openedFilter, setOpenedFilter] = useState<YesNoFilter>('all');
   const [presentFilter, setPresentFilter] = useState<YesNoFilter>('all');
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   function load() {
     return fetch('/api/admin/guests')
@@ -211,50 +198,6 @@ function InvitedPageInner() {
     }
     toast.success(present ? `${name} marked present` : 'Present status cleared');
     load();
-  }
-
-  async function handleSetAttending(g: GuestRow, attending: string) {
-    if (attending === (g.rsvp?.attending ?? 'pending')) return;
-    setUpdatingId(g.id);
-    try {
-      const res = await fetch(`/api/admin/guests/${g.id}/rsvp`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ attending }),
-      });
-      if (!res.ok) {
-        toast.error('Could not update RSVP status');
-        return;
-      }
-      toast.success('RSVP status updated');
-      load();
-    } catch {
-      toast.error('Could not update RSVP status');
-    } finally {
-      setUpdatingId(null);
-    }
-  }
-
-  function AttendingSelect({ g }: { g: GuestRow }) {
-    const current = g.rsvp?.attending ?? 'pending';
-    const options = attendingOptionsFor(g.type);
-    const hasCurrent = options.some((o) => o.value === current);
-    return (
-      <Select
-        value={current}
-        disabled={updatingId === g.id}
-        onChange={(e) => handleSetAttending(g, e.target.value)}
-        aria-label={`RSVP status for ${g.fullName}`}
-        className="w-auto min-w-[9rem] py-1.5 text-xs"
-      >
-        {!hasCurrent && <option value={current}>{attendingLabel(current)}</option>}
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </Select>
-    );
   }
 
   function GuestActions({ g }: { g: GuestRow }) {
@@ -399,7 +342,7 @@ function InvitedPageInner() {
                     </Td>
                     <Td>{g.linkOpenedAt ? <Badge tone="green">Opened</Badge> : <Badge tone="neutral">Not yet</Badge>}</Td>
                     <Td>
-                      <AttendingSelect g={g} />
+                      <Badge tone={attendingTone(g.rsvp?.attending)}>{attendingLabel(g.rsvp?.attending)}</Badge>
                     </Td>
                     <Td className="max-w-[8rem] truncate text-charcoal/70" title={g.rsvp?.allergyComment || undefined}>
                       {g.rsvp?.allergyComment || '—'}
@@ -427,7 +370,7 @@ function InvitedPageInner() {
                     {g.fullName}
                     {g.partnerName ? ` & ${g.partnerName}` : ''}
                   </p>
-                  <AttendingSelect g={g} />
+                  <Badge tone={attendingTone(g.rsvp?.attending)}>{attendingLabel(g.rsvp?.attending)}</Badge>
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {g.inviteSentAt && (
