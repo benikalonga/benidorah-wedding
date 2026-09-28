@@ -1,8 +1,10 @@
 import type { ReactNode } from 'react';
 
-type Tone = 'neutral' | 'green' | 'gold' | 'blue' | 'red';
+export type Tone = 'neutral' | 'green' | 'gold' | 'blue' | 'red';
 
-const tones: Record<Tone, string> = {
+// Exported so other components (e.g. a clickable badge that opens a menu)
+// can render the exact same tone colors without duplicating them.
+export const tones: Record<Tone, string> = {
   neutral: 'bg-onyx/[0.06] text-charcoal/70',
   green: 'bg-green-600/10 text-green-700',
   gold: 'bg-champagne-gold/15 text-[#8a6510]',

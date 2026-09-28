@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import * as RadixMenu from '@radix-ui/react-dropdown-menu';
 import { toast } from 'sonner';
 import { buildInvitationWaLink } from '@/lib/invitation';
 import type { Locale } from '@/lib/i18n';
@@ -10,7 +11,7 @@ import Button from '@/components/admin/ui/Button';
 import WhatsAppSendButton from '@/components/admin/ui/WhatsAppSendButton';
 import { useConfirm } from '@/components/admin/ui/ConfirmDialog';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/admin/ui/Table';
-import Badge from '@/components/admin/ui/Badge';
+import Badge, { tones as badgeTones } from '@/components/admin/ui/Badge';
 import Card from '@/components/admin/ui/Card';
 import EmptyState from '@/components/admin/ui/EmptyState';
 import Skeleton from '@/components/admin/ui/Skeleton';
@@ -61,6 +62,25 @@ function attendingLabel(status?: string) {
   return 'Pending';
 }
 
+// 'no' (single guest declining) vs 'none' (neither of a couple attending)
+// are the same concept shown as one "Declined" filter/badge elsewhere, but
+// the RSVP enum keeps them distinct per guest type — offer only the option
+// that's valid for this guest's type, same split as the public RSVPForm.
+function attendingOptionsFor(type: 'single' | 'couple') {
+  return type === 'couple'
+    ? [
+        { value: 'pending', label: 'Pending' },
+        { value: 'yes', label: 'Attending (full)' },
+        { value: 'one_only', label: 'One only' },
+        { value: 'none', label: 'Declined' },
+      ]
+    : [
+        { value: 'pending', label: 'Pending' },
+        { value: 'yes', label: 'Attending' },
+        { value: 'no', label: 'Declined' },
+      ];
+}
+
 export default function InvitedPage() {
   return (
     <Suspense fallback={null}>
@@ -80,6 +100,7 @@ function InvitedPageInner() {
   const [sentFilter, setSentFilter] = useState<YesNoFilter>('all');
   const [openedFilter, setOpenedFilter] = useState<YesNoFilter>('all');
   const [presentFilter, setPresentFilter] = useState<YesNoFilter>('all');
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   function load() {
     return fetch('/api/admin/guests')
@@ -198,6 +219,72 @@ function InvitedPageInner() {
     }
     toast.success(present ? `${name} marked present` : 'Present status cleared');
     load();
+  }
+
+  async function handleSetAttending(g: GuestRow, attending: string) {
+    if (attending === (g.rsvp?.attending ?? 'pending')) return;
+    setUpdatingId(g.id);
+    try {
+      const res = await fetch(`/api/admin/guests/${g.id}/rsvp`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ attending }),
+      });
+      if (!res.ok) {
+        toast.error('Could not update RSVP status');
+        return;
+      }
+      toast.success('RSVP status updated');
+      load();
+    } catch {
+      toast.error('Could not update RSVP status');
+    } finally {
+      setUpdatingId(null);
+    }
+  }
+
+  // Same colored pill as the read-only Badge (reuses its exact tone
+  // classes) but clickable, with a chevron hinting it opens a menu — the
+  // "Resend" WhatsAppSendButton popup is the style reference for the menu.
+  function AttendingBadgeMenu({ g }: { g: GuestRow }) {
+    const current = g.rsvp?.attending ?? 'pending';
+    const isUpdating = updatingId === g.id;
+    return (
+      <RadixMenu.Root>
+        <RadixMenu.Trigger asChild>
+          <button
+            type="button"
+            disabled={isUpdating}
+            aria-label={`Change RSVP status for ${g.fullName}`}
+            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium outline-none transition-opacity hover:opacity-80 disabled:opacity-50 ${badgeTones[attendingTone(current)]}`}
+          >
+            {attendingLabel(current)}
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
+        </RadixMenu.Trigger>
+        <RadixMenu.Portal>
+          <RadixMenu.Content
+            align="start"
+            sideOffset={6}
+            className="z-50 min-w-[10rem] overflow-hidden rounded-xl border border-onyx/10 bg-white py-1.5 shadow-lg
+              data-[state=open]:animate-in data-[state=open]:fade-in data-[state=open]:zoom-in-95
+              data-[state=closed]:animate-out data-[state=closed]:fade-out"
+          >
+            {attendingOptionsFor(g.type).map((o) => (
+              <RadixMenu.Item
+                key={o.value}
+                onSelect={() => handleSetAttending(g, o.value)}
+                className="cursor-pointer px-3.5 py-2 text-sm text-onyx outline-none transition-colors hover:bg-ivory data-[highlighted]:bg-ivory"
+              >
+                {o.label}
+              </RadixMenu.Item>
+            ))}
+          </RadixMenu.Content>
+        </RadixMenu.Portal>
+      </RadixMenu.Root>
+    );
   }
 
   function GuestActions({ g }: { g: GuestRow }) {
@@ -342,7 +429,7 @@ function InvitedPageInner() {
                     </Td>
                     <Td>{g.linkOpenedAt ? <Badge tone="green">Opened</Badge> : <Badge tone="neutral">Not yet</Badge>}</Td>
                     <Td>
-                      <Badge tone={attendingTone(g.rsvp?.attending)}>{attendingLabel(g.rsvp?.attending)}</Badge>
+                      <AttendingBadgeMenu g={g} />
                     </Td>
                     <Td className="max-w-[8rem] truncate text-charcoal/70" title={g.rsvp?.allergyComment || undefined}>
                       {g.rsvp?.allergyComment || '—'}
@@ -370,7 +457,7 @@ function InvitedPageInner() {
                     {g.fullName}
                     {g.partnerName ? ` & ${g.partnerName}` : ''}
                   </p>
-                  <Badge tone={attendingTone(g.rsvp?.attending)}>{attendingLabel(g.rsvp?.attending)}</Badge>
+                  <AttendingBadgeMenu g={g} />
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {g.inviteSentAt && (
