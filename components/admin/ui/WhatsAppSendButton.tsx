@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import * as RadixMenu from '@radix-ui/react-dropdown-menu';
 import Button from './Button';
 import { IconWhatsApp } from './icons';
@@ -13,15 +14,17 @@ import type { Locale } from '@/lib/i18n';
  */
 export default function WhatsAppSendButton({
   label,
+  icon,
   onSend,
 }: {
   label: string;
+  icon?: ReactNode;
   onSend: (locale: Locale) => void;
 }) {
   return (
     <RadixMenu.Root>
       <RadixMenu.Trigger asChild>
-        <Button variant="outline" size="sm" icon={<IconWhatsApp width={14} height={14} />}>
+        <Button variant="outline" size="sm" icon={icon ?? <IconWhatsApp width={14} height={14} />}>
           {label}
         </Button>
       </RadixMenu.Trigger>

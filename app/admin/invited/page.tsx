@@ -4,7 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import * as RadixMenu from '@radix-ui/react-dropdown-menu';
 import { toast } from 'sonner';
-import { buildInvitationWaLink } from '@/lib/invitation';
+import { buildInvitationWaLink, buildReminderWaLink } from '@/lib/invitation';
 import type { Locale } from '@/lib/i18n';
 import PageHeader from '@/components/admin/ui/PageHeader';
 import Button from '@/components/admin/ui/Button';
@@ -16,7 +16,7 @@ import Card from '@/components/admin/ui/Card';
 import EmptyState from '@/components/admin/ui/EmptyState';
 import Skeleton from '@/components/admin/ui/Skeleton';
 import { Input, Select } from '@/components/admin/ui/form';
-import { IconMail, IconSearch, IconCheck } from '@/components/admin/ui/icons';
+import { IconMail, IconSearch, IconCheck, IconBell } from '@/components/admin/ui/icons';
 
 interface GuestRow {
   id: string;
@@ -36,6 +36,10 @@ interface GuestRow {
     submittedAt: string | null;
   } | null;
 }
+
+// The "Present" check-in button is only needed on the day itself — hidden
+// until then, flip back to true to bring it back.
+const SHOW_PRESENT_BUTTON = false;
 
 type AttendingFilter = 'all' | 'responded' | 'yes' | 'one_only' | 'declined' | 'pending';
 type YesNoFilter = 'all' | 'yes' | 'no';
@@ -194,6 +198,12 @@ function InvitedPageInner() {
     load();
   }
 
+  // Reminder for guests who haven't RSVP'd — just opens the pre-filled
+  // wa.me chat; nothing is recorded since there's no "reminder sent" field.
+  function handleReminder(g: GuestRow, locale: Locale) {
+    window.open(buildReminderWaLink(g, locale), '_blank', 'noopener,noreferrer');
+  }
+
   async function setPresent(g: GuestRow, present: boolean) {
     const name = g.fullName + (g.partnerName ? ` & ${g.partnerName}` : '');
     const ok = await confirm(
@@ -291,7 +301,12 @@ function InvitedPageInner() {
     return (
       <div className="flex flex-nowrap items-center gap-1.5">
         <WhatsAppSendButton label="Resend" onSend={(locale) => handleResend(g, locale)} />
-        {g.presentAt ? (
+        <WhatsAppSendButton
+          label="Reminder"
+          icon={<IconBell width={14} height={14} />}
+          onSend={(locale) => handleReminder(g, locale)}
+        />
+        {!SHOW_PRESENT_BUTTON ? null : g.presentAt ? (
           <button
             type="button"
             onClick={() => setPresent(g, false)}

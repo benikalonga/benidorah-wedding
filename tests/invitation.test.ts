@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { buildInvitationUrl, buildInvitationMessage, buildInvitationWaLink } from '@/lib/invitation';
+import {
+  buildInvitationUrl,
+  buildInvitationMessage,
+  buildInvitationWaLink,
+  buildReminderMessage,
+  buildReminderWaLink,
+} from '@/lib/invitation';
 
 const guest = {
   fullName: 'Thandiwe Nkosi',
@@ -37,5 +43,31 @@ describe('Invitation link', () => {
   it('builds a wa.me link with digits-only phone and an encoded message', () => {
     const link = buildInvitationWaLink(guest, 'en');
     expect(link).toMatch(/^https:\/\/wa\.me\/27821234567\?text=/);
+  });
+});
+
+describe('Reminder message', () => {
+  it('carries the RSVP link, code and the 15 November deadline', () => {
+    const message = buildReminderMessage(guest, 'en');
+    expect(message).toContain('reminder');
+    expect(message).toContain('http://localhost:3000/AbC12xyz/en');
+    expect(message).toContain('123456');
+    expect(message).toContain('Sunday 15 November 2026');
+    const messageFr = buildReminderMessage(guest, 'fr');
+    expect(messageFr).toContain('http://localhost:3000/AbC12xyz/fr');
+    expect(messageFr).toContain('dimanche 15 novembre 2026');
+  });
+
+  it('greets by time of day instead of "Dear"', () => {
+    const morning = new Date(2026, 10, 10, 9, 0);
+    const evening = new Date(2026, 10, 10, 19, 30);
+    expect(buildReminderMessage(guest, 'en', morning)).toMatch(/^Good day Thandiwe Nkosi!/);
+    expect(buildReminderMessage(guest, 'en', evening)).toMatch(/^Good evening Thandiwe Nkosi!/);
+    expect(buildReminderMessage(guest, 'fr', morning)).toMatch(/^Bonjour Thandiwe Nkosi !/);
+    expect(buildReminderMessage(guest, 'fr', evening)).toMatch(/^Bonsoir Thandiwe Nkosi !/);
+  });
+
+  it('builds a wa.me link', () => {
+    expect(buildReminderWaLink(guest, 'fr')).toMatch(/^https:\/\/wa\.me\/27821234567\?text=/);
   });
 });

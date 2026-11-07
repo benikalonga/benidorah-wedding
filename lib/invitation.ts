@@ -1,5 +1,6 @@
 // Invitation WhatsApp message builder for the admin Guests page's "Send
-// Invitation" button and the Invited/RSVPs page's "Resend" button.
+// Invitation" button and the Invited/RSVPs page's "Resend" and "Reminder"
+// buttons.
 //
 // This deliberately does NOT go through the WhatsApp Cloud API (see the
 // removed lib/whatsapp.ts) — it builds a plain wa.me "click to chat" link
@@ -72,6 +73,43 @@ const MESSAGE_BUILDERS: Record<
     `Nous vous serions reconnaissants de répondre avant le ${RSVP_DEADLINE_LABEL.fr}. Nous avons hâte de célébrer avec vous !`,
 };
 
+// Same shape as the invitation, but chasing guests who haven't RSVP'd yet.
+const REMINDER_DEADLINE_LABEL: Record<Locale, string> = {
+  en: "Sunday 15 November 2026",
+  fr: "dimanche 15 novembre 2026",
+};
+
+// Time-of-day greeting instead of "Dear" — evening from 18:00, by the
+// clock of whoever clicks "Reminder" (the message is built in their browser).
+const EVENING_FROM_HOUR = 18;
+const REMINDER_GREETING: Record<Locale, { day: string; evening: string }> = {
+  en: { day: "Good day", evening: "Good evening" },
+  fr: { day: "Bonjour", evening: "Bonsoir" },
+};
+
+function reminderGreeting(locale: Locale, now: Date): string {
+  const { day, evening } = REMINDER_GREETING[locale];
+  return now.getHours() >= EVENING_FROM_HOUR ? evening : day;
+}
+
+const REMINDER_BUILDERS: Record<
+  Locale,
+  (greeting: string, name: string, link: string, code: string) => string
+> = {
+  en: (greeting, name, link, code) =>
+    `${greeting} ${name}!\n\n` +
+    `This is a kind reminder about the wedding of Beni & Dorah on the ${WEDDING_DATE_LABEL.en} at ${SITE_COPY.ceremony.time}, at ${SITE_COPY.venueName}.\n\n` +
+    `We haven't yet received your confirmation of attendance. As it is essential for our organisation, please RSVP by ${REMINDER_DEADLINE_LABEL.en} here: ${link}\n\n` +
+    `Or enter your unique code: ${code} on the website ${SITE_URL}\n\n` +
+    `Thank you, we can't wait to celebrate with you!`,
+  fr: (greeting, name, link, code) =>
+    `${greeting} ${name} !\n\n` +
+    `Petit rappel concernant le mariage de Beni & Dorah le ${WEDDING_DATE_LABEL.fr} à ${SITE_COPY.ceremony.time}, à ${SITE_COPY.venueName}.\n\n` +
+    `Nous n'avons pas encore reçu votre confirmation de présence. Celle-ci étant essentielle pour notre organisation, merci de confirmer avant le ${REMINDER_DEADLINE_LABEL.fr} ici : ${link}\n\n` +
+    `Ou entrez votre code unique : ${code} en allant sur le site ${SITE_URL}\n\n` +
+    `Merci, nous avons hâte de célébrer avec vous !`,
+};
+
 /**
  * The guest's personal link, carrying the language the invite was sent in
  * so the site opens in that language by default — `/<hash>/<locale>`.
@@ -96,12 +134,36 @@ export function buildInvitationMessage(
   );
 }
 
+export function buildReminderMessage(
+  guest: InvitationGuest,
+  locale: Locale,
+  now: Date = new Date(),
+): string {
+  const link = buildInvitationUrl(guest.userHashCode, locale);
+  return REMINDER_BUILDERS[locale](
+    reminderGreeting(locale, now),
+    greetingName(guest),
+    link,
+    guest.inviteCode,
+  );
+}
+
 // wa.me expects digits only — country code first, no "+", spaces, or dashes.
+function buildWaLink(phoneNumber: string, message: string): string {
+  const digits = phoneNumber.replace(/\D/g, "");
+  return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
+}
+
 export function buildInvitationWaLink(
   guest: InvitationGuest,
   locale: Locale,
 ): string {
-  const digits = guest.phoneNumber.replace(/\D/g, "");
-  const message = buildInvitationMessage(guest, locale);
-  return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
+  return buildWaLink(guest.phoneNumber, buildInvitationMessage(guest, locale));
+}
+
+export function buildReminderWaLink(
+  guest: InvitationGuest,
+  locale: Locale,
+): string {
+  return buildWaLink(guest.phoneNumber, buildReminderMessage(guest, locale));
 }
