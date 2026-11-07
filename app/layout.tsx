@@ -29,11 +29,12 @@ export const metadata: Metadata = {
     // The real save-the-date photo (public/images/gallery/27.jpeg) is a
     // 3123x4160 portrait — WhatsApp's crawler silently drops the preview
     // for anything that far outside the standard 1.91:1 og:image ratio.
-    // public/images/og/save-the-date.jpg is a landscape crop of that same
-    // photo (framed to keep the "Save the Date" text and both faces),
-    // not a different image — see the crop coordinates in git history if
-    // this ever needs re-cutting from the source photo.
-    images: [{ url: '/images/og/save-the-date.jpg', width: 1200, height: 630 }],
+    // public/images/og/save-the-date-full.jpg shows that photo in full,
+    // fitted to the 630px height and centred on a 1200x630 canvas, with a
+    // blurred, darkened copy of the same photo filling the sides. Renamed
+    // from save-the-date.jpg (the old landscape crop) so crawlers that
+    // cache by URL pick up the new image.
+    images: [{ url: '/images/og/save-the-date-full.jpg', width: 1200, height: 630 }],
     videos: [
       {
         url: OG_VIDEO_URL,
@@ -49,7 +50,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: OG_TITLE,
     description: OG_DESCRIPTION,
-    images: ['/images/og/save-the-date.jpg'],
+    images: ['/images/og/save-the-date-full.jpg'],
   },
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'Beni & Dorah' },
 };
