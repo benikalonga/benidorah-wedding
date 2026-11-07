@@ -50,11 +50,11 @@ describe('Reminder message', () => {
   it('carries the RSVP link, code and the 15 November deadline', () => {
     const message = buildReminderMessage(guest, 'en');
     expect(message).toContain('reminder');
-    expect(message).toContain('http://localhost:3000/AbC12xyz/en');
+    expect(message).toContain('http://localhost:3000/AbC12xyz/en#rsvp');
     expect(message).toContain('123456');
     expect(message).toContain('Sunday 15 November 2026');
     const messageFr = buildReminderMessage(guest, 'fr');
-    expect(messageFr).toContain('http://localhost:3000/AbC12xyz/fr');
+    expect(messageFr).toContain('http://localhost:3000/AbC12xyz/fr#rsvp');
     expect(messageFr).toContain('dimanche 15 novembre 2026');
   });
 

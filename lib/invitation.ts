@@ -139,7 +139,9 @@ export function buildReminderMessage(
   locale: Locale,
   now: Date = new Date(),
 ): string {
-  const link = buildInvitationUrl(guest.userHashCode, locale);
+  // #rsvp lands them straight on the form (see RSVPForm's hash handling)
+  // rather than at the top of the page like the invitation does.
+  const link = `${buildInvitationUrl(guest.userHashCode, locale)}#rsvp`;
   return REMINDER_BUILDERS[locale](
     reminderGreeting(locale, now),
     greetingName(guest),
