@@ -99,13 +99,13 @@ const REMINDER_BUILDERS: Record<
   en: (greeting, name, link, code) =>
     `${greeting} ${name}!\n\n` +
     `This is a kind reminder about the wedding of Beni & Dorah on the ${WEDDING_DATE_LABEL.en} at ${SITE_COPY.ceremony.time}, at ${SITE_COPY.venueName}.\n\n` +
-    `We haven't yet received your confirmation of attendance. As it is essential for our organisation, please RSVP by ${REMINDER_DEADLINE_LABEL.en} here: ${link}\n\n` +
+    `We haven't yet received your confirmation of attendance. As it is essential for our organisation, please confirm now, or at the latest by the end of ${REMINDER_DEADLINE_LABEL.en}, here: ${link}\n\n` +
     `Or enter your unique code: ${code} on the website ${SITE_URL}\n\n` +
     `Thank you, we can't wait to celebrate with you!`,
   fr: (greeting, name, link, code) =>
     `${greeting} ${name} !\n\n` +
     `Petit rappel concernant le mariage de Beni & Dorah le ${WEDDING_DATE_LABEL.fr} à ${SITE_COPY.ceremony.time}, à ${SITE_COPY.venueName}.\n\n` +
-    `Nous n'avons pas encore reçu votre confirmation de présence. Celle-ci étant essentielle pour notre organisation, merci de confirmer avant le ${REMINDER_DEADLINE_LABEL.fr} ici : ${link}\n\n` +
+    `Nous n'avons pas encore reçu votre confirmation de présence. Celle-ci étant essentielle pour notre organisation, merci de confirmer dès maintenant, ou au plus tard d'ici la fin du ${REMINDER_DEADLINE_LABEL.fr}, ici : ${link}\n\n` +
     `Ou entrez votre code unique : ${code} en allant sur le site ${SITE_URL}\n\n` +
     `Merci, nous avons hâte de célébrer avec vous !`,
 };
