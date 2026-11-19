@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import * as RadixMenu from '@radix-ui/react-dropdown-menu';
 import { toast } from 'sonner';
 import { buildInvitationWaLink, buildReminderWaLink } from '@/lib/invitation';
+import { guestHeads, headcount } from '@/lib/headcount';
 import type { Locale } from '@/lib/i18n';
 import PageHeader from '@/components/admin/ui/PageHeader';
 import Button from '@/components/admin/ui/Button';
@@ -173,7 +174,7 @@ function InvitedPageInner() {
     let total = 0;
     let responded = 0;
     for (const g of guests) {
-      const heads = g.type === 'couple' ? 2 : 1;
+      const heads = guestHeads(g);
       total += heads;
       if (!isPending(g)) responded += heads;
     }
@@ -439,7 +440,7 @@ function InvitedPageInner() {
             <Table>
               <Thead>
                 <Tr>
-                  <Th className="min-w-[12rem]" count={filtered.length}>
+                  <Th className="min-w-[12rem]" count={headcount(filtered)}>
                     Guest
                   </Th>
                   <Th>Invitation sent</Th>

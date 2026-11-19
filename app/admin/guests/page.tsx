@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { buildInvitationWaLink } from "@/lib/invitation";
+import { headcount } from "@/lib/headcount";
 import type { Locale } from "@/lib/i18n";
 import WhatsAppSendButton from "@/components/admin/ui/WhatsAppSendButton";
 import PageHeader from "@/components/admin/ui/PageHeader";
@@ -401,7 +402,7 @@ function GuestsPageInner() {
             <Table>
               <Thead>
                 <Tr>
-                  <Th className="w-12" count={filtered.length}>
+                  <Th className="w-12" count={headcount(filtered)}>
                     No
                   </Th>
                   <Th className="min-w-[12rem]">Name</Th>
