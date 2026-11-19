@@ -401,7 +401,9 @@ function GuestsPageInner() {
             <Table>
               <Thead>
                 <Tr>
-                  <Th className="w-12">No</Th>
+                  <Th className="w-12" count={filtered.length}>
+                    No
+                  </Th>
                   <Th className="min-w-[12rem]">Name</Th>
                   <Th>Phone</Th>
                   <Th>Code</Th>

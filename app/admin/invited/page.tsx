@@ -439,7 +439,9 @@ function InvitedPageInner() {
             <Table>
               <Thead>
                 <Tr>
-                  <Th className="min-w-[12rem]">Guest</Th>
+                  <Th className="min-w-[12rem]" count={filtered.length}>
+                    Guest
+                  </Th>
                   <Th>Invitation sent</Th>
                   <Th>Link opened</Th>
                   <Th>RSVP status</Th>

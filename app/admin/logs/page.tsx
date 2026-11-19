@@ -176,7 +176,7 @@ export default function LogsPage() {
               <Table>
                 <Thead>
                   <Tr>
-                    <Th>Visitor</Th>
+                    <Th count={data.total}>Visitor</Th>
                     <Th>Actions</Th>
                     <Th>First seen</Th>
                     <Th>Last seen</Th>
@@ -267,7 +267,7 @@ export default function LogsPage() {
             <Table>
               <Thead>
                 <Tr>
-                  <Th>Time</Th>
+                  <Th count={data.total}>Time</Th>
                   <Th>Visitor</Th>
                   <Th>Action</Th>
                   <Th>Path</Th>

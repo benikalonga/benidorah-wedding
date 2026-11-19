@@ -32,10 +32,18 @@ export function Tr({ children, className = '', ...props }: HTMLAttributes<HTMLTa
   );
 }
 
-export function Th({ children, className = '', ...props }: ThHTMLAttributes<HTMLTableCellElement>) {
+// `count` is for the first column of every admin table: the number of rows
+// currently shown (after search/filters), rendered as "Label (n)".
+export function Th({
+  children,
+  className = '',
+  count,
+  ...props
+}: ThHTMLAttributes<HTMLTableCellElement> & { count?: number }) {
   return (
     <th className={`whitespace-nowrap px-4 py-3 font-medium ${className}`} {...props}>
       {children}
+      {count !== undefined && <span className="ml-1 text-charcoal/40">({count})</span>}
     </th>
   );
 }
