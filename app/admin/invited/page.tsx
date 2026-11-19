@@ -24,6 +24,7 @@ interface GuestRow {
   fullName: string;
   partnerName: string | null;
   phoneNumber: string;
+  guestSide: 'groom' | 'bride';
   userHashCode: string;
   inviteCode: string;
   linkOpenedAt: string | null;
@@ -43,6 +44,7 @@ const SHOW_PRESENT_BUTTON = false;
 
 type AttendingFilter = 'all' | 'responded' | 'yes' | 'one_only' | 'declined' | 'pending';
 type YesNoFilter = 'all' | 'yes' | 'no';
+type SideFilter = 'all' | 'groom' | 'bride';
 
 function isDeclined(status?: string) {
   return status === 'no' || status === 'none';
@@ -100,6 +102,7 @@ function InvitedPageInner() {
   const searchParams = useSearchParams();
   const [guests, setGuests] = useState<GuestRow[] | null>(null);
   const [query, setQuery] = useState('');
+  const [sideFilter, setSideFilter] = useState<SideFilter>('all');
   const [attendingFilter, setAttendingFilter] = useState<AttendingFilter>('all');
   const [sentFilter, setSentFilter] = useState<YesNoFilter>('all');
   const [openedFilter, setOpenedFilter] = useState<YesNoFilter>('all');
@@ -116,9 +119,11 @@ function InvitedPageInner() {
     load();
   }, []);
 
-  // Deep-linked from the Dashboard — ?attending= / ?opened= / ?present=
-  // preset the matching filter dropdowns below.
+  // Deep-linked from the Dashboard — ?side= / ?attending= / ?opened= /
+  // ?present= preset the matching filter dropdowns below.
   useEffect(() => {
+    const side = searchParams.get('side');
+    if (side === 'groom' || side === 'bride') setSideFilter(side);
     const attending = searchParams.get('attending');
     if (attending && ['responded', 'yes', 'one_only', 'declined', 'pending'].includes(attending)) {
       setAttendingFilter(attending as AttendingFilter);
@@ -135,6 +140,7 @@ function InvitedPageInner() {
     if (!guests) return [];
     const q = query.trim().toLowerCase();
     return guests.filter((g) => {
+      if (sideFilter !== 'all' && g.guestSide !== sideFilter) return false;
       if (attendingFilter === 'responded' && isPending(g)) return false;
       if (attendingFilter === 'pending' && !isPending(g)) return false;
       if (attendingFilter === 'yes' && g.rsvp?.attending !== 'yes') return false;
@@ -149,10 +155,15 @@ function InvitedPageInner() {
       if (!q) return true;
       return g.fullName.toLowerCase().includes(q) || g.partnerName?.toLowerCase().includes(q);
     });
-  }, [guests, query, attendingFilter, sentFilter, openedFilter, presentFilter]);
+  }, [guests, query, sideFilter, attendingFilter, sentFilter, openedFilter, presentFilter]);
 
   const hasActiveFilter =
-    !!query || attendingFilter !== 'all' || sentFilter !== 'all' || openedFilter !== 'all' || presentFilter !== 'all';
+    !!query ||
+    sideFilter !== 'all' ||
+    attendingFilter !== 'all' ||
+    sentFilter !== 'all' ||
+    openedFilter !== 'all' ||
+    presentFilter !== 'all';
 
   // Headcount stats for the whole list (unaffected by the filters above) —
   // a couple is one guest row but two people, so it counts as 2 here, same
@@ -171,6 +182,7 @@ function InvitedPageInner() {
 
   function resetFilters() {
     setQuery('');
+    setSideFilter('all');
     setAttendingFilter('all');
     setSentFilter('all');
     setOpenedFilter('all');
@@ -349,12 +361,21 @@ function InvitedPageInner() {
       />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative max-w-sm sm:flex-1">
+        <div className="relative max-w-sm sm:min-w-[12rem] sm:flex-1">
           <IconSearch width={16} height={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/40" />
           <Input placeholder="Search by name…" value={query} onChange={(e) => setQuery(e.target.value)} className="pl-9" />
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <Select
+            value={sideFilter}
+            onChange={(e) => setSideFilter(e.target.value as SideFilter)}
+            className="w-auto min-w-[8.5rem]"
+          >
+            <option value="all">All sides</option>
+            <option value="groom">Groom&apos;s side</option>
+            <option value="bride">Bride&apos;s side</option>
+          </Select>
           <Select
             value={attendingFilter}
             onChange={(e) => setAttendingFilter(e.target.value as AttendingFilter)}
